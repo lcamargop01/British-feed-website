@@ -121,8 +121,8 @@ function getHTML(): string {
   <style>
     html { scroll-behavior: smooth; }
     .hero-bg {
-      background: linear-gradient(135deg, rgba(27,42,74,0.82) 0%, rgba(27,42,74,0.55) 60%, rgba(0,0,0,0.3) 100%),
-                  url('https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=1600&q=80') center/cover no-repeat;
+      background: linear-gradient(135deg, rgba(27,42,74,0.85) 0%, rgba(27,42,74,0.50) 55%, rgba(0,0,0,0.25) 100%),
+                  url('https://sspark.genspark.ai/cfimages?u1=hzEbAV4lPpykIa5X9lcQ4jr%2Fm9mpHj9nzVfssr4frp4kAfrI%2BXGE%2BRdSmGkNbIxpnhntyl9t3x6ivKuK9ssLhnalkfNY3MPhQuv3a11VUri%2F6A%3D%3D&u2=Y3f3oehzecr27oyj&width=2560') center/cover no-repeat;
     }
     .section-divider { border-top: 2px solid #C9A84C; width: 60px; margin: 0 auto; }
     .card-hover { transition: all 0.3s ease; }
@@ -286,7 +286,7 @@ function getHTML(): string {
       </div>
       <div class="scroll-reveal relative">
         <div class="rounded-2xl overflow-hidden shadow-2xl">
-          <img src="https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=700&q=80" alt="Horse being fed at feed store" class="w-full h-96 object-cover" />
+          <img src="https://sspark.genspark.ai/cfimages?u1=K2zg5KNpQPqHX6KgPMOu%2BqTtOAdJN%2Fkacb%2B3o1K%2FCWoh8CE4T1yaOqa6a4eTfwczJSJKqVVvn9gLgipg%2F4Vhkxd6dxSHlTaSe4v2P%2Fxqvz2GYw%3D%3D&u2=eFbKamVjWpBxOevY&width=2560" alt="Dressage horse in arena" class="w-full h-96 object-cover" />
         </div>
         <div class="absolute -bottom-6 -left-6 bg-white rounded-2xl p-5 shadow-xl border border-gray-100 max-w-xs hidden lg:block">
           <div class="flex items-center gap-3">
@@ -517,7 +517,7 @@ function getHTML(): string {
     </div>
     <div class="grid md:grid-cols-3 gap-8">
       <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 card-hover scroll-reveal">
-        <div class="h-48 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1505678261036-a3fcc5e884ee?w=500&q=80')"></div>
+        <div class="h-48 bg-cover bg-center" style="background-image:url('https://sspark.genspark.ai/cfimages?u1=APQFxRzBJu5iRG%2Be6%2BZSpV1FnL4sqrLBF61a2yu9f2v8MWczCNQSIgESkQQbf8iA%2FzJ5bD%2B4dbPiHRXn15DqqHv%2B714IxEzsafrHOXaCIR6eRXI4IYLxCq93T4CTomVNN%2FntdtJmtTsf&u2=FBjs72IGitspXxu9&width=2560')"></div>
         <div class="p-6">
           <div class="w-12 h-12 bg-navy-50 rounded-full flex items-center justify-center mb-4">
             <i class="fas fa-truck text-navy-700 text-xl"></i>
@@ -531,7 +531,7 @@ function getHTML(): string {
         </div>
       </div>
       <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 card-hover scroll-reveal">
-        <div class="h-48 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=500&q=80')"></div>
+        <div class="h-48 bg-cover bg-center" style="background-image:url('https://sspark.genspark.ai/cfimages?u1=CqkH4kIYABdVpnuxtR4bJqyehkIDpq3%2BdUQr%2FcbR38crltam%2BSVdBNtylFtOjAIbQiLcBWuAmcW42P%2F3dPIBpRuDsEF8u9g2sBQuyCtXS5dMZ3gwEWb6n0c%2BANfOj1jFDmw%3D&u2=erPuew9pmVC%2BvkXw&width=2560')"></div>
         <div class="p-6">
           <div class="w-12 h-12 bg-navy-50 rounded-full flex items-center justify-center mb-4">
             <i class="fas fa-user-md text-navy-700 text-xl"></i>
@@ -544,7 +544,7 @@ function getHTML(): string {
         </div>
       </div>
       <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 card-hover scroll-reveal">
-        <div class="h-48 bg-cover bg-center" style="background-image:url('https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=500&q=80')"></div>
+        <div class="h-48 bg-cover bg-center" style="background-image:url('https://sspark.genspark.ai/cfimages?u1=RSCeq2T%2FVGKFcvxpBbz9PZ4g21WB3CxOr%2B4PODR%2FSirFw%2Bq3FzkaoOwmZbMy%2BLEclsYUzaQtBOMk%2FEtgqFXt7CQ0wymSDb3cvuMDtDlU9qDD34U13PtQiC0Gfu4eOuuWU7nNr1GEyUrPc4eqT1nlVobQrs6F33lAh0NMrF2pJxrrDuw%3D&u2=mo%2FTEXhG78XbzS%2BM&width=2560')"></div>
         <div class="p-6">
           <div class="w-12 h-12 bg-navy-50 rounded-full flex items-center justify-center mb-4">
             <i class="fas fa-certificate text-navy-700 text-xl"></i>
@@ -1058,14 +1058,14 @@ document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
 // ── Brand card grid ────────────────────────────────────────────────────────────
 function brandCards(): string {
   const brands = [
-    { id:'nutrena',   name:'Nutrena',       logo:'https://nutrenaworld.com/wp-content/themes/nutrena/img/logo.svg',         color:'#e8f0fe', tag:'SafeChoice · ProForce · Triumph',       img:'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&q=70' },
-    { id:'proelite',  name:'Pro Elite',      logo:'https://proelitehorsefeed.com/wp-content/uploads/2021/10/ProElite_Logo_Reversed.png', color:'#fef9e8', tag:'Performance · Senior · Growth',       img:'https://images.unsplash.com/photo-1551632811-561732d1e306?w=300&q=70' },
-    { id:'cavalor',   name:'Cavalor',        logo:'https://cavalor.com/wp-content/uploads/2022/09/cavalor-logo.svg',          color:'#f0f7ff', tag:'Performix · FiberGastro · Strucomix',  img:'https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=300&q=70' },
-    { id:'redmills',  name:'Red Mills',      logo:'https://www.redmillshorse.com/wp-content/uploads/2019/01/logo.png',        color:'#fff0f0', tag:'Competition · Horse Care · Comfort',   img:'https://images.unsplash.com/photo-1548545373-687d8b2e64e1?w=300&q=70' },
-    { id:'havens',    name:'Havens',         logo:'',                                                                          color:'#f0fff4', tag:'Endurance · Gastro · Cool Mix',        img:'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=300&q=70' },
-    { id:'buckeye',   name:'Buckeye',        logo:'',                                                                          color:'#fff8f0', tag:'EQ8 · Cadence Ultra · Safe N Easy',    img:'https://images.unsplash.com/photo-1450052590821-8bf91254a353?w=300&q=70' },
-    { id:'cryptoaero',name:'Crypto Aero',   logo:'',                                                                          color:'#f4fff0', tag:'Wholefood · All Natural',              img:'https://images.unsplash.com/photo-1504870712357-65ea720d6078?w=300&q=70' },
-    { id:'kent',      name:'Kent Sentinel', logo:'',                                                                          color:'#f5f0ff', tag:'Quality Grain Feeds',                  img:'https://images.unsplash.com/photo-1416169607655-0c2b3ce2e1cc?w=300&q=70' },
+    { id:'nutrena',   name:'Nutrena',       logo:'https://nutrenaworld.com/wp-content/themes/nutrena/img/logo.svg',         color:'#e8f0fe', tag:'SafeChoice · ProForce · Triumph',       img:'https://sspark.genspark.ai/cfimages?u1=Inli4Vrc%2Bq7q%2Bhejp2YDAGwFAIaUPxW7K%2FwGYXRV7M%2FosuAUR1Dg%2F0CYc7d60OG48eic0M3S7QLmL7rjvtV13G6oK3uyoFxL%2F6mCxQ%2BPP0S%2BoyvO&u2=KfyuzNFlfV1IBWO5&width=600' },
+    { id:'proelite',  name:'Pro Elite',      logo:'https://proelitehorsefeed.com/wp-content/uploads/2021/10/ProElite_Logo_Reversed.png', color:'#fef9e8', tag:'Performance · Senior · Growth',       img:'https://sspark.genspark.ai/cfimages?u1=UxSf44ASGNVschWMwLtxVTJm3%2BRiUSyER74fAAsvVIMvRn1hKeSeK4y%2BjKNE8jwMaOERwhJljHYQcYwWUmC1zwynUJr1ADAMOeXYd7zaFrqolHnB&u2=5%2BTutAkigKGikiTN&width=600' },
+    { id:'cavalor',   name:'Cavalor',        logo:'https://cavalor.com/wp-content/uploads/2022/09/cavalor-logo.svg',          color:'#f0f7ff', tag:'Performix · FiberGastro · Strucomix',  img:'https://sspark.genspark.ai/cfimages?u1=onNaXY4%2FhbZvy5YUkL6RJRe7GDYh%2FXQ%2F9jUCePwxorXO0SXh9sJ4V5ZlP8bfJnaEM4xvG77mMoaKrx2Kh4NABnoukeaffKYGZCZbO8v6anEF9nDmP8mcozZwUEkzk0ZJI0S3JYPVUJekW5Q%2FTQ7Wo1Ym%2F384PTiYCw%3D%3D&u2=HvaCFz89bIhAFLwE&width=600' },
+    { id:'redmills',  name:'Red Mills',      logo:'https://www.redmillshorse.com/wp-content/uploads/2019/01/logo.png',        color:'#fff0f0', tag:'Competition · Horse Care · Comfort',   img:'https://sspark.genspark.ai/cfimages?u1=7osbNYU1ox8HmUk%2Ff45sEFuifDuvcNmaipEgpuBsDXSH2IHPavx1l1F8XyLl6hGDuY9d7%2BNMCEuIiPfiM%2BXq2K%2BeZndZ3qLBoOkpr7yNJg%3D%3D&u2=2MbM4LT9HP0TC4eI&width=600' },
+    { id:'havens',    name:'Havens',         logo:'',                                                                          color:'#f0fff4', tag:'Endurance · Gastro · Cool Mix',        img:'https://sspark.genspark.ai/cfimages?u1=dhrtoOORdnVmpeg5tu7Vf6iZPYmcuNy2bGs4%2F7HVf9X7%2FqSEKc8h4k8BEc2V5IGz%2BZu3%2FCtD5Qu55n%2F526YoYwwmmVccVgPnmttMjJxE%2FQk%3D&u2=7nQSyV4Lh9alc6Az&width=600' },
+    { id:'buckeye',   name:'Buckeye',        logo:'',                                                                          color:'#fff8f0', tag:'EQ8 · Cadence Ultra · Safe N Easy',    img:'https://sspark.genspark.ai/cfimages?u1=9XhtqN4rYmnFIf9UGMrzL7a9c7Ql2XBXrI6%2BK3o57loRQp60kAcf3xQdI%2BlJC9wcQvXchR9jZmirwQJGcDU%2B5FrgA86yTp6np7%2FN%2BLwuscUFAo2fjOxUxzIVKU4cPngVqwZepEz%2FUKNZINWBMvefKj9PnA%3D%3D&u2=ruqOATUPxWic6yRH&width=600' },
+    { id:'cryptoaero',name:'Crypto Aero',   logo:'',                                                                          color:'#f4fff0', tag:'Wholefood · All Natural',              img:'https://sspark.genspark.ai/cfimages?u1=UUsiXOiA0Ei8p%2FfKKGgbk1xAySyI%2FiMwtVhDYyrYBbgpnGA1ZJtkrAhHHwCYX1JzMYoWCDxVgQn44pKRN%2Bml1gVbJzt6nT4%2F%2B%2BDhAQJwPC%2BdZw%3D%3D&u2=QDzJUpsrG0A2lDdk&width=600' },
+    { id:'kent',      name:'Kent Sentinel', logo:'',                                                                          color:'#f5f0ff', tag:'Quality Grain Feeds',                  img:'https://sspark.genspark.ai/cfimages?u1=Vxz9lWjwxf2ZDBQw4sfUrkXEXV%2FJcZJZ%2FlYvsjswpMWnkrFwvhy8fUCTlInJHfSAcgbZhxIOUmLFM3lX4GvrTZqxqRl7aGNdVnzq9B9g7wZDh59ixKMAQk8Gp6G6Q1qmrlP2hg1jjhE%3D&u2=rkES%2F33%2By4pHTknJ&width=600' },
   ]
   return brands.map(b => `
     <div class="product-brand-card bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100"
