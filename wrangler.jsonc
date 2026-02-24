@@ -6,5 +6,12 @@
   "pages_build_output_dir": "./dist",
   "vars": {
     "OPENAI_BASE_URL": "https://www.genspark.ai/api/llm_proxy/v1"
-  }
+  },
+  "kv_namespaces": [
+    {
+      "binding": "BF_STORE",
+      "id": "local-bf-store",
+      "preview_id": "local-bf-store"
+    }
+  ]
 }

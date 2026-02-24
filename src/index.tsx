@@ -1,13 +1,19 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { serveStatic } from 'hono/cloudflare-workers'
+import { admin } from './admin'
 
 type Bindings = {
   OPENAI_API_KEY: string
   OPENAI_BASE_URL: string
+  BF_STORE: KVNamespace
+  ADMIN_PASSWORD: string
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
+
+// Mount admin panel
+app.route('/admin', admin)
 
 app.use('/api/*', cors())
 app.use('/static/*', serveStatic({ root: './' }))
@@ -18,8 +24,33 @@ app.post('/api/chat', async (c) => {
 
   const apiKey  = c.env?.OPENAI_API_KEY  || ''
   const baseURL = c.env?.OPENAI_BASE_URL || 'https://www.genspark.ai/api/llm_proxy/v1'
+  const kv = c.env?.BF_STORE
 
-  const systemPrompt = `You are Bri, the friendly AI assistant for British Feed & Supplies, 
+  // Load dynamic KB and rules from KV if available
+  let kbEntries: any[] = []
+  let botRules: any = {}
+  if (kv) {
+    try {
+      const kbRaw = await kv.get('chatbot_kb')
+      if (kbRaw) kbEntries = JSON.parse(kbRaw)
+      const rulesRaw = await kv.get('chatbot_rules')
+      if (rulesRaw) botRules = JSON.parse(rulesRaw)
+    } catch {}
+  }
+
+  const kbSection = kbEntries.length > 0
+    ? '\n\nKNOWLEDGE BASE (use these as authoritative answers):\n' +
+      kbEntries.map((e: any) => `Q: ${e.question}\nA: ${e.answer}`).join('\n\n')
+    : ''
+
+  const toneMap: any = {
+    friendly: 'friendly, warm, and helpful',
+    professional: 'professional, knowledgeable, and expert',
+    casual: 'casual, approachable, and conversational',
+    detailed: 'detailed, technical, and thorough',
+  }
+
+  const systemPrompt = `You are ${botRules.name || 'Bri'}, the ${toneMap[botRules.tone || 'friendly']} AI assistant for British Feed & Supplies, 
 a premier horse feed and livestock supply store located in Loxahatchee Groves (Wellington area), 
 Palm Beach County, Florida. You help customers find the best feed, hay, and supplements for their horses.
 
@@ -49,8 +80,10 @@ RECOMMENDATION GUIDELINES:
 - Endurance horses → Havens Endurance, Cavalor Endurix
 - Nervous/calm needed → Cavalor Pianissimo, Havens Cool Mix
 - Broodmares → Pro Elite Grass Advantage, Nutrena SafeChoice Mare & Foal, Red Mills Horse Care 14
+${botRules.customPrompt ? '\n' + botRules.customPrompt : ''}
+${kbSection}
 
-Keep answers friendly, practical, and under 120 words unless more detail is needed. Always end with an invitation to visit the store or call (561) 633-6003.`
+Keep answers ${botRules.length === 'short' ? 'very short (1-2 sentences)' : botRules.length === 'long' ? 'detailed and complete' : 'friendly, practical, and under 120 words unless more detail is needed'}. Always end with: ${botRules.cta || 'Visit the store or call (561) 633-6003!'}`
 
   try {
     const response = await fetch(`${baseURL}/chat/completions`, {
@@ -65,12 +98,27 @@ Keep answers friendly, practical, and under 120 words unless more detail is need
           { role: 'system', content: systemPrompt },
           ...messages
         ],
-        max_tokens: 300,
+        max_tokens: 400,
         temperature: 0.7,
       }),
     })
 
     const data: any = await response.json()
+    // Save conversation snippet to history
+    if (kv && messages.length >= 1) {
+      try {
+        const histRaw = await kv.get('chat_history')
+        const history: any[] = histRaw ? JSON.parse(histRaw) : []
+        const reply = data.choices?.[0]?.message?.content || ''
+        history.push({
+          date: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }),
+          messages: [...messages, { role:'assistant', content: reply }]
+        })
+        // Keep only last 200 sessions
+        if (history.length > 200) history.splice(0, history.length - 200)
+        await kv.put('chat_history', JSON.stringify(history))
+      } catch {}
+    }
     return c.json({ reply: data.choices?.[0]?.message?.content || 'Sorry, I could not process that. Please call us at (561) 633-6003!' })
   } catch (e) {
     return c.json({ reply: 'Sorry, something went wrong. Please call us at (561) 633-6003 for expert help!' })
@@ -79,8 +127,19 @@ Keep answers friendly, practical, and under 120 words unless more detail is need
 
 // ── Contact form endpoint ─────────────────────────────────────────────────────
 app.post('/api/contact', async (c) => {
+  const kv = c.env?.BF_STORE
   const body = await c.req.json()
-  // In production, integrate with email service (SendGrid, etc.)
+  if (kv) {
+    try {
+      const raw = await kv.get('contacts')
+      const contacts: any[] = raw ? JSON.parse(raw) : []
+      contacts.push({
+        ...body,
+        date: new Date().toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' })
+      })
+      await kv.put('contacts', JSON.stringify(contacts))
+    } catch {}
+  }
   return c.json({ success: true, message: 'Thank you! We will contact you within 24 hours.' })
 })
 
