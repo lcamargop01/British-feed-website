@@ -1640,7 +1640,7 @@ ${kbSection}`
           { role: 'system', content: systemPrompt },
           { role: 'user', content: message }
         ],
-        max_tokens: 400,
+        max_tokens: 2000,
         temperature: 0.7,
       }),
     })

@@ -98,7 +98,7 @@ Keep answers ${botRules.length === 'short' ? 'very short (1-2 sentences)' : botR
           { role: 'system', content: systemPrompt },
           ...messages
         ],
-        max_tokens: 400,
+        max_tokens: 2000,
         temperature: 0.7,
       }),
     })
