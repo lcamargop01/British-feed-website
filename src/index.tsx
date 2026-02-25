@@ -143,6 +143,16 @@ app.post('/api/contact', async (c) => {
   return c.json({ success: true, message: 'Thank you! We will contact you within 24 hours.' })
 })
 
+// ── Products catalog page ──────────────────────────────────────────────────────
+app.get('/products', (c) => {
+  return c.html(getProductsHTML())
+})
+
+// ── Favicon ────────────────────────────────────────────────────────────────────
+app.get('/favicon.ico', (c) => {
+  return c.redirect('/static/favicon.ico', 301)
+})
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 app.get('/', (c) => {
   return c.html(getHTML())
@@ -224,6 +234,9 @@ function getHTML(): string {
       <div class="hidden md:flex items-center gap-6 text-sm font-medium text-white/90">
         <a href="#about"    class="nav-link hover:text-gold-400 transition-colors">About</a>
         <a href="#products" class="nav-link hover:text-gold-400 transition-colors">Products</a>
+        <a href="/products" class="nav-link hover:text-gold-400 transition-colors flex items-center gap-1" title="Browse all 986 items">
+          <i class="fas fa-list text-gold-400 text-xs"></i>Full Catalog
+        </a>
         <a href="#services" class="nav-link hover:text-gold-400 transition-colors">Services</a>
         <a href="#team"     class="nav-link hover:text-gold-400 transition-colors">Our Team</a>
         <a href="#reviews"  class="nav-link hover:text-gold-400 transition-colors">Reviews</a>
@@ -242,6 +255,9 @@ function getHTML(): string {
     <div class="px-4 py-3 space-y-2 text-sm font-medium text-white/90">
       <a href="#about"    onclick="closeMobileMenu()" class="block py-2 hover:text-gold-400">About</a>
       <a href="#products" onclick="closeMobileMenu()" class="block py-2 hover:text-gold-400">Products</a>
+      <a href="/products" class="block py-2 hover:text-gold-400 flex items-center gap-2">
+        <i class="fas fa-list text-xs" style="color:#C9A84C"></i>Full Catalog (986 items)
+      </a>
       <a href="#services" onclick="closeMobileMenu()" class="block py-2 hover:text-gold-400">Services</a>
       <a href="#team"     onclick="closeMobileMenu()" class="block py-2 hover:text-gold-400">Our Team</a>
       <a href="#reviews"  onclick="closeMobileMenu()" class="block py-2 hover:text-gold-400">Reviews</a>
@@ -514,10 +530,21 @@ function getHTML(): string {
       </div>
     </div>
 
+    <!-- Browse Full Catalog CTA -->
+    <div class="text-center mt-10 scroll-reveal">
+      <div class="inline-flex flex-col sm:flex-row items-center gap-4 bg-white rounded-2xl px-8 py-6 shadow-sm border border-gray-100">
+        <div class="text-left">
+          <div class="font-bold text-navy-700 text-base">Looking for something specific?</div>
+          <div class="text-gray-500 text-sm mt-0.5">Browse our complete inventory of 986 products with search & filters.</div>
+        </div>
+        <a href="/products" class="flex-shrink-0 bg-navy-700 hover:bg-navy-800 text-white font-bold px-6 py-3 rounded-xl transition-all hover:scale-105 flex items-center gap-2 whitespace-nowrap" style="background:#1B2A4A">
+          <i class="fas fa-list"></i> Browse Full Catalog
+        </a>
+      </div>
+    </div>
+
   </div>
 </section>
-
-<!-- ═══════════════════════════ HORSE FINDER TOOL ═══════════════════════════ -->
 <section id="finder" class="py-20 bg-white">
   <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-12 scroll-reveal">
@@ -1309,3 +1336,403 @@ function brandModals(): string {
 }
 
 export default app
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  FULL PRODUCT CATALOG PAGE
+// ═══════════════════════════════════════════════════════════════════════════
+function getProductsHTML(): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Full Product Catalog | British Feed & Supplies — Wellington, FL</title>
+  <meta name="description" content="Browse all 986 products at British Feed & Supplies — Nutrena, Cavalor, Red Mills, Havens, hay, shavings, supplements, grooming, tack and more."/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy:  { DEFAULT:'#1B2A4A', 50:'#EEF1F8', 700:'#1B2A4A', 800:'#0F1A30' },
+            gold:  { DEFAULT:'#C9A84C', 400:'#C9A84C', 500:'#A88A35' },
+            cream: { DEFAULT:'#FBF7F0', dark:'#F0E9D8' },
+          },
+          fontFamily: {
+            serif: ['Playfair Display','Georgia','serif'],
+            sans:  ['Inter','system-ui','sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { scroll-behavior:smooth; }
+    body { font-family:'Inter',sans-serif; background:#F8FAFC; }
+    .nav-sticky { position:sticky; top:0; z-index:50; background:rgba(27,42,74,0.97); backdrop-filter:blur(8px); }
+    .card-item { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; transition:all .2s; }
+    .card-item:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(27,42,74,0.1); border-color:#C9A84C; }
+    .badge-cat { display:inline-block; padding:2px 9px; border-radius:20px; font-size:10.5px; font-weight:600; }
+    .in-stock  { background:#ECFDF5; color:#065F46; }
+    .out-stock { background:#F1F5F9; color:#94A3B8; }
+    .filter-btn { border:1.5px solid #e2e8f0; border-radius:8px; padding:6px 14px; font-size:12px; font-weight:500; cursor:pointer; transition:all .2s; background:#fff; color:#475569; white-space:nowrap; }
+    .filter-btn.active { background:#1B2A4A; color:#fff; border-color:#1B2A4A; }
+    .filter-btn:hover:not(.active) { border-color:#C9A84C; color:#1B2A4A; }
+    .search-input { border:1.5px solid #e2e8f0; border-radius:10px; padding:10px 16px 10px 42px; font-size:14px; width:100%; outline:none; transition:border .2s; }
+    .search-input:focus { border-color:#1B2A4A; box-shadow:0 0 0 3px rgba(27,42,74,0.08); }
+    #items-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+    @media(max-width:640px){ #items-grid { grid-template-columns:1fr; } }
+    .sort-select { border:1.5px solid #e2e8f0; border-radius:8px; padding:8px 32px 8px 12px; font-size:13px; outline:none; background:#fff; cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 8px center; background-size:14px; }
+    .pagination-btn { padding:6px 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; cursor:pointer; background:#fff; transition:all .2s; }
+    .pagination-btn.active, .pagination-btn:hover { background:#1B2A4A; color:#fff; border-color:#1B2A4A; }
+    .pagination-btn:disabled { opacity:.4; cursor:not-allowed; }
+    .price-tag { color:#C9A84C; font-weight:700; font-size:15px; }
+    .plu-tag { font-size:10px; color:#94a3b8; font-family:monospace; }
+  </style>
+</head>
+<body>
+  <!-- Nav -->
+  <nav class="nav-sticky py-3 px-6 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-3">
+      <img src="https://www.genspark.ai/api/files/s/P7DEplwl" alt="British Feed" class="h-8 brightness-0 invert" onerror="this.style.display='none'"/>
+      <span class="text-white font-bold text-base hidden sm:block" style="font-family:'Playfair Display',serif">British Feed & Supplies</span>
+    </a>
+    <div class="flex items-center gap-4">
+      <a href="/" class="text-white/80 hover:text-white text-sm font-medium transition-colors">
+        <i class="fas fa-arrow-left mr-1.5"></i>Back to Home
+      </a>
+      <a href="tel:5616336003" class="hidden sm:flex items-center gap-2 bg-gold text-navy-700 font-bold text-sm px-4 py-2 rounded-lg hover:bg-yellow-400 transition-colors" style="color:#1B2A4A">
+        <i class="fas fa-phone"></i>(561) 633-6003
+      </a>
+    </div>
+  </nav>
+
+  <!-- Hero bar -->
+  <div style="background:linear-gradient(135deg,#1B2A4A,#2D4A7A)" class="py-8 px-6 text-center text-white">
+    <h1 class="font-serif text-3xl font-bold mb-2">Complete Product Catalog</h1>
+    <p class="text-white/70 text-sm">British Feed & Supplies — Loxahatchee Groves, FL · (561) 633-6003</p>
+    <div class="flex items-center justify-center gap-6 mt-4 text-sm text-white/80">
+      <span id="total-count" class="flex items-center gap-1.5"><i class="fas fa-box"></i> Loading…</span>
+      <span class="flex items-center gap-1.5"><i class="fas fa-map-marker-alt"></i> 14589 Southern Blvd, Loxahatchee Groves</span>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="max-w-screen-xl mx-auto px-4 py-5">
+    <!-- Search + sort row -->
+    <div class="flex flex-wrap gap-3 items-center mb-4">
+      <div class="relative flex-1 min-w-56">
+        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+        <input id="search" type="text" class="search-input" placeholder="Search products by name, brand, description…" oninput="applyFilters()"/>
+      </div>
+      <select id="sort-sel" class="sort-select" onchange="applyFilters()">
+        <option value="name-az">Name A–Z</option>
+        <option value="name-za">Name Z–A</option>
+        <option value="price-lo">Price Low–High</option>
+        <option value="price-hi">Price High–Low</option>
+        <option value="instock">In Stock First</option>
+      </select>
+      <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
+        <input type="checkbox" id="instock-only" onchange="applyFilters()" class="w-4 h-4 rounded"/>
+        In stock only
+      </label>
+      <button onclick="clearFilters()" class="text-sm text-gray-400 hover:text-navy underline">Clear</button>
+    </div>
+
+    <!-- Category filter chips -->
+    <div class="flex flex-wrap gap-2 mb-5" id="cat-filters">
+      <button class="filter-btn active" data-cat="ALL" onclick="selectCat(this,'ALL')">All Categories</button>
+    </div>
+
+    <!-- Results info -->
+    <div class="flex items-center justify-between mb-4">
+      <div class="text-sm text-gray-500" id="results-info">Loading products…</div>
+      <div class="flex items-center gap-2" id="pagination-top"></div>
+    </div>
+
+    <!-- Grid -->
+    <div id="items-grid"></div>
+
+    <!-- Pagination bottom -->
+    <div class="flex items-center justify-center gap-2 mt-8" id="pagination-bottom"></div>
+  </div>
+
+  <!-- Footer -->
+  <footer style="background:#1B2A4A" class="text-center py-8 mt-12">
+    <p class="text-white/60 text-sm">British Feed & Supplies · 14589 Southern Blvd, Palm West Plaza, Loxahatchee Groves, FL 33470</p>
+    <p class="text-white/40 text-xs mt-1">(561) 633-6003 · admin@britishfeed.com</p>
+    <a href="/" class="inline-block mt-4 text-gold text-sm hover:underline">← Return to Main Website</a>
+  </footer>
+
+<script>
+const PAGE_SIZE = 48;
+let allItems = [];
+let filtered = [];
+let currentPage = 1;
+let activeCat = 'ALL';
+
+// Category display names + icons
+const catMeta = {
+  'Cargill / Nutrena':              { icon:'fa-seedling',    color:'#276749' },
+  'Cavalor':                        { icon:'fa-horse',       color:'#1B2A4A' },
+  'Red Mills':                      { icon:'fa-fire',        color:'#DC2626' },
+  'Havens':                         { icon:'fa-leaf',        color:'#059669' },
+  'Crypto Aero':                    { icon:'fa-apple-alt',   color:'#7C3AED' },
+  'Emerald Valley':                 { icon:'fa-mountain',    color:'#047857' },
+  'Hay':                            { icon:'fa-wheat-alt',   color:'#D97706' },
+  'Shavings & Bedding':             { icon:'fa-layer-group', color:'#92400E' },
+  'Animal Health & Supplements':    { icon:'fa-heart-pulse', color:'#BE123C' },
+  'Digestive Health':               { icon:'fa-pills',       color:'#0891B2' },
+  'Fly Prevention':                 { icon:'fa-bug',         color:'#6B7280' },
+  'FLYPREVENTION':                  { icon:'fa-bug',         color:'#6B7280' },
+  'Farm Supplies':                  { icon:'fa-tractor',     color:'#92400E' },
+  'Grooming':                       { icon:'fa-scissors',    color:'#7C3AED' },
+  'Hoof & Coat':                    { icon:'fa-horse-head',  color:'#B45309' },
+  'HOOF/COAT':                      { icon:'fa-horse-head',  color:'#B45309' },
+  'Tack & Equipment':               { icon:'fa-wrench',      color:'#374151' },
+  'First Aid':                      { icon:'fa-kit-medical', color:'#DC2626' },
+  'FIRSTAID':                       { icon:'fa-kit-medical', color:'#DC2626' },
+  'Treats':                         { icon:'fa-star',        color:'#DB2777' },
+  'TREATS':                         { icon:'fa-star',        color:'#DB2777' },
+  'Wormers':                        { icon:'fa-syringe',     color:'#6D28D9' },
+  'WORMERS':                        { icon:'fa-syringe',     color:'#6D28D9' },
+  'Wormers (Poultry)':              { icon:'fa-syringe',     color:'#6D28D9' },
+  'WORMERS,POULTRY':                { icon:'fa-syringe',     color:'#6D28D9' },
+  'Stress Relief':                  { icon:'fa-spa',         color:'#0D9488' },
+  'STRESSRELIEF':                   { icon:'fa-spa',         color:'#0D9488' },
+  'Poultry':                        { icon:'fa-egg',         color:'#D97706' },
+  'POULTRY':                        { icon:'fa-egg',         color:'#D97706' },
+  'Beverages':                      { icon:'fa-mug-hot',     color:'#1D4ED8' },
+  'Equine America':                 { icon:'fa-flag-usa',    color:'#1D4ED8' },
+  'EQUINEAMERICA':                  { icon:'fa-flag-usa',    color:'#1D4ED8' },
+  'Buckeye Nutrition':              { icon:'fa-bucket',      color:'#B45309' },
+  'NUTRITIONBUCKE':                 { icon:'fa-bucket',      color:'#B45309' },
+  'Small Pets':                     { icon:'fa-paw',         color:'#7C3AED' },
+  'SMALLPETS':                      { icon:'fa-paw',         color:'#7C3AED' },
+  'Kent':                           { icon:'fa-boxes-stacked',color:'#374151' },
+  'Poulin Grain':                   { icon:'fa-seedling',    color:'#059669' },
+  'POULINGRAININ':                  { icon:'fa-seedling',    color:'#059669' },
+  'Total Equine':                   { icon:'fa-horse',       color:'#1B2A4A' },
+  'TOTALEQUINE':                    { icon:'fa-horse',       color:'#1B2A4A' },
+  'Grain&Forage':                   { icon:'fa-seedling',    color:'#276749' },
+  'Muscle&Joint':                   { icon:'fa-dumbbell',    color:'#BE123C' },
+  'Vitamins&Elec':                  { icon:'fa-capsules',    color:'#0891B2' },
+  'Misc(Toy/Cndy)':                 { icon:'fa-gift',        color:'#DB2777' },
+};
+
+function catIcon(cat) {
+  return catMeta[cat]?.icon || 'fa-box';
+}
+function catColor(cat) {
+  return catMeta[cat]?.color || '#64748b';
+}
+
+// Clean category name for display
+const catNameMap = {
+  'FLYPREVENTION': 'Fly Prevention',
+  'FIRSTAID': 'First Aid',
+  'HOOF/COAT': 'Hoof & Coat',
+  'STRESSRELIEF': 'Stress Relief',
+  'POULTRY': 'Poultry',
+  'WORMERS': 'Wormers',
+  'EQUINEAMERICA': 'Equine America',
+  'NUTRITIONBUCKE': 'Buckeye Nutrition',
+  'SMALLPETS': 'Small Pets',
+  'TREATS': 'Treats',
+  'POULINGRAININ': 'Poulin Grain',
+  'TOTALEQUINE': 'Total Equine',
+  'WORMERS,POULTRY': 'Wormers (Poultry)',
+  'Grain&Forage': 'Grain & Forage',
+  'Muscle&Joint': 'Muscle & Joint',
+  'Vitamins&Elec': 'Vitamins & Electrolytes',
+  'Misc(Toy/Cndy)': 'Misc / Toys',
+};
+function cleanCatName(cat) {
+  return catNameMap[cat] || cat;
+}
+
+async function loadData() {
+  try {
+    const res = await fetch('/static/products-data.json');
+    allItems = await res.json();
+
+    // Build category buttons
+    const cats = [...new Set(allItems.map(i => i.category))].sort();
+    const container = document.getElementById('cat-filters');
+    cats.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'filter-btn';
+      btn.dataset.cat = cat;
+      btn.onclick = function(){ selectCat(this, cat); };
+      btn.innerHTML = \`<i class="fas \${catIcon(cat)} mr-1" style="color:\${catColor(cat)}"></i>\${cleanCatName(cat)}\`;
+      container.appendChild(btn);
+    });
+
+    document.getElementById('total-count').innerHTML = \`<i class="fas fa-box"></i> \${allItems.length} Products\`;
+    applyFilters();
+  } catch(e) {
+    document.getElementById('items-grid').innerHTML = '<div class="col-span-full text-center py-12 text-gray-400">Failed to load products. Please refresh.</div>';
+  }
+}
+
+function selectCat(btn, cat) {
+  document.querySelectorAll('#cat-filters .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeCat = cat;
+  currentPage = 1;
+  applyFilters();
+}
+
+function applyFilters() {
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const sort = document.getElementById('sort-sel').value;
+  const inStockOnly = document.getElementById('instock-only').checked;
+
+  filtered = allItems.filter(item => {
+    if (activeCat !== 'ALL' && item.category !== activeCat) return false;
+    if (inStockOnly && !item.inStock) return false;
+    if (q) {
+      const hay = ((item.displayName || item.name) + ' ' + item.category + ' ' + item.plu + ' ' + (item.vendorItem || '')).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  // Sort
+  filtered.sort((a, b) => {
+    if (sort === 'name-az') return a.name.localeCompare(b.name);
+    if (sort === 'name-za') return b.name.localeCompare(a.name);
+    if (sort === 'price-lo') return a.price - b.price;
+    if (sort === 'price-hi') return b.price - a.price;
+    if (sort === 'instock') return (b.inStock ? 1:0) - (a.inStock ? 1:0);
+    return 0;
+  });
+
+  currentPage = 1;
+  renderPage();
+}
+
+function clearFilters() {
+  document.getElementById('search').value = '';
+  document.getElementById('instock-only').checked = false;
+  document.getElementById('sort-sel').value = 'name-az';
+  activeCat = 'ALL';
+  document.querySelectorAll('#cat-filters .filter-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+  applyFilters();
+}
+
+function renderPage() {
+  const total = filtered.length;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  if (currentPage > totalPages) currentPage = totalPages;
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const slice = filtered.slice(start, start + PAGE_SIZE);
+
+  // Results info
+  document.getElementById('results-info').textContent = \`Showing \${start+1}–\${Math.min(start+PAGE_SIZE, total)} of \${total} products\`;
+
+  // Grid
+  const grid = document.getElementById('items-grid');
+  if (!slice.length) {
+    grid.innerHTML = \`
+    <div class="col-span-full text-center py-16 text-gray-400">
+      <i class="fas fa-search text-4xl mb-3 block"></i>
+      <div class="font-medium mb-1">No products found</div>
+      <button onclick="clearFilters()" class="text-sm text-blue-500 hover:underline mt-2">Clear filters</button>
+    </div>\`;
+  } else {
+    grid.innerHTML = slice.map(item => {
+      // Use displayName if available, otherwise format the raw name
+      const dispName = item.displayName || formatProductName(item.name);
+      const stockBadge = item.inStock
+        ? \`<span class="badge-cat in-stock"><i class="fas fa-check-circle mr-1"></i>In Stock (\${item.qoh})</span>\`
+        : \`<span class="badge-cat out-stock"><i class="fas fa-clock mr-1"></i>Out of Stock</span>\`;
+      const icon = catIcon(item.category);
+      const color = catColor(item.category);
+      return \`
+      <div class="card-item flex flex-col">
+        <div class="flex items-start gap-3 mb-3">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:\${color}15">
+            <i class="fas \${icon} text-sm" style="color:\${color}"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="font-semibold text-gray-800 text-sm leading-snug">\${dispName}</div>
+            <div class="text-xs text-gray-400 mt-0.5">\${cleanCatName(item.category)}</div>
+          </div>
+        </div>
+        <div class="flex items-center justify-between mt-auto pt-2 border-t border-gray-50">
+          <div>
+            <div class="price-tag">\\$\${item.price.toFixed(2)}</div>
+            <div class="plu-tag">PLU #\${item.plu}</div>
+          </div>
+          \${stockBadge}
+        </div>
+      </div>\`;
+    }).join('');
+  }
+
+  // Pagination
+  renderPagination(totalPages);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderPagination(totalPages) {
+  const html = paginationHTML(totalPages);
+  document.getElementById('pagination-top').innerHTML = html;
+  document.getElementById('pagination-bottom').innerHTML = html;
+}
+
+function paginationHTML(totalPages) {
+  if (totalPages <= 1) return '';
+  let pages = [];
+  // Always show first, last, and pages near current
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) pages.push(i);
+    else if (pages[pages.length-1] !== '…') pages.push('…');
+  }
+  return \`
+    <button class="pagination-btn" \${currentPage===1?'disabled':''} onclick="goPage(\${currentPage-1})">
+      <i class="fas fa-chevron-left text-xs"></i>
+    </button>
+    \${pages.map(p => p === '…'
+      ? \`<span class="text-gray-400 px-1">…</span>\`
+      : \`<button class="pagination-btn \${p===currentPage?'active':''}" onclick="goPage(\${p})">\${p}</button>\`
+    ).join('')}
+    <button class="pagination-btn" \${currentPage===totalPages?'disabled':''} onclick="goPage(\${currentPage+1})">
+      <i class="fas fa-chevron-right text-xs"></i>
+    </button>
+  \`;
+}
+
+function goPage(p) {
+  currentPage = p;
+  renderPage();
+}
+
+function formatProductName(raw) {
+  // Smart formatter for concatenated uppercase product names from POS system
+  let s = raw || '';
+  // Insert space before digits following letters (not decimal)
+  s = s.replace(/([A-Za-z])(\d)/g, (_, a, b) => a + ' ' + b);
+  // Insert space after digits before letters (not decimal context)
+  s = s.replace(/(\d)([A-Za-z])/g, (_, a, b) => a + ' ' + b);
+  // Fix double spaces
+  s = s.replace(/\s+/g, ' ').trim();
+  // Title case (lowercase units)
+  const units = new Set(['lb','lbs','oz','kg','g','ml','l','gal','qt','fl','cc','mg','ft','lt','ct']);
+  const small = new Set(['and','or','the','a','an','of','in','for','with','to','by','at','w/','&']);
+  return s.split(' ').map((w, i) => {
+    const wl = w.toLowerCase();
+    if (units.has(wl)) return wl;
+    if (i > 0 && small.has(wl)) return wl;
+    return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+  }).join(' ');
+}
+
+loadData();
+</script>
+</body>
+</html>`
+}
