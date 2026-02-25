@@ -412,16 +412,16 @@ function getHTML(): string {
     <!-- Category tabs -->
     <div class="flex flex-wrap justify-center gap-3 mb-10">
       <button onclick="filterProducts('all')" id="tab-all" class="product-tab active-tab px-5 py-2 rounded-full font-semibold text-sm border-2 border-navy-700 bg-navy-700 text-white transition-all">All Products</button>
-      <button onclick="filterProducts('grain')" id="tab-grain" class="product-tab px-5 py-2 rounded-full font-semibold text-sm border-2 border-navy-200 text-navy-700 hover:border-navy-700 hover:bg-navy-700 hover:text-white transition-all">🌾 Grain & Feed</button>
-      <button onclick="filterProducts('hay')" id="tab-hay" class="product-tab px-5 py-2 rounded-full font-semibold text-sm border-2 border-navy-200 text-navy-700 hover:border-navy-700 hover:bg-navy-700 hover:text-white transition-all">🌿 Hay</button>
-      <button onclick="filterProducts('shavings')" id="tab-shavings" class="product-tab px-5 py-2 rounded-full font-semibold text-sm border-2 border-navy-200 text-navy-700 hover:border-navy-700 hover:bg-navy-700 hover:text-white transition-all">🪵 Shavings & Bedding</button>
-      <button onclick="filterProducts('supplements')" id="tab-supplements" class="product-tab px-5 py-2 rounded-full font-semibold text-sm border-2 border-navy-200 text-navy-700 hover:border-navy-700 hover:bg-navy-700 hover:text-white transition-all">💊 Supplements</button>
+      <button onclick="filterProducts('grain')" id="tab-grain" class="product-tab px-5 py-2 rounded-full font-semibold text-sm border-2 border-navy-200 text-navy-700 hover:border-navy-700 hover:bg-navy-700 hover:text-white transition-all">Grain & Feed</button>
+      <button onclick="filterProducts('hay')" id="tab-hay" class="product-tab px-5 py-2 rounded-full font-semibold text-sm border-2 border-navy-200 text-navy-700 hover:border-navy-700 hover:bg-navy-700 hover:text-white transition-all">Hay</button>
+      <button onclick="filterProducts('shavings')" id="tab-shavings" class="product-tab px-5 py-2 rounded-full font-semibold text-sm border-2 border-navy-200 text-navy-700 hover:border-navy-700 hover:bg-navy-700 hover:text-white transition-all">Shavings & Bedding</button>
+      <button onclick="filterProducts('supplements')" id="tab-supplements" class="product-tab px-5 py-2 rounded-full font-semibold text-sm border-2 border-navy-200 text-navy-700 hover:border-navy-700 hover:bg-navy-700 hover:text-white transition-all">Supplements</button>
     </div>
 
     <!-- GRAIN BRAND CARDS -->
     <div id="cat-grain" class="product-category mb-12">
       <h3 class="text-2xl font-serif font-bold text-navy-700 mb-6 flex items-center gap-3">
-        <span class="text-3xl">🌾</span> Grain Brands
+        Grain Brands
         <span class="text-sm font-sans font-normal text-gray-400 ml-2">— click a brand to see all products</span>
       </h3>
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -431,7 +431,7 @@ function getHTML(): string {
 
     <!-- HAY -->
     <div id="cat-hay" class="product-category mb-12">
-      <h3 class="text-2xl font-serif font-bold text-navy-700 mb-6 flex items-center gap-3"><span class="text-3xl">🌿</span> Hay Selection</h3>
+      <h3 class="text-2xl font-serif font-bold text-navy-700 mb-6 flex items-center gap-3">Hay Selection</h3>
       <div class="grid md:grid-cols-2 gap-6">
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 card-hover">
           <div class="flex items-center gap-3 mb-4">
@@ -460,7 +460,7 @@ function getHTML(): string {
 
     <!-- SHAVINGS -->
     <div id="cat-shavings" class="product-category mb-12">
-      <h3 class="text-2xl font-serif font-bold text-navy-700 mb-6 flex items-center gap-3"><span class="text-3xl">🪵</span> Shavings & Bedding</h3>
+      <h3 class="text-2xl font-serif font-bold text-navy-700 mb-6 flex items-center gap-3">Shavings & Bedding</h3>
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         ${[
           {name:'WD Fine',desc:'Very fine shavings — 7–8 cu. ft. per bag. Excellent dust control.',icon:'fa-feather'},
@@ -488,7 +488,7 @@ function getHTML(): string {
 
     <!-- SUPPLEMENTS -->
     <div id="cat-supplements" class="product-category mb-12">
-      <h3 class="text-2xl font-serif font-bold text-navy-700 mb-6 flex items-center gap-3"><span class="text-3xl">💊</span> Supplements & Additives</h3>
+      <h3 class="text-2xl font-serif font-bold text-navy-700 mb-6 flex items-center gap-3">Supplements & Additives</h3>
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         ${[
           {name:'Cavalor Hepato Liq',cat:'Liver Support',desc:'Liquid liver support supplement. Detoxifies and supports optimal liver function, especially for horses in heavy training.'},
@@ -904,7 +904,7 @@ ${brandModals()}
   </div>
   <div id="chat-messages" class="flex-1 overflow-y-auto p-4 bg-white space-y-3" style="min-height:280px;max-height:320px;">
     <div class="chat-bubble-bot text-sm p-3 max-w-xs">
-      👋 Hi! I'm <strong>Bri</strong>, your British Feed advisor. Tell me about your horse — age, activity level, and any concerns — and I'll recommend the perfect feed! 🐴
+      Hi! I'm <strong>Bri</strong>, your British Feed advisor. Tell me about your horse — age, activity level, and any concerns — and I'll recommend the perfect feed!
     </div>
   </div>
   <div class="p-3 border-t border-gray-100 bg-white">
