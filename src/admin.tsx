@@ -701,7 +701,7 @@ admin.get('/content', requireAuth, async (c) => {
     </div>
     <div>
       <label class="form-label">Main Paragraph</label>
-      <textarea id="c-about-para1" class="form-input" rows="4" placeholder="Founded in 2012…"></textarea>
+      <textarea id="c-about-para1" class="form-input" rows="4" placeholder="In 2016, Vieri Bracco purchased British Feed & Supplies…"></textarea>
     </div>
     <div>
       <label class="form-label">Second Paragraph</label>

@@ -852,7 +852,7 @@ function getHTML(): string {
     <div class="grid md:grid-cols-3 gap-8 mb-8">
       <div>
         <img src="https://www.genspark.ai/api/files/s/P7DEplwl" alt="British Feed Logo" class="h-10 brightness-0 invert mb-4" onerror="this.style.display='none'" />
-        <p class="text-white/50 text-sm leading-relaxed">Premium horse feed, hay, shavings & supplies for Wellington's equestrian community since 2012.</p>
+        <p class="text-white/50 text-sm leading-relaxed">Premium horse feed, hay, shavings & supplies for Wellington's equestrian community since 2016.</p>
         <a href="https://www.instagram.com/british_feed_and_supplies/" target="_blank" rel="noopener" class="inline-flex items-center gap-2 mt-4 text-white/50 hover:text-gold-400 transition-colors text-sm">
           <i class="fab fa-instagram text-lg"></i> @british_feed_and_supplies
         </a>
