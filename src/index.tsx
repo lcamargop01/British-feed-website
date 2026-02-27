@@ -2131,9 +2131,9 @@ function openModal(id) {
   const videoWrap = document.getElementById('modalVideoWrap');
   if (p.videoUrl && videoWrap) {
     let embedHtml = '';
-    const ytMatch = p.videoUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+    const ytMatch = p.videoUrl.match(new RegExp('(?:youtube\\.com/watch\\?v=|youtu\\.be/)([\\w-]+)'));
     if (ytMatch) embedHtml = \`<iframe width="100%" height="220" src="https://www.youtube.com/embed/\${ytMatch[1]}" frameborder="0" allowfullscreen style="border-radius:10px;"></iframe>\`;
-    const vimeoMatch = p.videoUrl.match(/vimeo\.com\/(\d+)/);
+    const vimeoMatch = p.videoUrl.match(new RegExp('vimeo\\.com/(\\d+)'));
     if (vimeoMatch) embedHtml = \`<iframe width="100%" height="220" src="https://player.vimeo.com/video/\${vimeoMatch[1]}" frameborder="0" allowfullscreen style="border-radius:10px;"></iframe>\`;
     if (!embedHtml && (p.videoUrl.includes('.mp4') || p.videoUrl.includes('.webm')))
       embedHtml = \`<video src="\${p.videoUrl}" controls style="width:100%;max-height:220px;border-radius:10px;"></video>\`;
@@ -2156,7 +2156,7 @@ function openModal(id) {
     if (p.bestFor) extraHtml += \`<div class="mt-3 text-sm"><span class="font-semibold text-navy">Best For: </span><span class="text-gray-600">\${p.bestFor}</span></div>\`;
     if (p.features && p.features.length > 0) {
       extraHtml += \`<div class="mt-3"><div class="text-sm font-semibold text-navy mb-1.5">Key Features:</div>
-      <ul class="list-disc list-inside text-sm text-gray-600 space-y-0.5">\${p.features.map((f: string) => \`<li>\${f}</li>\`).join('')}</ul></div>\`;
+      <ul class="list-disc list-inside text-sm text-gray-600 space-y-0.5">\${p.features.map((f) => \`<li>\${f}</li>\`).join('')}</ul></div>\`;
     }
     if (p.protein || p.fat || p.fiber) {
       extraHtml += \`<div class="mt-3 flex gap-4">
