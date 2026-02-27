@@ -260,284 +260,818 @@ admin.get('/products', requireAuth, (c) => c.redirect('/admin/catalog'))
 
 admin.get('/content', requireAuth, async (c) => {
   return c.html(adminShell('Site Content', 'content', `
-<div class="p-6 max-w-5xl mx-auto">
-  <div class="flex items-center justify-between mb-6">
-    <div>
-      <h1 class="text-2xl font-bold text-gray-900">Site Content Editor</h1>
-      <p class="text-gray-500 text-sm mt-1">Edit all text and images displayed on your public website</p>
-    </div>
-    <button onclick="saveAllContent()" class="btn-primary"><i class="fas fa-save"></i> Save All Changes</button>
-  </div>
+<!-- Visual Content Editor — full viewport split layout -->
+<style>
+  /* override adminShell body padding for this page */
+  main.flex-1.overflow-y-auto { overflow:hidden !important; }
+  #ve-root { display:flex; flex-direction:column; height:100%; overflow:hidden; }
+  #ve-toolbar { flex-shrink:0; display:flex; align-items:center; gap:10px; padding:10px 16px; background:#fff; border-bottom:1px solid #e5e7eb; z-index:10; }
+  #ve-body { flex:1; display:flex; overflow:hidden; }
+  #ve-iframe-wrap { flex:1; position:relative; overflow:hidden; background:#f3f4f6; }
+  #ve-iframe { width:100%; height:100%; border:none; display:block; }
+  #ve-iframe-loading { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#f3f4f6; color:#9ca3af; gap:8px; font-size:14px; z-index:5; }
+  #ve-panel { width:0; flex-shrink:0; overflow:hidden; transition:width .25s cubic-bezier(.4,0,.2,1); background:#fff; border-left:1px solid #e5e7eb; display:flex; flex-direction:column; }
+  #ve-panel.open { width:440px; }
+  #ve-panel-inner { flex:1; overflow-y:auto; padding:0; }
+  #ve-panel-footer { flex-shrink:0; padding:12px 16px; border-top:1px solid #e5e7eb; display:flex; gap:8px; justify-content:flex-end; background:#fff; }
+  .ve-section-btn { display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; border:1px solid #e5e7eb; background:#fff; color:#374151; transition:all .15s; white-space:nowrap; }
+  .ve-section-btn.active { background:#1B2A4A; color:#fff; border-color:#1B2A4A; }
+  .ve-section-btn:hover:not(.active) { background:#f9fafb; border-color:#1B2A4A; color:#1B2A4A; }
+  .ve-field { margin-bottom:14px; }
+  .ve-label { display:block; font-size:11px; font-weight:600; color:#6b7280; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+  .ve-input { width:100%; border:1px solid #e5e7eb; border-radius:8px; padding:7px 10px; font-size:13px; color:#111827; background:#fff; outline:none; transition:border-color .15s; box-sizing:border-box; }
+  .ve-input:focus { border-color:#1B2A4A; }
+  .ve-textarea { width:100%; border:1px solid #e5e7eb; border-radius:8px; padding:7px 10px; font-size:13px; color:#111827; background:#fff; outline:none; resize:vertical; min-height:72px; transition:border-color .15s; box-sizing:border-box; }
+  .ve-textarea:focus { border-color:#1B2A4A; }
+  .ve-section-header { padding:14px 16px 10px; border-bottom:1px solid #f3f4f6; margin-bottom:0; display:flex; align-items:center; gap:8px; }
+  .ve-section-body { padding:14px 16px; }
+  .ve-subsection { background:#f9fafb; border-radius:10px; padding:12px; margin-bottom:10px; border:1px solid #f0f0f0; }
+  .ve-subsection-title { font-size:11px; font-weight:700; color:#374151; text-transform:uppercase; letter-spacing:.06em; margin-bottom:10px; }
+  .ve-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .ve-save-flash { position:fixed; bottom:24px; right:24px; background:#1B2A4A; color:#fff; padding:10px 20px; border-radius:10px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px; z-index:9999; opacity:0; transform:translateY(8px); transition:all .3s; pointer-events:none; }
+  .ve-save-flash.show { opacity:1; transform:translateY(0); }
+  .ve-img-row { display:flex; gap:8px; align-items:flex-start; }
+  .ve-img-row input { flex:1; }
+  .ve-img-thumb { width:48px; height:36px; border-radius:6px; object-fit:cover; border:1px solid #e5e7eb; flex-shrink:0; display:none; }
+  .ve-img-thumb.has-img { display:block; }
+  .ve-device-btn { padding:4px 10px; border-radius:6px; font-size:11px; border:1px solid #e5e7eb; background:#fff; cursor:pointer; font-weight:600; color:#6b7280; }
+  .ve-device-btn.active { background:#1B2A4A; color:#fff; border-color:#1B2A4A; }
+  .ve-highlight-notice { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); background:rgba(27,42,74,.9); color:#fff; font-size:12px; padding:7px 16px; border-radius:20px; pointer-events:none; white-space:nowrap; display:flex; align-items:center; gap:6px; }
+</style>
 
-  <!-- Tab buttons -->
-  <div class="flex gap-2 mb-5 flex-wrap">
-    <button class="tab-btn active" data-tab="hero" onclick="switchTab(this,'hero')">Hero Section</button>
-    <button class="tab-btn" data-tab="about" onclick="switchTab(this,'about')">About</button>
-    <button class="tab-btn" data-tab="services" onclick="switchTab(this,'services')">Services</button>
-    <button class="tab-btn" data-tab="team" onclick="switchTab(this,'team')">Team</button>
-    <button class="tab-btn" data-tab="contact" onclick="switchTab(this,'contact')">Contact Info</button>
-    <button class="tab-btn" data-tab="seo" onclick="switchTab(this,'seo')">SEO</button>
-  </div>
+<div id="ve-root">
 
-  <!-- Hero Tab -->
-  <div id="tab-hero" class="tab-content active card space-y-4">
-    <h2 class="font-semibold text-gray-800 border-b pb-2">Hero Section</h2>
-    <div>
-      <label class="form-label">Main Headline</label>
-      <input id="c-hero-headline" class="form-input" placeholder="Premium Horse Feed & Supplies…"/>
+  <!-- Toolbar -->
+  <div id="ve-toolbar">
+    <div class="font-bold text-gray-800 text-sm flex items-center gap-2 mr-2">
+      <i class="fas fa-paint-brush" style="color:#C9A84C"></i>
+      Visual Editor
     </div>
-    <div>
-      <label class="form-label">Sub-headline</label>
-      <input id="c-hero-subheadline" class="form-input" placeholder="Wellington & Loxahatchee's trusted source…"/>
+    <!-- Section quick-jump buttons -->
+    <div class="flex gap-1.5 flex-wrap">
+      <button class="ve-section-btn active" data-sec="hero"    onclick="openSection('hero')">   Hero</button>
+      <button class="ve-section-btn" data-sec="stats"   onclick="openSection('stats')">  Stats</button>
+      <button class="ve-section-btn" data-sec="about"   onclick="openSection('about')">  About</button>
+      <button class="ve-section-btn" data-sec="services"onclick="openSection('services')">Services</button>
+      <button class="ve-section-btn" data-sec="team"    onclick="openSection('team')">   Team</button>
+      <button class="ve-section-btn" data-sec="contact" onclick="openSection('contact')">Contact</button>
+      <button class="ve-section-btn" data-sec="seo"     onclick="openSection('seo')">    SEO</button>
     </div>
-    <div>
-      <label class="form-label">Hero Description</label>
-      <textarea id="c-hero-desc" class="form-input" rows="3" placeholder="Supporting text below headline…"></textarea>
-    </div>
-    <div>
-      <label class="form-label">CTA Button 1 Text</label>
-      <input id="c-cta1" class="form-input" placeholder="Shop Feed & Supplies"/>
-    </div>
-    <div>
-      <label class="form-label">CTA Button 2 Text</label>
-      <input id="c-cta2" class="form-input" placeholder="Find My Horse's Feed"/>
-    </div>
-    <div>
-      <label class="form-label">Hero Background Image URL</label>
-      <input id="c-hero-bg" class="form-input" placeholder="https://…"/>
-    </div>
-  </div>
-
-  <!-- About Tab -->
-  <div id="tab-about" class="tab-content card space-y-4">
-    <h2 class="font-semibold text-gray-800 border-b pb-2">About Section</h2>
-    <div>
-      <label class="form-label">Section Heading</label>
-      <input id="c-about-heading" class="form-input" placeholder="About British Feed & Supplies"/>
-    </div>
-    <div>
-      <label class="form-label">Main Paragraph</label>
-      <textarea id="c-about-para1" class="form-input" rows="4" placeholder="In 2016, Vieri Bracco purchased British Feed & Supplies…"></textarea>
-    </div>
-    <div>
-      <label class="form-label">Second Paragraph</label>
-      <textarea id="c-about-para2" class="form-input" rows="3" placeholder="Ownership changed in 2016…"></textarea>
-    </div>
-    <div>
-      <label class="form-label">About Section Image URL</label>
-      <input id="c-about-image" class="form-input" placeholder="https://…"/>
-    </div>
-    <div>
-      <label class="form-label">Stats (shown in stat bar)</label>
-      <div class="grid grid-cols-3 gap-3">
-        <div>
-          <label class="form-label">Stat 1 Number</label>
-          <input id="c-stat1-num" class="form-input" placeholder="12+"/>
-        </div>
-        <div>
-          <label class="form-label">Stat 1 Label</label>
-          <input id="c-stat1-label" class="form-input" placeholder="Years in Business"/>
-        </div>
-        <div></div>
-        <div>
-          <label class="form-label">Stat 2 Number</label>
-          <input id="c-stat2-num" class="form-input" placeholder="500+"/>
-        </div>
-        <div>
-          <label class="form-label">Stat 2 Label</label>
-          <input id="c-stat2-label" class="form-input" placeholder="Happy Customers"/>
-        </div>
-        <div></div>
-        <div>
-          <label class="form-label">Stat 3 Number</label>
-          <input id="c-stat3-num" class="form-input" placeholder="50+"/>
-        </div>
-        <div>
-          <label class="form-label">Stat 3 Label</label>
-          <input id="c-stat3-label" class="form-input" placeholder="Product Brands"/>
-        </div>
-      </div>
+    <div class="ml-auto flex items-center gap-2">
+      <!-- Device width toggles -->
+      <button class="ve-device-btn active" id="dev-desktop" onclick="setDevice('desktop')" title="Desktop view"><i class="fas fa-desktop"></i></button>
+      <button class="ve-device-btn"       id="dev-tablet"  onclick="setDevice('tablet')"  title="Tablet view"> <i class="fas fa-tablet-alt"></i></button>
+      <button class="ve-device-btn"       id="dev-mobile"  onclick="setDevice('mobile')"  title="Mobile view"> <i class="fas fa-mobile-alt"></i></button>
+      <div style="width:1px;height:22px;background:#e5e7eb;margin:0 4px"></div>
+      <button onclick="saveAllContent()" id="ve-save-btn"
+        style="background:#1B2A4A;color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+        <i class="fas fa-save"></i> Save &amp; Publish
+      </button>
     </div>
   </div>
 
-  <!-- Services Tab -->
-  <div id="tab-services" class="tab-content card space-y-6">
-    <h2 class="font-semibold text-gray-800 border-b pb-2">Services Section</h2>
-    <p class="text-sm text-gray-500">Edit your 3 service cards shown on the website</p>
-    
-    ${[1,2,3].map(n => `
-    <div class="bg-gray-50 rounded-xl p-4 space-y-3">
-      <div class="font-medium text-gray-700 text-sm">Service ${n}</div>
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="form-label">Title</label>
-          <input id="c-svc${n}-title" class="form-input" placeholder="Service title…"/>
-        </div>
-        <div>
-          <label class="form-label">Icon (Font Awesome class)</label>
-          <input id="c-svc${n}-icon" class="form-input" placeholder="fas fa-truck"/>
-        </div>
-        <div class="col-span-2">
-          <label class="form-label">Description</label>
-          <textarea id="c-svc${n}-desc" class="form-input" rows="2"></textarea>
-        </div>
-        <div>
-          <label class="form-label">Detail Text</label>
-          <input id="c-svc${n}-detail" class="form-input" placeholder="e.g. Min. order $150"/>
-        </div>
-        <div>
-          <label class="form-label">Image URL</label>
-          <input id="c-svc${n}-image" class="form-input" placeholder="https://…"/>
-        </div>
-      </div>
-    </div>`).join('')}
-  </div>
+  <!-- Main body -->
+  <div id="ve-body">
 
-  <!-- Team Tab -->
-  <div id="tab-team" class="tab-content card space-y-6">
-    <h2 class="font-semibold text-gray-800 border-b pb-2">Team Members</h2>
-    
-    ${[1,2].map(n => `
-    <div class="bg-gray-50 rounded-xl p-4 space-y-3">
-      <div class="font-medium text-gray-700 text-sm">Team Member ${n}</div>
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="form-label">Name</label>
-          <input id="c-team${n}-name" class="form-input" placeholder="Full name"/>
-        </div>
-        <div>
-          <label class="form-label">Role / Title</label>
-          <input id="c-team${n}-role" class="form-input" placeholder="Owner / General Manager"/>
-        </div>
-        <div class="col-span-2">
-          <label class="form-label">Bio</label>
-          <textarea id="c-team${n}-bio" class="form-input" rows="3"></textarea>
-        </div>
-        <div>
-          <label class="form-label">Photo URL</label>
-          <input id="c-team${n}-photo" class="form-input" placeholder="https://…"/>
-        </div>
-        <div>
-          <label class="form-label">Credentials / Badge</label>
-          <input id="c-team${n}-cred" class="form-input" placeholder="e.g. Certified Equine Nutritionist"/>
-        </div>
+    <!-- iframe preview -->
+    <div id="ve-iframe-wrap">
+      <div id="ve-iframe-loading">
+        <i class="fas fa-spinner fa-spin text-3xl" style="color:#C9A84C"></i>
+        Loading preview…
       </div>
-    </div>`).join('')}
-  </div>
-
-  <!-- Contact Tab -->
-  <div id="tab-contact" class="tab-content card space-y-4">
-    <h2 class="font-semibold text-gray-800 border-b pb-2">Contact Information</h2>
-    <div class="grid grid-cols-2 gap-4">
-      <div>
-        <label class="form-label">Phone</label>
-        <input id="c-phone" class="form-input" placeholder="(561) 633-6003"/>
-      </div>
-      <div>
-        <label class="form-label">Email</label>
-        <input id="c-email" class="form-input" placeholder="admin@britishfeed.com"/>
-      </div>
-      <div class="col-span-2">
-        <label class="form-label">Store Address</label>
-        <input id="c-address" class="form-input" placeholder="14589 Southern Blvd, Palm West Plaza, Loxahatchee Groves, FL 33470"/>
-      </div>
-      <div>
-        <label class="form-label">Store Hours (Mon-Fri)</label>
-        <input id="c-hours-wk" class="form-input" placeholder="7am – 6pm"/>
-      </div>
-      <div>
-        <label class="form-label">Store Hours (Sat-Sun)</label>
-        <input id="c-hours-wknd" class="form-input" placeholder="8am – 4pm"/>
-      </div>
-      <div>
-        <label class="form-label">Instagram URL</label>
-        <input id="c-instagram" class="form-input" placeholder="https://instagram.com/british_feed_and_supplies"/>
-      </div>
-      <div>
-        <label class="form-label">Facebook URL</label>
-        <input id="c-facebook" class="form-input" placeholder="https://facebook.com/british.feed"/>
-      </div>
-      <div>
-        <label class="form-label">Google Maps Embed URL</label>
-        <input id="c-maps-url" class="form-input" placeholder="https://maps.google.com/…"/>
-      </div>
-      <div>
-        <label class="form-label">Delivery Min. Order</label>
-        <input id="c-delivery-min" class="form-input" placeholder="$150"/>
-      </div>
-      <div class="col-span-2">
-        <label class="form-label">Delivery Areas (comma separated)</label>
-        <textarea id="c-delivery-areas" class="form-input" rows="2" placeholder="Wellington, Loxahatchee, Royal Palm Beach, Jupiter Farms…"></textarea>
+      <iframe id="ve-iframe" src="/admin/content/preview" title="Site Preview"></iframe>
+      <div class="ve-highlight-notice" id="ve-notice">
+        <i class="fas fa-mouse-pointer"></i> Click any section to edit it
       </div>
     </div>
-  </div>
 
-  <!-- SEO Tab -->
-  <div id="tab-seo" class="tab-content card space-y-4">
-    <h2 class="font-semibold text-gray-800 border-b pb-2">SEO & Meta</h2>
-    <div>
-      <label class="form-label">Page Title</label>
-      <input id="c-seo-title" class="form-input" placeholder="British Feed & Supplies | Premium Horse Feed — Wellington, FL"/>
+    <!-- Sliding edit panel -->
+    <div id="ve-panel">
+      <div id="ve-panel-inner"></div>
+      <div id="ve-panel-footer">
+        <button onclick="closePanel()" style="padding:7px 14px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;font-size:13px;cursor:pointer;font-weight:500;color:#374151;">
+          Close
+        </button>
+        <button onclick="saveAllContent()" style="background:#1B2A4A;color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+          <i class="fas fa-save"></i> Save &amp; Publish
+        </button>
+      </div>
     </div>
-    <div>
-      <label class="form-label">Meta Description</label>
-      <textarea id="c-seo-desc" class="form-input" rows="3" placeholder="British Feed & Supplies in Loxahatchee Groves, FL. Premium horse feed…"></textarea>
-    </div>
-    <div>
-      <label class="form-label">Keywords</label>
-      <input id="c-seo-keywords" class="form-input" placeholder="horse feed, Wellington FL, Nutrena, Cavalor, hay…"/>
-    </div>
-  </div>
 
-  <div class="flex justify-end mt-6">
-    <button onclick="saveAllContent()" class="btn-primary"><i class="fas fa-save"></i> Save All Changes</button>
   </div>
 </div>
 
+<!-- Save flash toast -->
+<div class="ve-save-flash" id="ve-flash"><i class="fas fa-check-circle" style="color:#4ade80"></i><span id="ve-flash-msg">Saved!</span></div>
+
 <script>
-const contentFields = [
+// ─── State ────────────────────────────────────────────────────────────────────
+let veData = {};
+let veCurrentSection = 'hero';
+const FIELDS = [
   'hero-headline','hero-subheadline','hero-desc','cta1','cta2','hero-bg',
-  'about-heading','about-para1','about-para2','about-image',
-  'stat1-num','stat1-label','stat2-num','stat2-label','stat3-num','stat3-label',
+  'stats-1-num','stats-1-label','stats-2-num','stats-2-label','stats-3-num','stats-3-label','stats-4-num','stats-4-label',
+  'about-heading','about-para1','about-para2','about-para3','about-image',
   'svc1-title','svc1-icon','svc1-desc','svc1-detail','svc1-image',
   'svc2-title','svc2-icon','svc2-desc','svc2-detail','svc2-image',
   'svc3-title','svc3-icon','svc3-desc','svc3-detail','svc3-image',
   'team1-name','team1-role','team1-bio','team1-photo','team1-cred',
   'team2-name','team2-role','team2-bio','team2-photo','team2-cred',
+  'quote-text','quote-author',
   'phone','email','address','hours-wk','hours-wknd',
   'instagram','facebook','maps-url','delivery-min','delivery-areas',
   'seo-title','seo-desc','seo-keywords'
 ];
 
+// ─── Load saved content ───────────────────────────────────────────────────────
 async function loadContent() {
-  const data = await apiGet('site_content') || {};
-  contentFields.forEach(f => {
-    const el = document.getElementById('c-' + f);
-    if (el && data[f] !== undefined) el.value = data[f];
-  });
+  try {
+    const r = await fetch('/admin/api/data/site_content');
+    const d = await r.json();
+    veData = d.value || {};
+  } catch(e) {}
 }
 
+// ─── Save ─────────────────────────────────────────────────────────────────────
 async function saveAllContent() {
-  const data = {};
-  contentFields.forEach(f => {
-    const el = document.getElementById('c-' + f);
-    if (el) data[f] = el.value;
+  // Collect any live values from currently open panel
+  collectPanelValues();
+  const btn = document.getElementById('ve-save-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…'; }
+  try {
+    const r = await fetch('/admin/api/data/site_content', {
+      method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({value: veData})
+    });
+    const d = await r.json();
+    if (d.ok !== false) {
+      showFlash('Saved & published!', true);
+      // Tell iframe to refresh its content
+      const iframe = document.getElementById('ve-iframe');
+      iframe.contentWindow.postMessage({type:'content-saved', data: veData}, '*');
+    } else {
+      showFlash('Save failed — try again', false);
+    }
+  } catch(e) {
+    showFlash('Error: ' + e.message, false);
+  }
+  if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Save &amp; Publish'; }
+}
+
+function collectPanelValues() {
+  document.querySelectorAll('#ve-panel-inner [data-field]').forEach(el => {
+    veData[el.dataset.field] = el.value;
   });
-  const ok = await apiPut('site_content', data);
-  if (ok) showToast('Content saved successfully!');
-  else showToast('Save failed — please try again','error');
 }
 
-function switchTab(btn, tab) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('tab-' + tab).classList.add('active');
+// ─── Flash toast ──────────────────────────────────────────────────────────────
+function showFlash(msg, ok = true) {
+  const f = document.getElementById('ve-flash');
+  const m = document.getElementById('ve-flash-msg');
+  m.textContent = msg;
+  f.querySelector('i').style.color = ok ? '#4ade80' : '#f87171';
+  f.classList.add('show');
+  setTimeout(() => f.classList.remove('show'), 3000);
 }
 
-document.addEventListener('DOMContentLoaded', loadContent);
+// ─── Panel open/close ─────────────────────────────────────────────────────────
+function openSection(sec) {
+  collectPanelValues();
+  veCurrentSection = sec;
+  // Update toolbar active
+  document.querySelectorAll('.ve-section-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.sec === sec);
+  });
+  // Render panel content
+  document.getElementById('ve-panel-inner').innerHTML = buildPanel(sec);
+  document.getElementById('ve-panel').classList.add('open');
+  // Tell iframe to highlight this section
+  const iframe = document.getElementById('ve-iframe');
+  iframe.contentWindow.postMessage({type:'highlight', section: sec}, '*');
+  // Scroll iframe to section
+  iframe.contentWindow.postMessage({type:'scroll-to', section: sec}, '*');
+  // Attach thumb preview for img fields
+  document.querySelectorAll('#ve-panel-inner [data-field]').forEach(el => {
+    if (el.dataset.imgthumb) {
+      el.addEventListener('input', () => updateThumb(el));
+      updateThumb(el);
+    }
+  });
+}
+
+function closePanel() {
+  collectPanelValues();
+  document.getElementById('ve-panel').classList.remove('open');
+  document.querySelectorAll('.ve-section-btn').forEach(b => b.classList.remove('active'));
+  const iframe = document.getElementById('ve-iframe');
+  iframe.contentWindow.postMessage({type:'highlight', section: null}, '*');
+}
+
+function updateThumb(inputEl) {
+  const thumbId = inputEl.dataset.imgthumb;
+  const thumb = document.getElementById(thumbId);
+  if (!thumb) return;
+  const url = inputEl.value.trim();
+  if (url) { thumb.src = url; thumb.classList.add('has-img'); }
+  else { thumb.classList.remove('has-img'); }
+}
+
+// ─── Device preview ───────────────────────────────────────────────────────────
+function setDevice(dev) {
+  document.querySelectorAll('.ve-device-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('dev-' + dev).classList.add('active');
+  const wrap = document.getElementById('ve-iframe-wrap');
+  const iframe = document.getElementById('ve-iframe');
+  if (dev === 'desktop') {
+    wrap.style.alignItems = '';
+    wrap.style.justifyContent = '';
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.maxWidth = '';
+    iframe.style.margin = '';
+    iframe.style.boxShadow = '';
+    iframe.style.transform = '';
+  } else if (dev === 'tablet') {
+    wrap.style.alignItems = 'flex-start';
+    wrap.style.justifyContent = 'center';
+    wrap.style.padding = '16px';
+    wrap.style.overflowY = 'auto';
+    iframe.style.width = '768px';
+    iframe.style.maxWidth = '768px';
+    iframe.style.height = '1024px';
+    iframe.style.boxShadow = '0 8px 40px rgba(0,0,0,.18)';
+    iframe.style.borderRadius = '12px';
+  } else {
+    wrap.style.alignItems = 'flex-start';
+    wrap.style.justifyContent = 'center';
+    wrap.style.padding = '16px';
+    wrap.style.overflowY = 'auto';
+    iframe.style.width = '390px';
+    iframe.style.maxWidth = '390px';
+    iframe.style.height = '844px';
+    iframe.style.boxShadow = '0 8px 40px rgba(0,0,0,.18)';
+    iframe.style.borderRadius = '16px';
+  }
+}
+
+// ─── Listen for messages from the iframe ─────────────────────────────────────
+window.addEventListener('message', e => {
+  if (e.data?.type === 'section-click') openSection(e.data.section);
+  if (e.data?.type === 'iframe-ready') {
+    document.getElementById('ve-iframe-loading').style.display = 'none';
+    document.getElementById('ve-notice').style.display = 'flex';
+    // Push current data into iframe for live preview
+    const iframe = document.getElementById('ve-iframe');
+    iframe.contentWindow.postMessage({type:'load-content', data: veData}, '*');
+  }
+});
+
+// iframe loaded fallback
+document.getElementById('ve-iframe').addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('ve-iframe-loading').style.display = 'none';
+    const iframe = document.getElementById('ve-iframe');
+    iframe.contentWindow.postMessage({type:'load-content', data: veData}, '*');
+  }, 400);
+});
+
+// ─── Panel HTML builders ──────────────────────────────────────────────────────
+function f(field, label, type = 'text', placeholder = '') {
+  const val = veData[field] || '';
+  const isArea = type === 'textarea';
+  const tag = isArea ? 'textarea' : 'input';
+  const extra = isArea ? \`rows="3"\` : \`type="text"\`;
+  const isImg = type === 'image';
+  if (isImg) {
+    const thumbId = 'thumb-' + field;
+    return \`<div class="ve-field">
+      <label class="ve-label">\${label}</label>
+      <div class="ve-img-row">
+        <input class="ve-input" data-field="\${field}" data-imgthumb="\${thumbId}"
+          value="\${esc(val)}" placeholder="\${esc(placeholder || 'https://...')}"
+          oninput="veData['\${field}']=this.value"/>
+        <img id="\${thumbId}" class="ve-img-thumb \${val ? 'has-img' : ''}" src="\${esc(val)}" alt=""/>
+      </div>
+    </div>\`;
+  }
+  return \`<div class="ve-field">
+    <label class="ve-label">\${label}</label>
+    <\${tag} class="ve-\${isArea?'textarea':'input'}" data-field="\${field}" \${extra}
+      placeholder="\${esc(placeholder)}"
+      oninput="veData['\${field}']=this.value">\${isArea ? esc(val) : ''}<\\/\${tag}>\${isArea ? '' : ''}
+    \${!isArea ? \`<input class="ve-input" data-field="\${field}" value="\${esc(val)}" type="hidden" style="display:none"/>\` : ''}
+  </div>\`;
+}
+
+// simpler builders
+function fi(field, label, placeholder = '') {
+  const val = veData[field] || '';
+  return \`<div class="ve-field">
+    <label class="ve-label">\${label}</label>
+    <input class="ve-input" data-field="\${field}" value="\${esc(val)}"
+      placeholder="\${esc(placeholder)}" oninput="veData['\${field}']=this.value"/>
+  </div>\`;
+}
+function ft(field, label, placeholder = '', rows = 3) {
+  const val = veData[field] || '';
+  return \`<div class="ve-field">
+    <label class="ve-label">\${label}</label>
+    <textarea class="ve-textarea" data-field="\${field}" rows="\${rows}"
+      placeholder="\${esc(placeholder)}"
+      oninput="veData['\${field}']=this.value">\${esc(val)}</textarea>
+  </div>\`;
+}
+function fimg(field, label, placeholder = '') {
+  const val = veData[field] || '';
+  const tid = 'thumb-' + field.replace(/[^a-z0-9]/gi,'-');
+  return \`<div class="ve-field">
+    <label class="ve-label">\${label}</label>
+    <div class="ve-img-row">
+      <input class="ve-input" data-field="\${field}" data-imgthumb="\${tid}"
+        value="\${esc(val)}" placeholder="\${esc(placeholder || 'https://...')}"
+        oninput="veData['\${field}']=this.value; updateThumb(this)"/>
+      <img id="\${tid}" class="ve-img-thumb \${val?'has-img':''}" src="\${esc(val)}" alt=""/>
+    </div>
+  </div>\`;
+}
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function buildPanel(sec) {
+  const sections = {
+    hero: () => \`
+      <div class="ve-section-header">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:#1B2A4A">
+          <i class="fas fa-image text-xs" style="color:#C9A84C"></i>
+        </div>
+        <div>
+          <div class="font-bold text-gray-900 text-sm">Hero Section</div>
+          <div class="text-xs text-gray-400">Top banner — first thing visitors see</div>
+        </div>
+      </div>
+      <div class="ve-section-body">
+        \${fi('hero-headline',   'Main Headline', 'Premium Feed for Champions.')}
+        \${fi('hero-subheadline','Sub-headline / Location Tag', 'Wellington · Loxahatchee · Palm Beach County')}
+        \${ft('hero-desc',       'Description Paragraph', 'Serving Wellington\'s equestrian community…')}
+        \${fi('cta1',           'Primary Button Text', 'Find the Right Feed')}
+        \${fi('cta2',           'Secondary Button Text', 'Contact Us')}
+        \${fimg('hero-bg',      'Hero Background Image', 'https://…')}
+      </div>\`,
+
+    stats: () => \`
+      <div class="ve-section-header">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:#C9A84C">
+          <i class="fas fa-chart-bar text-xs text-white"></i>
+        </div>
+        <div>
+          <div class="font-bold text-gray-900 text-sm">Stats Bar</div>
+          <div class="text-xs text-gray-400">4 highlight numbers below the hero</div>
+        </div>
+      </div>
+      <div class="ve-section-body">
+        \${[['1','13+','Years Serving WPB'],['2','10+','Premium Brands'],['3','50+','Hay & Feed Options'],['4','4.8★','Google Rating']].map(([n,num,lbl]) => \`
+        <div class="ve-subsection">
+          <div class="ve-subsection-title">Stat \${n}</div>
+          <div class="ve-grid2">
+            \${fi(\`stats-\${n}-num\`, 'Number', num)}
+            \${fi(\`stats-\${n}-label\`, 'Label', lbl)}
+          </div>
+        </div>\`).join('')}
+      </div>\`,
+
+    about: () => \`
+      <div class="ve-section-header">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:#15803D">
+          <i class="fas fa-store text-xs text-white"></i>
+        </div>
+        <div>
+          <div class="font-bold text-gray-900 text-sm">About Section</div>
+          <div class="text-xs text-gray-400">Company story and background</div>
+        </div>
+      </div>
+      <div class="ve-section-body">
+        \${fi('about-heading', 'Section Heading', 'Wellington\'s Most Trusted Feed Store')}
+        \${ft('about-para1',   'First Paragraph', 'Established in 2012…', 4)}
+        \${ft('about-para2',   'Second Paragraph', 'In the summer of 2016…', 3)}
+        \${ft('about-para3',   'Third Paragraph', 'Whether you own…', 3)}
+        \${fimg('about-image', 'Section Photo', 'https://…')}
+      </div>\`,
+
+    services: () => \`
+      <div class="ve-section-header">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:#0369a1">
+          <i class="fas fa-concierge-bell text-xs text-white"></i>
+        </div>
+        <div>
+          <div class="font-bold text-gray-900 text-sm">Services Section</div>
+          <div class="text-xs text-gray-400">Three service cards</div>
+        </div>
+      </div>
+      <div class="ve-section-body">
+        \${[1,2,3].map(n => \`
+        <div class="ve-subsection">
+          <div class="ve-subsection-title">Service \${n}</div>
+          \${fi(\`svc\${n}-title\`,  'Title', 'Service title…')}
+          \${fi(\`svc\${n}-icon\`,   'Icon (Font Awesome)', 'fas fa-truck')}
+          \${ft(\`svc\${n}-desc\`,   'Description', '')}
+          \${fi(\`svc\${n}-detail\`, 'Detail / Badge text', 'e.g. Free on orders $150+')}
+          \${fimg(\`svc\${n}-image\`,'Photo', 'https://…')}
+        </div>\`).join('')}
+      </div>\`,
+
+    team: () => \`
+      <div class="ve-section-header">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:#7c3aed">
+          <i class="fas fa-users text-xs text-white"></i>
+        </div>
+        <div>
+          <div class="font-bold text-gray-900 text-sm">Team Section</div>
+          <div class="text-xs text-gray-400">Team member cards + quote</div>
+        </div>
+      </div>
+      <div class="ve-section-body">
+        \${[['1','Vieri Bracco','Owner & Founder'],['2','Carmine Garrett','General Manager']].map(([n,name,role]) => \`
+        <div class="ve-subsection">
+          <div class="ve-subsection-title">Team Member \${n}</div>
+          \${fi(\`team\${n}-name\`, 'Name', name)}
+          \${fi(\`team\${n}-role\`, 'Role / Title', role)}
+          \${ft(\`team\${n}-bio\`,  'Bio', '', 4)}
+          \${fi(\`team\${n}-cred\`, 'Credentials / Badge', 'e.g. Certified Equine Nutritionist')}
+          \${fimg(\`team\${n}-photo\`, 'Photo', 'https://…')}
+        </div>\`).join('')}
+        <div class="ve-subsection">
+          <div class="ve-subsection-title">Quote Block</div>
+          \${ft('quote-text',   'Quote Text', 'Your suggestions and opinions…')}
+          \${fi('quote-author', 'Attribution', '— Vieri Bracco, Owner')}
+        </div>
+      </div>\`,
+
+    contact: () => \`
+      <div class="ve-section-header">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:#b45309">
+          <i class="fas fa-address-card text-xs text-white"></i>
+        </div>
+        <div>
+          <div class="font-bold text-gray-900 text-sm">Contact Information</div>
+          <div class="text-xs text-gray-400">Phone, hours, social, delivery</div>
+        </div>
+      </div>
+      <div class="ve-section-body">
+        <div class="ve-subsection">
+          <div class="ve-subsection-title">Store Details</div>
+          <div class="ve-grid2">
+            \${fi('phone', 'Phone', '(561) 633-6003')}
+            \${fi('email', 'Email', 'admin@britishfeed.com')}
+          </div>
+          \${fi('address', 'Address', '14589 Southern Blvd…')}
+          <div class="ve-grid2">
+            \${fi('hours-wk',   'Weekday Hours', '7am – 6pm')}
+            \${fi('hours-wknd','Weekend Hours',  '8am – 4pm')}
+          </div>
+        </div>
+        <div class="ve-subsection">
+          <div class="ve-subsection-title">Social Links</div>
+          \${fi('instagram', 'Instagram URL', 'https://instagram.com/…')}
+          \${fi('facebook',  'Facebook URL',  'https://facebook.com/…')}
+        </div>
+        <div class="ve-subsection">
+          <div class="ve-subsection-title">Delivery</div>
+          <div class="ve-grid2">
+            \${fi('delivery-min', 'Min. Order', '$150')}
+          </div>
+          \${ft('delivery-areas', 'Delivery Areas (comma separated)', 'Wellington, Loxahatchee…')}
+        </div>
+        \${fimg('maps-url', 'Google Maps Embed URL', 'https://maps.google.com/…')}
+      </div>\`,
+
+    seo: () => \`
+      <div class="ve-section-header">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:#064e3b">
+          <i class="fas fa-search text-xs text-white"></i>
+        </div>
+        <div>
+          <div class="font-bold text-gray-900 text-sm">SEO &amp; Meta</div>
+          <div class="text-xs text-gray-400">Page title, description &amp; keywords</div>
+        </div>
+      </div>
+      <div class="ve-section-body">
+        \${fi('seo-title',    'Page Title', 'British Feed & Supplies | Premium Horse Feed — Wellington, FL')}
+        \${ft('seo-desc',     'Meta Description', 'British Feed & Supplies in Loxahatchee Groves, FL…', 3)}
+        \${fi('seo-keywords', 'Keywords', 'horse feed, Wellington FL, Nutrena, Cavalor, hay…')}
+      </div>\`,
+  };
+
+  return (sections[sec] || sections.hero)();
+}
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+async function init() {
+  await loadContent();
+  // Open hero panel by default
+  openSection('hero');
+}
+
+document.addEventListener('DOMContentLoaded', init);
 </script>
 `))
+})
+
+// ─── Preview page (homepage + edit overlay) ───────────────────────────────────
+admin.get('/content/preview', requireAuth, async (c) => {
+  const kv = c.env?.BF_STORE
+  const siteContent: any = kv ? (await kvGet(kv, 'site_content', {})) : {}
+
+  // Inject the edit-mode overlay script into the full homepage HTML
+  const overlayScript = `
+<style>
+  [data-edit-section] { position:relative; transition:outline .15s; cursor:pointer; }
+  [data-edit-section]:hover { outline: 3px solid rgba(201,168,76,.7); outline-offset: 2px; }
+  [data-edit-section].ve-active { outline: 3px solid #C9A84C !important; outline-offset: 2px; }
+  .ve-edit-badge {
+    position:absolute; top:8px; right:8px; z-index:9999;
+    background:#1B2A4A; color:#fff;
+    padding:4px 10px 4px 8px; border-radius:20px;
+    font-size:11px; font-weight:700; cursor:pointer;
+    display:flex; align-items:center; gap:5px;
+    box-shadow:0 2px 8px rgba(0,0,0,.25); pointer-events:all;
+    opacity:0; transition:opacity .15s;
+    white-space:nowrap;
+  }
+  [data-edit-section]:hover .ve-edit-badge { opacity:1; }
+  .ve-edit-badge i { color:#C9A84C; }
+</style>
+<script>
+(function(){
+  // Map section IDs to edit section keys
+  const SEC_MAP = {
+    'home':     'hero',
+    'about':    'about',
+    'services': 'services',
+    'team':     'team',
+    'contact':  'contact',
+  };
+
+  function applyContent(data) {
+    const D = data || {};
+    // Hero
+    if (D['hero-headline']) {
+      const h1 = document.querySelector('#home h1');
+      if (h1) h1.innerHTML = D['hero-headline'].replace('\\n','<br/>');
+    }
+    if (D['hero-subheadline']) {
+      const sub = document.querySelector('#home .text-gold-400.font-semibold.tracking-widest');
+      if (sub) sub.textContent = D['hero-subheadline'];
+    }
+    if (D['hero-desc']) {
+      const desc = document.querySelector('#home p.text-xl');
+      if (desc) desc.textContent = D['hero-desc'];
+    }
+    if (D['cta1']) {
+      const cta = document.querySelector('#home a[href="#products"]');
+      if (cta) cta.innerHTML = '<i class="fas fa-search mr-2"></i>' + D['cta1'];
+    }
+    if (D['cta2']) {
+      const cta2 = document.querySelector('#home a[href="#contact"]');
+      if (cta2) cta2.innerHTML = '<i class="fas fa-envelope mr-2"></i>' + D['cta2'];
+    }
+    if (D['hero-bg']) {
+      const hero = document.getElementById('home');
+      if (hero) hero.style.backgroundImage = 'url(' + D['hero-bg'] + ')';
+    }
+    // Stats bar
+    const statNums = document.querySelectorAll('section.bg-navy-700.text-white.py-8 .text-3xl');
+    const statLabels = document.querySelectorAll('section.bg-navy-700.text-white.py-8 .text-sm.text-white\\/70');
+    [1,2,3,4].forEach((n,i) => {
+      if (D['stats-'+n+'-num']   && statNums[i])   statNums[i].textContent   = D['stats-'+n+'-num'];
+      if (D['stats-'+n+'-label'] && statLabels[i]) statLabels[i].textContent = D['stats-'+n+'-label'];
+    });
+    // About
+    if (D['about-heading']) {
+      const h = document.querySelector('#about h2');
+      if (h) h.textContent = D['about-heading'];
+    }
+    const paras = document.querySelectorAll('#about .text-gray-600');
+    if (D['about-para1'] && paras[0]) paras[0].innerHTML = D['about-para1'];
+    if (D['about-para2'] && paras[1]) paras[1].innerHTML = D['about-para2'];
+    if (D['about-para3'] && paras[2]) paras[2].innerHTML = D['about-para3'];
+    if (D['about-image']) {
+      const img = document.querySelector('#about img');
+      if (img) img.src = D['about-image'];
+    }
+    // Services
+    const svcCards = document.querySelectorAll('#services .grid.md\\:grid-cols-3 > div');
+    [1,2,3].forEach((n,i) => {
+      const card = svcCards[i]; if (!card) return;
+      if (D['svc'+n+'-title']) { const h3 = card.querySelector('h3'); if(h3) h3.textContent = D['svc'+n+'-title']; }
+      if (D['svc'+n+'-desc'])  { const p  = card.querySelector('p');  if(p)  p.textContent  = D['svc'+n+'-desc']; }
+      if (D['svc'+n+'-image']) { const bg = card.querySelector('[style*="background-image"]'); if(bg) bg.style.backgroundImage = 'url('+D['svc'+n+'-image']+')'; }
+    });
+    // Team
+    const teamCards = document.querySelectorAll('#team .grid.md\\:grid-cols-2 > div');
+    [1,2].forEach((n,i) => {
+      const card = teamCards[i]; if (!card) return;
+      if (D['team'+n+'-name']) { const h3 = card.querySelector('h3'); if(h3) h3.textContent = D['team'+n+'-name']; }
+      if (D['team'+n+'-role']) { const p  = card.querySelector('p.text-gold-500'); if(p) p.textContent = D['team'+n+'-role']; }
+      if (D['team'+n+'-bio'])  { const bio= card.querySelector('p.text-gray-600'); if(bio) bio.textContent = D['team'+n+'-bio']; }
+    });
+    if (D['quote-text'])   { const q = document.querySelector('#team .italic'); if(q) q.textContent = D['quote-text']; }
+    if (D['quote-author']) { const a = document.querySelector('#team .font-semibold.text-gold-400'); if(a) a.textContent = D['quote-author']; }
+    // Contact
+    if (D['phone'])   { document.querySelectorAll('a[href^="tel"]').forEach(el => { el.textContent = D['phone']; }); }
+    if (D['address']) { const addr = document.querySelector('#contact .text-white\\/75'); if(addr) addr.textContent = D['address']; }
+  }
+
+  function setupOverlays() {
+    Object.entries(SEC_MAP).forEach(([id, secKey]) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.setAttribute('data-edit-section', secKey);
+      // Inject edit badge
+      const badge = document.createElement('div');
+      badge.className = 've-edit-badge';
+      badge.innerHTML = '<i class="fas fa-pencil-alt"></i> Edit ' + secKey;
+      badge.onclick = (e) => { e.stopPropagation(); sendSection(secKey); };
+      // Make section position:relative if not already
+      const pos = getComputedStyle(el).position;
+      if (pos === 'static') el.style.position = 'relative';
+      el.prepend(badge);
+
+      el.addEventListener('click', () => sendSection(secKey));
+    });
+
+    // Also add stats bar
+    const statsBar = document.querySelector('section.bg-navy-700.text-white.py-8');
+    if (statsBar) {
+      statsBar.setAttribute('data-edit-section','stats');
+      const b2 = document.createElement('div');
+      b2.className = 've-edit-badge';
+      b2.innerHTML = '<i class="fas fa-pencil-alt"></i> Edit stats';
+      b2.onclick = (e) => { e.stopPropagation(); sendSection('stats'); };
+      if (getComputedStyle(statsBar).position === 'static') statsBar.style.position = 'relative';
+      statsBar.prepend(b2);
+      statsBar.addEventListener('click', () => sendSection('stats'));
+    }
+  }
+
+  function sendSection(sec) {
+    // Highlight active section
+    document.querySelectorAll('[data-edit-section]').forEach(el => el.classList.remove('ve-active'));
+    document.querySelectorAll('[data-edit-section="' + sec + '"]').forEach(el => el.classList.add('ve-active'));
+    window.parent.postMessage({type:'section-click', section: sec}, '*');
+  }
+
+  // Listen for commands from parent
+  window.addEventListener('message', (e) => {
+    const msg = e.data;
+    if (!msg) return;
+    if (msg.type === 'load-content') {
+      applyContent(msg.data);
+    }
+    if (msg.type === 'content-saved') {
+      applyContent(msg.data);
+    }
+    if (msg.type === 'highlight') {
+      document.querySelectorAll('[data-edit-section]').forEach(el => el.classList.remove('ve-active'));
+      if (msg.section) {
+        document.querySelectorAll('[data-edit-section="' + msg.section + '"]').forEach(el => el.classList.add('ve-active'));
+      }
+    }
+    if (msg.type === 'scroll-to') {
+      const secToId = { hero:'home', stats:'home', about:'about', services:'services', team:'team', contact:'contact' };
+      const targetId = secToId[msg.section];
+      if (targetId) {
+        const el = document.getElementById(targetId);
+        if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
+      }
+    }
+  });
+
+  // Signal parent we are ready
+  window.parent.postMessage({type:'iframe-ready'}, '*');
+
+  // Run after DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupOverlays);
+  } else {
+    setupOverlays();
+  }
+})();
+</script>`;
+
+  // Preview page — fetches the homepage HTML client-side then injects edit overlays
+  const OVERLAY_STYLE = `
+<style>
+  [data-edit-section]{position:relative;transition:outline .15s;cursor:pointer;}
+  [data-edit-section]:hover{outline:3px solid rgba(201,168,76,.65);outline-offset:2px;}
+  [data-edit-section].ve-active{outline:3px solid #C9A84C!important;outline-offset:2px;}
+  .ve-edit-badge{position:absolute;top:8px;right:8px;z-index:9000;background:#1B2A4A;color:#fff;padding:4px 10px 4px 8px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,.3);opacity:0;transition:opacity .15s;white-space:nowrap;}
+  [data-edit-section]:hover .ve-edit-badge{opacity:1;}
+  .ve-edit-badge i{color:#C9A84C;}
+</style>`;
+
+  return c.html(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Preview</title>
+  <style>html,body{margin:0;padding:0;height:100%;overflow-x:hidden;}</style>
+</head>
+<body style="margin:0;padding:0;">
+<script>
+(async function(){
+  try {
+    const r = await fetch('/');
+    let html = await r.text();
+    // Inject overlay style just before </head>
+    html = html.replace('</head>', ${"`"}${OVERLAY_STYLE}${"`"} + '</head>');
+    document.open(); document.write(html); document.close();
+  } catch(e) {
+    document.body.innerHTML='<p style="padding:20px;color:red">Preview error: '+e.message+'</p>';
+    return;
+  }
+
+  // ── Overlay logic (runs after document.write completes) ──────────────────
+  const SEC_MAP = {home:'hero', about:'about', services:'services', team:'team', contact:'contact'};
+
+  function applyContent(D) {
+    if (!D) return;
+    if (D['hero-headline'])    { const el=document.querySelector('#home h1'); if(el) el.innerHTML=D['hero-headline'].replace(/\\n/g,'<br/>'); }
+    if (D['hero-subheadline']) { const el=document.querySelector('#home .text-gold-400.font-semibold.tracking-widest'); if(el) el.textContent=D['hero-subheadline']; }
+    if (D['hero-desc'])        { const el=document.querySelector('#home p.text-xl'); if(el) el.textContent=D['hero-desc']; }
+    if (D['cta1'])             { const el=document.querySelector('#home a[href="#products"]'); if(el) el.innerHTML='<i class="fas fa-search mr-2"></i>'+D['cta1']; }
+    if (D['cta2'])             { const el=document.querySelector('#home a[href="#contact"]'); if(el) el.innerHTML='<i class="fas fa-envelope mr-2"></i>'+D['cta2']; }
+    if (D['hero-bg'])          { const el=document.getElementById('home'); if(el) el.style.backgroundImage='url('+D['hero-bg']+')'; }
+    // Stats
+    const statNums   = document.querySelectorAll('section.bg-navy-700.text-white.py-8 .text-3xl');
+    const statLabels = document.querySelectorAll('section.bg-navy-700.text-white.py-8 .text-sm.text-white\\/70');
+    [1,2,3,4].forEach(function(n,i){ if(D['stats-'+n+'-num']&&statNums[i]) statNums[i].textContent=D['stats-'+n+'-num']; if(D['stats-'+n+'-label']&&statLabels[i]) statLabels[i].textContent=D['stats-'+n+'-label']; });
+    // About
+    if (D['about-heading']) { const el=document.querySelector('#about h2'); if(el) el.textContent=D['about-heading']; }
+    var ap=document.querySelectorAll('#about p.text-gray-600');
+    if(D['about-para1']&&ap[0]) ap[0].innerHTML=D['about-para1'];
+    if(D['about-para2']&&ap[1]) ap[1].innerHTML=D['about-para2'];
+    if(D['about-para3']&&ap[2]) ap[2].innerHTML=D['about-para3'];
+    if(D['about-image']) { var im=document.querySelector('#about img'); if(im) im.src=D['about-image']; }
+    // Services
+    var sc=document.querySelectorAll('#services .grid.md\\:grid-cols-3>div');
+    [1,2,3].forEach(function(n,i){ var c=sc[i]; if(!c) return; if(D['svc'+n+'-title']){var h=c.querySelector('h3');if(h)h.textContent=D['svc'+n+'-title'];} if(D['svc'+n+'-desc']){var p=c.querySelector('p');if(p)p.textContent=D['svc'+n+'-desc'];} if(D['svc'+n+'-image']){var bg=c.querySelector('[style*="background-image"]');if(bg)bg.style.backgroundImage='url('+D['svc'+n+'-image']+')';} });
+    // Team
+    var tc=document.querySelectorAll('#team .grid.md\\:grid-cols-2>div');
+    [1,2].forEach(function(n,i){ var c=tc[i]; if(!c) return; if(D['team'+n+'-name']){var h=c.querySelector('h3');if(h)h.textContent=D['team'+n+'-name'];} if(D['team'+n+'-role']){var p=c.querySelector('p.text-gold-500');if(p)p.textContent=D['team'+n+'-role'];} if(D['team'+n+'-bio']){var b=c.querySelector('p.text-gray-600');if(b)b.textContent=D['team'+n+'-bio'];} });
+    if(D['quote-text'])  { var q=document.querySelector('#team .italic');  if(q) q.textContent=D['quote-text']; }
+    if(D['quote-author']){ var a=document.querySelector('#team .font-semibold.text-gold-400'); if(a) a.textContent=D['quote-author']; }
+  }
+
+  function sendSection(sec) {
+    document.querySelectorAll('[data-edit-section]').forEach(function(el){el.classList.remove('ve-active');});
+    document.querySelectorAll('[data-edit-section="'+sec+'"]').forEach(function(el){el.classList.add('ve-active');});
+    window.parent.postMessage({type:'section-click',section:sec},'*');
+  }
+
+  function setupOverlays() {
+    Object.entries(SEC_MAP).forEach(function([id,secKey]){
+      var el=document.getElementById(id); if(!el) return;
+      el.setAttribute('data-edit-section',secKey);
+      var badge=document.createElement('div');
+      badge.className='ve-edit-badge';
+      badge.innerHTML='<i class="fas fa-pencil-alt"></i> Edit '+secKey;
+      badge.onclick=function(e){e.stopPropagation();sendSection(secKey);};
+      if(getComputedStyle(el).position==='static') el.style.position='relative';
+      el.prepend(badge);
+      el.addEventListener('click',function(){sendSection(secKey);});
+    });
+    // Stats bar
+    var sb=document.querySelector('section.bg-navy-700.text-white.py-8');
+    if(sb){
+      sb.setAttribute('data-edit-section','stats');
+      var b2=document.createElement('div');
+      b2.className='ve-edit-badge';
+      b2.innerHTML='<i class="fas fa-pencil-alt"></i> Edit stats';
+      b2.onclick=function(e){e.stopPropagation();sendSection('stats');};
+      if(getComputedStyle(sb).position==='static') sb.style.position='relative';
+      sb.prepend(b2);
+      sb.addEventListener('click',function(){sendSection('stats');});
+    }
+  }
+
+  window.addEventListener('message',function(e){
+    var msg=e.data; if(!msg) return;
+    if(msg.type==='load-content'||msg.type==='content-saved') applyContent(msg.data);
+    if(msg.type==='highlight'){
+      document.querySelectorAll('[data-edit-section]').forEach(function(el){el.classList.remove('ve-active');});
+      if(msg.section) document.querySelectorAll('[data-edit-section="'+msg.section+'"]').forEach(function(el){el.classList.add('ve-active');});
+    }
+    if(msg.type==='scroll-to'){
+      var m={hero:'home',stats:'home',about:'about',services:'services',team:'team',contact:'contact'};
+      var tid=m[msg.section]; if(tid){var t=document.getElementById(tid);if(t)t.scrollIntoView({behavior:'smooth',block:'start'});}
+    }
+  });
+
+  setupOverlays();
+  window.parent.postMessage({type:'iframe-ready'},'*');
+})();
+</script>
+</body>
+</html>`)
 })
 
 // ═══════════════════════════════════════════════════════════════════════════
