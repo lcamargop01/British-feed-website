@@ -1700,10 +1700,18 @@ admin.post('/api/contact', async (c) => {
 // ─── Public API — get dynamic data for frontend ───────────────────────────────
 admin.get('/api/public/:key', async (c) => {
   const key = c.req.param('key')
-  // Only expose safe keys to the public
-  const allowed = ['products', 'reviews', 'site_content', 'chatbot_rules']
-  if (!allowed.includes(key)) return c.json({ error: 'Not found' }, 404)
   const kv = c.env?.BF_STORE
+  // Special handling for catalog
+  if (key === 'catalog') {
+    const kvProds = await kvGet(kv, 'catalog_products', null)
+    if (kvProds && Array.isArray(kvProds) && kvProds.length > 0) {
+      return c.json({ products: kvProds, source: 'kv', count: kvProds.length })
+    }
+    return c.json({ products: [], source: 'empty', count: 0 })
+  }
+  // Only expose safe keys to the public
+  const allowed = ['products', 'reviews', 'site_content', 'chatbot_rules', 'catalog_products']
+  if (!allowed.includes(key)) return c.json({ error: 'Not found' }, 404)
   const data = await kvGet(kv, key, null)
   return c.json({ data })
 })
