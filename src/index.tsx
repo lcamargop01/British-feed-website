@@ -1232,6 +1232,82 @@ async function loadHomepageSections() {
 }
 loadHomepageSections();
 
+// ─── Site Content — apply saved editor data from KV ──────────────────────────
+async function loadSiteContent() {
+  try {
+    const r = await fetch('/admin/api/public/site_content');
+    if (!r.ok) return;
+    const d = await r.json();
+    // Public API returns { data: <stored_value> }
+    // Stored value was saved as { value: {...fields} }
+    const stored = d.data;
+    const D = (stored && stored.value) ? stored.value : (stored || null);
+    if (!D || typeof D !== 'object') return;
+
+    // Helper
+    const q  = s => document.querySelector(s);
+    const qa = s => document.querySelectorAll(s);
+    const g  = id => document.getElementById(id);
+
+    // Hero
+    if (D['hero-headline'])    { var e = q('#home h1'); if (e) e.innerHTML = D['hero-headline'].replace(/\\n/g,'<br/>'); }
+    if (D['hero-subheadline']) { var e = q('#home .text-gold-400'); if (e) e.textContent = D['hero-subheadline']; }
+    if (D['hero-desc'])        { var e = q('#home p.text-xl'); if (e) e.textContent = D['hero-desc']; }
+    if (D['cta1']) { var e = q('#home a[href="#products"]'); if (e) e.innerHTML = '<i class="fas fa-search mr-2"></i>' + D['cta1']; }
+    if (D['cta2']) { var e = q('#home a[href="#contact"]');  if (e) e.innerHTML = '<i class="fas fa-envelope mr-2"></i>' + D['cta2']; }
+    if (D['hero-bg']) { var e = g('home'); if (e) e.style.backgroundImage = 'url(' + D['hero-bg'] + ')'; }
+
+    // Stats bar
+    var sn = qa('section.bg-navy-700 .text-3xl'), sl = qa('section.bg-navy-700 .text-sm');
+    [1,2,3,4].forEach((n, i) => {
+      if (D['stats-'+n+'-num']   && sn[i]) sn[i].textContent = D['stats-'+n+'-num'];
+      if (D['stats-'+n+'-label'] && sl[i]) sl[i].textContent = D['stats-'+n+'-label'];
+    });
+
+    // About
+    if (D['about-heading']) { var e = q('#about h2'); if (e) e.textContent = D['about-heading']; }
+    var ap = qa('#about p.text-gray-600');
+    if (D['about-para1'] && ap[0]) ap[0].innerHTML = D['about-para1'];
+    if (D['about-para2'] && ap[1]) ap[1].innerHTML = D['about-para2'];
+    if (D['about-para3'] && ap[2]) ap[2].innerHTML = D['about-para3'];
+    if (D['about-image']) { var e = q('#about img'); if (e) e.src = D['about-image']; }
+
+    // Services
+    var sc = qa('#services .grid > div');
+    [1,2,3].forEach((n, i) => { var c = sc[i]; if (!c) return;
+      if (D['svc'+n+'-title']) { var h = c.querySelector('h3'); if (h) h.textContent = D['svc'+n+'-title']; }
+      if (D['svc'+n+'-desc'])  { var p = c.querySelector('p'); if (p) p.textContent = D['svc'+n+'-desc']; }
+      if (D['svc'+n+'-image']) { var bg = c.querySelector('[style*="background-image"]'); if (bg) bg.style.backgroundImage = 'url(' + D['svc'+n+'-image'] + ')'; }
+    });
+
+    // Team
+    var tc = qa('#team .grid > div');
+    [1,2].forEach((n, i) => { var c = tc[i]; if (!c) return;
+      if (D['team'+n+'-name']) { var h = c.querySelector('h3'); if (h) h.textContent = D['team'+n+'-name']; }
+      if (D['team'+n+'-role']) { var p = c.querySelector('p.text-gold-500'); if (p) p.textContent = D['team'+n+'-role']; }
+      if (D['team'+n+'-bio'])  { var b = c.querySelector('p.text-gray-600'); if (b) b.textContent = D['team'+n+'-bio']; }
+      if (D['team'+n+'-photo']) { var img = c.querySelector('img'); if (img) img.src = D['team'+n+'-photo']; }
+    });
+    if (D['quote-text'])   { var e = q('#team .italic'); if (e) e.textContent = D['quote-text']; }
+    if (D['quote-author']) { var e = q('#team .font-semibold.text-gold-400'); if (e) e.textContent = D['quote-author']; }
+
+    // Contact
+    if (D['phone'])   { var els = qa('#contact [data-field="phone"],   #contact .contact-phone');   els.forEach(e => e.textContent = D['phone']); }
+    if (D['email'])   { var els = qa('#contact [data-field="email"],   #contact .contact-email');   els.forEach(e => { e.textContent = D['email']; if (e.tagName==='A') e.href='mailto:'+D['email']; }); }
+    if (D['address']) { var els = qa('#contact [data-field="address"], #contact .contact-address'); els.forEach(e => e.textContent = D['address']); }
+    if (D['hours-wk'])   { var e = q('#contact .hours-wk');   if (e) e.textContent = D['hours-wk']; }
+    if (D['hours-wknd']) { var e = q('#contact .hours-wknd'); if (e) e.textContent = D['hours-wknd']; }
+    if (D['instagram']) { var e = q('a[href*="instagram"]'); if (e) e.href = D['instagram']; }
+    if (D['facebook'])  { var e = q('a[href*="facebook"]');  if (e) e.href = D['facebook']; }
+
+    // SEO / meta
+    if (D['seo-title'])    { document.title = D['seo-title']; var e = q('title'); if(e) e.textContent = D['seo-title']; }
+    if (D['seo-desc'])     { var e = q('meta[name="description"]'); if (e) e.setAttribute('content', D['seo-desc']); }
+    if (D['seo-keywords']) { var e = q('meta[name="keywords"]');    if (e) e.setAttribute('content', D['seo-keywords']); }
+  } catch(e) {}
+}
+loadSiteContent();
+
 // ─── Scroll reveal ────────────────────────────────────────────────────────────
 const observer = new IntersectionObserver(entries => {
   entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });

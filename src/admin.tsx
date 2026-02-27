@@ -394,7 +394,10 @@ async function loadContent() {
   try {
     const r = await fetch('/admin/api/data/site_content');
     const d = await r.json();
-    veData = d.value || {};
+    // GET /admin/api/data/:key returns { data: <stored_value> }
+    // The stored value was PUT as { value: veData }, so unwrap both layers
+    const stored = d.data;
+    veData = (stored && stored.value) ? stored.value : (stored || {});
   } catch(e) {}
 }
 
