@@ -1875,35 +1875,97 @@ const CAT_PAGE_SIZE = 25;
 const IMGBB_KEY = 'a1c8e5f3b2d9047e6f4a7b8c3d2e1f0a'; // placeholder - will use server-side upload
 
 // ── Load categories & vendors into the product modal dropdowns ────────────
+// In-memory cache so the modal never shows "Loading…" after first fetch
+let _cachedCats    = [];   // [{name}]
+let _cachedVendors = [];   // [{name}]
+let _cvLoaded      = false;
+
+// Default categories — exactly matches the real catalog taxonomy
+// Used as instant fallback before / if KV has nothing saved
+const FALLBACK_CATS = [
+  'Horse Feed','Hay','Hay Cubes & Pellets','Shavings & Bedding',
+  'Supplements','Gut Health','Electrolytes','Psyllium Supplements',
+  'Shampoo & Coat Care','Fly Sprays','Fly Control Supplements',
+  'Grooming','Clippers & Tools','Leather Care','Oils','Liniments & Topicals',
+];
+const FALLBACK_VENDORS = [
+  'Nutrena','Pro Elite','Cavalor','Red Mills','Havens',
+  'Buckeye','Crypto Aero','Kent Sentinel','Absorbine','Farnam',
+  'Purina','Tribute','Standlee','Manna Pro',
+];
+
+// Apply cached cats/vendors to the modal DOM right now (synchronous)
+function applyCatVendorToModal(selectedCategory) {
+  const sel = document.getElementById('pm-category');
+  if (!sel) return;
+  const cats = _cachedCats.length ? _cachedCats
+    : FALLBACK_CATS.map(n => ({ name: n }));
+  sel.innerHTML = cats.map(c =>
+    \`<option value="\${c.name.replace(/"/g,'&quot;')}">\${c.name}</option>\`
+  ).join('');
+  // Set selected value — if it exists as an option use it, otherwise add it
+  if (selectedCategory) {
+    if ([...sel.options].some(o => o.value === selectedCategory)) {
+      sel.value = selectedCategory;
+    } else {
+      // Product has a category not in the list yet — add it as an option
+      const opt = document.createElement('option');
+      opt.value = selectedCategory;
+      opt.textContent = selectedCategory;
+      sel.insertBefore(opt, sel.firstChild);
+      sel.value = selectedCategory;
+    }
+  }
+
+  const dl = document.getElementById('pm-vendor-list');
+  if (dl) {
+    const vendors = _cachedVendors.length ? _cachedVendors
+      : FALLBACK_VENDORS.map(n => ({ name: n }));
+    dl.innerHTML = vendors.map(v =>
+      \`<option value="\${v.name.replace(/"/g,'&quot;')}"></option>\`
+    ).join('');
+  }
+}
+
 async function loadCatVendorLists() {
-  // Categories → populate #pm-category select
   try {
-    const r = await fetch('/admin/api/categories');
-    if (r.ok) {
-      const d = await r.json();
-      const cats = d.data || [];
-      const sel = document.getElementById('pm-category');
-      if (cats.length) {
-        const prev = sel.value;
-        sel.innerHTML = cats.map(c => \`<option value="\${c.name.replace(/"/g,'&quot;')}">\${c.name}</option>\`).join('');
-        // restore previously selected value if still valid
-        if (prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
+    const [rc, rv] = await Promise.all([
+      fetch('/admin/api/categories'),
+      fetch('/admin/api/vendors'),
+    ]);
+
+    if (rc.ok) {
+      const d = await rc.json();
+      // KV returns null until admin saves for the first time
+      // Fall back to unique categories from the loaded catalog
+      if (d.data && d.data.length) {
+        _cachedCats = d.data;
+      } else {
+        // Seed from catalog products (already loaded) + hardcoded defaults
+        const fromCatalog = [...new Set(catProducts.map(p => p.category).filter(Boolean))];
+        const merged = [...new Set([...FALLBACK_CATS, ...fromCatalog])].sort();
+        _cachedCats = merged.map(n => ({ name: n }));
+      }
+    }
+
+    if (rv.ok) {
+      const d = await rv.json();
+      if (d.data && d.data.length) {
+        _cachedVendors = d.data;
+      } else {
+        const fromCatalog = [...new Set(catProducts.map(p => p.vendor).filter(Boolean))];
+        const merged = [...new Set([...FALLBACK_VENDORS, ...fromCatalog])].sort();
+        _cachedVendors = merged.map(n => ({ name: n }));
       }
     }
   } catch(e) {}
 
-  // Vendors → populate #pm-vendor-list datalist
-  try {
-    const r = await fetch('/admin/api/vendors');
-    if (r.ok) {
-      const d = await r.json();
-      const vendors = d.data || [];
-      const dl = document.getElementById('pm-vendor-list');
-      if (dl && vendors.length) {
-        dl.innerHTML = vendors.map(v => \`<option value="\${v.name.replace(/"/g,'&quot;')}"></option>\`).join('');
-      }
-    }
-  } catch(e) {}
+  _cvLoaded = true;
+  // Re-apply to modal in case it's already open
+  const sel = document.getElementById('pm-category');
+  if (sel && sel.options.length <= 1) {
+    applyCatVendorToModal(sel.value || '');
+  }
 }
 
 // ── Load catalog ────────────────────────────────────────────────────────
@@ -2410,6 +2472,8 @@ function openAddProductModal() {
   document.getElementById('pm-id').value = '';
   const maxId = Math.max(0, ...catProducts.map(p => p.id || 0));
   document.getElementById('pm-id').value = maxId + 1;
+  // Populate dropdowns before opening so they're never "Loading…"
+  applyCatVendorToModal('');
   showProdModal();
 }
 
@@ -2420,7 +2484,8 @@ function openEditProduct(id) {
   document.getElementById('pm-delete-btn').style.display = 'flex';
   document.getElementById('pm-id').value = p.id;
   document.getElementById('pm-name').value = p.name || '';
-  document.getElementById('pm-category').value = p.category || 'Grain & Feed';
+  // Populate dropdowns FIRST so .value assignment finds its option
+  applyCatVendorToModal(p.category || '');
   document.getElementById('pm-vendor').value = p.vendor || '';
   document.getElementById('pm-price').value = p.price || '';
   document.getElementById('pm-instock').checked = p.inStock !== false;
@@ -2476,8 +2541,7 @@ function clearProdForm() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
-  const catEl = document.getElementById('pm-category');
-  catEl.value = catEl.options[0]?.value || '';
+  // Reset category to first available option (populated dynamically)\n  applyCatVendorToModal('');
   document.getElementById('pm-instock').checked = true;
   document.getElementById('pm-featured').checked = false;
   document.getElementById('pm-img-preview-wrap').style.display = 'none';
