@@ -324,6 +324,11 @@ admin.get('/content', requireAuth, async (c) => {
       <button class="ve-device-btn"       id="dev-tablet"  onclick="setDevice('tablet')"  title="Tablet view"> <i class="fas fa-tablet-alt"></i></button>
       <button class="ve-device-btn"       id="dev-mobile"  onclick="setDevice('mobile')"  title="Mobile view"> <i class="fas fa-mobile-alt"></i></button>
       <div style="width:1px;height:22px;background:#e5e7eb;margin:0 4px"></div>
+      <a href="/" target="_blank"
+        style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;font-size:13px;font-weight:600;color:#374151;text-decoration:none;cursor:pointer;"
+        title="Open live site in new tab">
+        <i class="fas fa-external-link-alt" style="font-size:11px;color:#C9A84C"></i> Live Site
+      </a>
       <button onclick="saveAllContent()" id="ve-save-btn"
         style="background:#1B2A4A;color:#fff;border:none;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
         <i class="fas fa-save"></i> Save &amp; Publish
