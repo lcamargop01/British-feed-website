@@ -345,7 +345,7 @@ admin.get('/content', requireAuth, async (c) => {
         <i class="fas fa-spinner fa-spin text-3xl" style="color:#C9A84C"></i>
         Loading preview…
       </div>
-      <iframe id="ve-iframe" src="/admin/content/preview" title="Site Preview"></iframe>
+      <iframe id="ve-iframe" src="/" title="Site Preview"></iframe>
       <div class="ve-highlight-notice" id="ve-notice">
         <i class="fas fa-mouse-pointer"></i> Click any section to edit it
       </div>
@@ -412,8 +412,12 @@ async function saveAllContent() {
     if (d.ok !== false) {
       showFlash('Saved & published!', true);
       // Push updated content into iframe for live preview
-      const iframe = document.getElementById('ve-iframe');
-      if (iframe.contentWindow) iframe.contentWindow.postMessage({type:'apply-content', data: veData}, '*');
+      if (window._veApplyContent) {
+        window._veApplyContent(veData);
+      } else {
+        const iframe = document.getElementById('ve-iframe');
+        if (iframe && iframe.contentWindow) iframe.contentWindow.postMessage({type:'apply-content', data: veData}, '*');
+      }
     } else {
       showFlash('Save failed — try again', false);
     }
@@ -457,11 +461,16 @@ function openSection(sec) {
   // Render panel content
   document.getElementById('ve-panel-inner').innerHTML = buildPanel(sec);
   document.getElementById('ve-panel').classList.add('open');
-  // Tell iframe to highlight this section (guard: iframe may not be loaded yet)
-  const iframe = document.getElementById('ve-iframe');
-  if (iframe && iframe.contentWindow) {
-    iframe.contentWindow.postMessage({type:'highlight', section: sec}, '*');
-    iframe.contentWindow.postMessage({type:'scroll-to', section: sec}, '*');
+  // Tell iframe to highlight this section (use direct DOM if overlay injected, else postMessage fallback)
+  if (window._veHighlight) {
+    window._veHighlight(sec);
+    window._veScrollTo && window._veScrollTo(sec);
+  } else {
+    const iframe = document.getElementById('ve-iframe');
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({type:'highlight', section: sec}, '*');
+      iframe.contentWindow.postMessage({type:'scroll-to', section: sec}, '*');
+    }
   }
   // Attach thumb preview for img fields
   document.querySelectorAll('#ve-panel-inner [data-field]').forEach(el => {
@@ -476,8 +485,12 @@ function closePanel() {
   collectPanelValues();
   document.getElementById('ve-panel').classList.remove('open');
   document.querySelectorAll('.ve-section-btn').forEach(b => b.classList.remove('active'));
-  const iframe = document.getElementById('ve-iframe');
-  if (iframe && iframe.contentWindow) iframe.contentWindow.postMessage({type:'highlight', section: null}, '*');
+  if (window._veHighlight) {
+    window._veHighlight(null);
+  } else {
+    const iframe = document.getElementById('ve-iframe');
+    if (iframe && iframe.contentWindow) iframe.contentWindow.postMessage({type:'highlight', section: null}, '*');
+  }
 }
 
 function updateThumb(inputEl) {
@@ -586,7 +599,7 @@ function fimg(field, label, placeholder = '') {
   const pickerId = 'vep-' + field.replace(/[^a-z0-9]/gi,'-');
   // Use the shared imgPickerHTML widget (URL tab + Upload tab)
   // setterExpr: update veData AND refresh the live iframe preview
-  const setterExpr = \`veData['\${field}']=url;document.getElementById('ve-iframe')?.contentWindow?.postMessage({type:'apply-content',data:veData},'*')\`;
+  const setterExpr = \`veData['\${field}']=url;if(window._veApplyContent){window._veApplyContent(veData);}else{document.getElementById('ve-iframe')?.contentWindow?.postMessage({type:'apply-content',data:veData},'*');}\`;
   const pickerHtml = imgPickerHTML(pickerId, val, setterExpr);
   // Inject data-ve-field into the root picker div so collectPanelValues() can sync it
   const pickerWithAttr = pickerHtml.replace(
@@ -773,34 +786,152 @@ function buildPanel(sec) {
 // overlays already injected server-side. The preview page posts "iframe-ready"
 // when its overlays are set up; we listen above in the message handler.
 
+function injectOverlayIntoIframe() {
+  const iframe = document.getElementById('ve-iframe');
+  if (!iframe || !iframe.contentDocument) return;
+  const doc = iframe.contentDocument;
+
+  // Inject overlay CSS
+  if (!doc.getElementById('ve-overlay-css')) {
+    const style = doc.createElement('style');
+    style.id = 've-overlay-css';
+    style.textContent = [
+      '[data-edit-section]{position:relative;cursor:pointer;}',
+      '[data-edit-section]:hover{outline:3px solid rgba(201,168,76,.7);outline-offset:2px;}',
+      '[data-edit-section].ve-active{outline:3px solid #C9A84C!important;outline-offset:2px;}',
+      '.ve-edit-badge{position:absolute;top:10px;right:10px;z-index:9000;background:#1B2A4A;color:#fff;padding:5px 12px 5px 9px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;box-shadow:0 2px 10px rgba(0,0,0,.3);opacity:0;transition:opacity .15s;white-space:nowrap;pointer-events:all;}',
+      '[data-edit-section]:hover .ve-edit-badge{opacity:1;}',
+      '.ve-edit-badge i{color:#C9A84C;}',
+      '#chat-widget,.cookie-banner,#chat-btn{display:none!important;}'
+    ].join('\\n');
+    doc.head.appendChild(style);
+  }
+
+  // Inject overlay JS (as a proper script element via DOM)
+  if (!doc.getElementById('ve-overlay-js')) {
+    const SEC_MAP = {home:'hero', about:'about', services:'services', team:'team', contact:'contact'};
+
+    // applyContent — updates DOM in iframe from veData
+    function applyContent(D, iDoc) {
+      if (!D) return;
+      var q = function(s) { return iDoc.querySelector(s); };
+      var qa = function(s) { return iDoc.querySelectorAll(s); };
+      var g = function(id) { return iDoc.getElementById(id); };
+      if (D['hero-headline']) { var e = q('#home h1'); if (e) e.innerHTML = D['hero-headline'].replace(/\\n/g, '<br/>'); }
+      if (D['hero-subheadline']) { var e = q('#home .text-gold-400'); if (e) e.textContent = D['hero-subheadline']; }
+      if (D['hero-desc']) { var e = q('#home p.text-xl'); if (e) e.textContent = D['hero-desc']; }
+      if (D['cta1']) { var e = q('#home a[href="#products"]'); if (e) e.innerHTML = '<i class="fas fa-search mr-2"></i>' + D['cta1']; }
+      if (D['cta2']) { var e = q('#home a[href="#contact"]'); if (e) e.innerHTML = '<i class="fas fa-envelope mr-2"></i>' + D['cta2']; }
+      if (D['hero-bg']) { var e = g('home'); if (e) e.style.backgroundImage = 'url(' + D['hero-bg'] + ')'; }
+      var sn = qa('section.bg-navy-700 .text-3xl'), sl = qa('section.bg-navy-700 .text-sm');
+      [1,2,3,4].forEach(function(n, i) {
+        if (D['stats-'+n+'-num'] && sn[i]) sn[i].textContent = D['stats-'+n+'-num'];
+        if (D['stats-'+n+'-label'] && sl[i]) sl[i].textContent = D['stats-'+n+'-label'];
+      });
+      if (D['about-heading']) { var e = q('#about h2'); if (e) e.textContent = D['about-heading']; }
+      var ap = qa('#about p.text-gray-600');
+      if (D['about-para1'] && ap[0]) ap[0].innerHTML = D['about-para1'];
+      if (D['about-para2'] && ap[1]) ap[1].innerHTML = D['about-para2'];
+      if (D['about-para3'] && ap[2]) ap[2].innerHTML = D['about-para3'];
+      if (D['about-image']) { var e = q('#about img'); if (e) e.src = D['about-image']; }
+      var sc = qa('#services .grid > div');
+      [1,2,3].forEach(function(n, i) { var c = sc[i]; if (!c) return;
+        if (D['svc'+n+'-title']) { var h = c.querySelector('h3'); if (h) h.textContent = D['svc'+n+'-title']; }
+        if (D['svc'+n+'-desc']) { var p = c.querySelector('p'); if (p) p.textContent = D['svc'+n+'-desc']; }
+        if (D['svc'+n+'-image']) { var bg = c.querySelector('[style*="background-image"]'); if (bg) bg.style.backgroundImage = 'url(' + D['svc'+n+'-image'] + ')'; }
+      });
+      var tc = qa('#team .grid > div');
+      [1,2].forEach(function(n, i) { var c = tc[i]; if (!c) return;
+        if (D['team'+n+'-name']) { var h = c.querySelector('h3'); if (h) h.textContent = D['team'+n+'-name']; }
+        if (D['team'+n+'-role']) { var p = c.querySelector('p.text-gold-500'); if (p) p.textContent = D['team'+n+'-role']; }
+        if (D['team'+n+'-bio']) { var b = c.querySelector('p.text-gray-600'); if (b) b.textContent = D['team'+n+'-bio']; }
+      });
+      if (D['quote-text']) { var e = q('#team .italic'); if (e) e.textContent = D['quote-text']; }
+      if (D['quote-author']) { var e = q('#team .font-semibold.text-gold-400'); if (e) e.textContent = D['quote-author']; }
+    }
+
+    // setupOverlays — add edit badges and click handlers to iframe sections
+    function setupOverlays(iDoc, parentWin) {
+      Object.entries(SEC_MAP).forEach(function(kv) {
+        var id = kv[0], sk = kv[1], el = iDoc.getElementById(id);
+        if (!el) return;
+        el.setAttribute('data-edit-section', sk);
+        var b = iDoc.createElement('div'); b.className = 've-edit-badge';
+        b.innerHTML = '<i class="fas fa-pencil-alt"></i> Edit ' + sk.charAt(0).toUpperCase() + sk.slice(1);
+        b.addEventListener('click', function(e) { e.stopPropagation(); parentWin._veOpenSection(sk); });
+        if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+        el.prepend(b);
+        el.addEventListener('click', function() { parentWin._veOpenSection(sk); });
+      });
+      var sb = iDoc.querySelector('section.bg-navy-700.text-white.py-8');
+      if (sb) {
+        sb.setAttribute('data-edit-section', 'stats');
+        var b = iDoc.createElement('div'); b.className = 've-edit-badge';
+        b.innerHTML = '<i class="fas fa-pencil-alt"></i> Edit Stats';
+        b.addEventListener('click', function(e) { e.stopPropagation(); parentWin._veOpenSection('stats'); });
+        if (getComputedStyle(sb).position === 'static') sb.style.position = 'relative';
+        sb.prepend(b);
+        sb.addEventListener('click', function() { parentWin._veOpenSection('stats'); });
+      }
+    }
+
+    // Expose a callback for the iframe to call
+    window._veOpenSection = function(sec) { openSection(sec); };
+    // Expose applyContent so it can be called directly
+    window._veApplyContent = function(D) { applyContent(D, iframe.contentDocument); };
+    // Expose highlight
+    window._veHighlight = function(sec) {
+      if (!iframe.contentDocument) return;
+      iframe.contentDocument.querySelectorAll('[data-edit-section]').forEach(function(el) { el.classList.remove('ve-active'); });
+      if (sec) iframe.contentDocument.querySelectorAll('[data-edit-section="'+sec+'"]').forEach(function(el) { el.classList.add('ve-active'); });
+    };
+    // Expose scroll-to
+    window._veScrollTo = function(sec) {
+      if (!iframe.contentDocument) return;
+      var map = {hero:'home', stats:'home', about:'about', services:'services', team:'team', contact:'contact'};
+      var tid = map[sec]; if (!tid) return;
+      var t = iframe.contentDocument.getElementById(tid);
+      if (t) t.scrollIntoView({behavior:'smooth', block:'start'});
+    };
+
+    // Run overlays setup
+    setupOverlays(doc, window);
+
+    // Mark as injected
+    var marker = doc.createElement('meta');
+    marker.id = 've-overlay-js';
+    marker.name = 've-overlay';
+    doc.head.appendChild(marker);
+  }
+}
+
+// Update postMessage handlers to use direct DOM calls when possible
 function showPreview() {
   const loading = document.getElementById('ve-iframe-loading');
   const notice  = document.getElementById('ve-notice');
-  const iframe  = document.getElementById('ve-iframe');
   if (!loading || loading.style.display === 'none') return; // already shown
   loading.style.display = 'none';
   if (notice) notice.style.display = 'flex';
-  // Push saved content data into the now-ready iframe
-  if (iframe && iframe.contentWindow && veData && Object.keys(veData).length) {
-    iframe.contentWindow.postMessage({type:'apply-content', data: veData}, '*');
+  // Inject overlay into iframe DOM
+  injectOverlayIntoIframe();
+  // Apply saved content data directly
+  if (veData && Object.keys(veData).length && window._veApplyContent) {
+    window._veApplyContent(veData);
   }
-  if (iframe && iframe.contentWindow && veCurrentSection) {
-    iframe.contentWindow.postMessage({type:'highlight', section: veCurrentSection}, '*');
+  if (veCurrentSection && window._veHighlight) {
+    window._veHighlight(veCurrentSection);
   }
 }
 
 async function init() {
-  // Attach iframe.onload FIRST — most reliable trigger regardless of postMessage timing
   const iframe = document.getElementById('ve-iframe');
   if (iframe) {
     iframe.addEventListener('load', showPreview);
   }
-
   await loadContent();
-  // Open hero panel immediately — iframe loads independently via its src attribute
   openSection('hero');
-  // Hard fallback: force-show after 10 s in case all else fails
-  setTimeout(showPreview, 10000);
+  // Hard fallback: force-show after 12 s
+  setTimeout(showPreview, 12000);
 }
 
 document.addEventListener('DOMContentLoaded', init);
@@ -809,129 +940,8 @@ document.addEventListener('DOMContentLoaded', init);
 })
 
 
-// ─── /admin/content/preview — serves homepage HTML with overlays injected ────
-// Used as iframe src so the browser loads it natively (no srcdoc size limits)
-// No auth required — preview only serves homepage public content with edit overlays
-admin.get('/content/preview', async (c) => {
-  try {
-    // Fetch the homepage from the same worker
-    const origin = new URL(c.req.url).origin
-    const homeRes = await fetch(origin + '/', { headers: { 'x-edit-preview': '1' } })
-    if (!homeRes.ok) throw new Error('Home fetch failed: ' + homeRes.status)
-    let html = await homeRes.text()
-
-    // Build the overlay script server-side (same as _overlayScript in /content)
-    const overlayCss = [
-      '<style>',
-      '[data-edit-section]{position:relative;cursor:pointer;}',
-      '[data-edit-section]:hover{outline:3px solid rgba(201,168,76,.7);outline-offset:2px;}',
-      '[data-edit-section].ve-active{outline:3px solid #C9A84C!important;outline-offset:2px;}',
-      '.ve-edit-badge{position:absolute;top:10px;right:10px;z-index:9000;background:#1B2A4A;' +
-        'color:#fff;padding:5px 12px 5px 9px;border-radius:20px;font-size:11px;font-weight:700;' +
-        'cursor:pointer;display:flex;align-items:center;gap:5px;box-shadow:0 2px 10px rgba(0,0,0,.3);' +
-        'opacity:0;transition:opacity .15s;white-space:nowrap;pointer-events:all;}',
-      '[data-edit-section]:hover .ve-edit-badge{opacity:1;}',
-      '.ve-edit-badge i{color:#C9A84C;}',
-      '#chat-widget,.cookie-banner,#chat-btn{display:none!important;}',
-      '</style>',
-    ].join('\n')
-
-    const overlayJs = '<script>(function(){' +
-      'var SEC_MAP={home:"hero",about:"about",services:"services",team:"team",contact:"contact"};' +
-      'function applyContent(D){' +
-      '  if(!D)return;' +
-      '  var q=function(s){return document.querySelector(s);};' +
-      '  var qa=function(s){return document.querySelectorAll(s);};' +
-      '  var g=function(id){return document.getElementById(id);};' +
-      '  if(D["hero-headline"]){var e=q("#home h1");if(e)e.innerHTML=D["hero-headline"].replace(/\\n/g,"<br/>");}' +
-      '  if(D["hero-subheadline"]){var e=q("#home .text-gold-400");if(e)e.textContent=D["hero-subheadline"];}' +
-      '  if(D["hero-desc"]){var e=q("#home p.text-xl");if(e)e.textContent=D["hero-desc"];}' +
-      '  if(D["cta1"]){var e=q(\'#home a[href="#products"]\');if(e)e.innerHTML=\'<i class="fas fa-search mr-2"></i>\'+D["cta1"];}' +
-      '  if(D["cta2"]){var e=q(\'#home a[href="#contact"]\');if(e)e.innerHTML=\'<i class="fas fa-envelope mr-2"></i>\'+D["cta2"];}' +
-      '  if(D["hero-bg"]){var e=g("home");if(e)e.style.backgroundImage="url("+D["hero-bg"]+")";}' +
-      '  var sn=qa("section.bg-navy-700 .text-3xl"),sl=qa("section.bg-navy-700 .text-sm");' +
-      '  [1,2,3,4].forEach(function(n,i){' +
-      '    if(D["stats-"+n+"-num"]&&sn[i])sn[i].textContent=D["stats-"+n+"-num"];' +
-      '    if(D["stats-"+n+"-label"]&&sl[i])sl[i].textContent=D["stats-"+n+"-label"];' +
-      '  });' +
-      '  if(D["about-heading"]){var e=q("#about h2");if(e)e.textContent=D["about-heading"];}' +
-      '  var ap=qa("#about p.text-gray-600");' +
-      '  if(D["about-para1"]&&ap[0])ap[0].innerHTML=D["about-para1"];' +
-      '  if(D["about-para2"]&&ap[1])ap[1].innerHTML=D["about-para2"];' +
-      '  if(D["about-para3"]&&ap[2])ap[2].innerHTML=D["about-para3"];' +
-      '  if(D["about-image"]){var e=q("#about img");if(e)e.src=D["about-image"];}' +
-      '  var sc=qa("#services .grid > div");' +
-      '  [1,2,3].forEach(function(n,i){var c=sc[i];if(!c)return;' +
-      '    if(D["svc"+n+"-title"]){var h=c.querySelector("h3");if(h)h.textContent=D["svc"+n+"-title"];}' +
-      '    if(D["svc"+n+"-desc"]){var p=c.querySelector("p");if(p)p.textContent=D["svc"+n+"-desc"];}' +
-      '    if(D["svc"+n+"-image"]){var bg=c.querySelector(\'[style*="background-image"]\');if(bg)bg.style.backgroundImage="url("+D["svc"+n+"-image"]+")";}' +
-      '  });' +
-      '  var tc=qa("#team .grid > div");' +
-      '  [1,2].forEach(function(n,i){var c=tc[i];if(!c)return;' +
-      '    if(D["team"+n+"-name"]){var h=c.querySelector("h3");if(h)h.textContent=D["team"+n+"-name"];}' +
-      '    if(D["team"+n+"-role"]){var p=c.querySelector("p.text-gold-500");if(p)p.textContent=D["team"+n+"-role"];}' +
-      '    if(D["team"+n+"-bio"]){var b=c.querySelector("p.text-gray-600");if(b)b.textContent=D["team"+n+"-bio"];}' +
-      '  });' +
-      '  if(D["quote-text"]){var e=q("#team .italic");if(e)e.textContent=D["quote-text"];}' +
-      '  if(D["quote-author"]){var e=q("#team .font-semibold.text-gold-400");if(e)e.textContent=D["quote-author"];}' +
-      '}' +
-      'function sendSection(sec){' +
-      '  document.querySelectorAll("[data-edit-section]").forEach(function(el){el.classList.remove("ve-active");});' +
-      '  document.querySelectorAll("[data-edit-section=\\""+sec+"\\"]").forEach(function(el){el.classList.add("ve-active");});' +
-      '  window.parent.postMessage({type:"section-click",section:sec},"*");' +
-      '}' +
-      'function setupOverlays(){' +
-      '  Object.entries(SEC_MAP).forEach(function(kv){' +
-      '    var id=kv[0],sk=kv[1],el=document.getElementById(id);if(!el)return;' +
-      '    el.setAttribute("data-edit-section",sk);' +
-      '    var b=document.createElement("div");b.className="ve-edit-badge";' +
-      '    b.innerHTML=\'<i class="fas fa-pencil-alt"></i> Edit \'+sk.charAt(0).toUpperCase()+sk.slice(1);' +
-      '    b.addEventListener("click",function(e){e.stopPropagation();sendSection(sk);});' +
-      '    if(getComputedStyle(el).position==="static")el.style.position="relative";' +
-      '    el.prepend(b);el.addEventListener("click",function(){sendSection(sk);});' +
-      '  });' +
-      '  var sb=document.querySelector("section.bg-navy-700.text-white.py-8");' +
-      '  if(sb){sb.setAttribute("data-edit-section","stats");' +
-      '    var b=document.createElement("div");b.className="ve-edit-badge";' +
-      '    b.innerHTML=\'<i class="fas fa-pencil-alt"></i> Edit Stats\';' +
-      '    b.addEventListener("click",function(e){e.stopPropagation();sendSection("stats");});' +
-      '    if(getComputedStyle(sb).position==="static")sb.style.position="relative";' +
-      '    sb.prepend(b);sb.addEventListener("click",function(){sendSection("stats");});' +
-      '  }' +
-      '  // Signal parent that iframe is interactive (DOMContentLoaded)' +
-      '  window.parent.postMessage({type:"iframe-ready"},"*");' +
-      '}' +
-      // Also fire on window.onload — gives parent page extra time to register listener
-      'window.addEventListener("load",function(){window.parent.postMessage({type:"iframe-ready"},"*");});' +
-      'window.addEventListener("message",function(e){' +
-      '  var m=e.data;if(!m)return;' +
-      '  if(m.type==="apply-content")applyContent(m.data);' +
-      '  if(m.type==="highlight"){' +
-      '    document.querySelectorAll("[data-edit-section]").forEach(function(el){el.classList.remove("ve-active");});' +
-      '    if(m.section)document.querySelectorAll("[data-edit-section=\\""+m.section+"\\"]").forEach(function(el){el.classList.add("ve-active");});' +
-      '  }' +
-      '  if(m.type==="scroll-to"){' +
-      '    var map={hero:"home",stats:"home",about:"about",services:"services",team:"team",contact:"contact"};' +
-      '    var tid=map[m.section];if(tid){var t=document.getElementById(tid);if(t)t.scrollIntoView({behavior:"smooth",block:"start"});}' +
-      '  }' +
-      '});' +
-      'if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",setupOverlays);}' +
-      'else{setupOverlays();}' +
-      '})();<\/script>'
-
-    // Inject overlay into the homepage HTML
-    html = html.replace('</body>', overlayCss + '\n' + overlayJs + '\n</body>')
-
-    return new Response(html, {
-      headers: { 'Content-Type': 'text/html; charset=UTF-8', 'X-Frame-Options': 'SAMEORIGIN' }
-    })
-  } catch (err: any) {
-    return new Response(`<html><body style="font-family:sans-serif;padding:40px;color:#ef4444">
-      <h2>Preview failed</h2><p>${err.message}</p>
-      <button onclick="location.reload()" style="background:#1B2A4A;color:#fff;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;margin-top:12px">Retry</button>
-    </body></html>`, { headers: { 'Content-Type': 'text/html' } })
-  }
-})
+// ─── /admin/content/preview — kept for backward compat, now just redirects to /
+admin.get('/content/preview', (c) => c.redirect('/'))
 
 
 // ═══════════════════════════════════════════════════════════════════════════
