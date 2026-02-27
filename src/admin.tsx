@@ -259,6 +259,101 @@ admin.get('/products', requireAuth, (c) => c.redirect('/admin/catalog'))
 // ═══════════════════════════════════════════════════════════════════════════
 
 admin.get('/content', requireAuth, async (c) => {
+  // ── Overlay CSS+JS injected into the homepage srcdoc (server-side) ──────────
+  const _overlayCss = [
+    '<style>',
+    '[data-edit-section]{position:relative;cursor:pointer;}',
+    '[data-edit-section]:hover{outline:3px solid rgba(201,168,76,.7);outline-offset:2px;}',
+    '[data-edit-section].ve-active{outline:3px solid #C9A84C!important;outline-offset:2px;}',
+    '.ve-edit-badge{position:absolute;top:10px;right:10px;z-index:9000;background:#1B2A4A;' +
+      'color:#fff;padding:5px 12px 5px 9px;border-radius:20px;font-size:11px;font-weight:700;' +
+      'cursor:pointer;display:flex;align-items:center;gap:5px;box-shadow:0 2px 10px rgba(0,0,0,.3);' +
+      'opacity:0;transition:opacity .15s;white-space:nowrap;pointer-events:all;}',
+    '[data-edit-section]:hover .ve-edit-badge{opacity:1;}',
+    '.ve-edit-badge i{color:#C9A84C;}',
+    '#chat-widget,.cookie-banner,#chat-btn{display:none!important;}',
+    '</style>',
+  ].join('\n');
+  const _overlayJs = '<script>(function(){' +
+    'var SEC_MAP={home:"hero",about:"about",services:"services",team:"team",contact:"contact"};' +
+    'function applyContent(D){' +
+    '  if(!D)return;' +
+    '  var q=function(s){return document.querySelector(s);};' +
+    '  var qa=function(s){return document.querySelectorAll(s);};' +
+    '  var g=function(id){return document.getElementById(id);};' +
+    '  if(D["hero-headline"]){var e=q("#home h1");if(e)e.innerHTML=D["hero-headline"].replace(/\\n/g,"<br/>");}' +
+    '  if(D["hero-subheadline"]){var e=q("#home .text-gold-400");if(e)e.textContent=D["hero-subheadline"];}' +
+    '  if(D["hero-desc"]){var e=q("#home p.text-xl");if(e)e.textContent=D["hero-desc"];}' +
+    '  if(D["cta1"]){var e=q(\'#home a[href="#products"]\');if(e)e.innerHTML=\'<i class="fas fa-search mr-2"></i>\'+D["cta1"];}' +
+    '  if(D["cta2"]){var e=q(\'#home a[href="#contact"]\');if(e)e.innerHTML=\'<i class="fas fa-envelope mr-2"></i>\'+D["cta2"];}' +
+    '  if(D["hero-bg"]){var e=g("home");if(e)e.style.backgroundImage="url("+D["hero-bg"]+")";}' +
+    '  var sn=qa("section.bg-navy-700 .text-3xl"),sl=qa("section.bg-navy-700 .text-sm");' +
+    '  [1,2,3,4].forEach(function(n,i){' +
+    '    if(D["stats-"+n+"-num"]&&sn[i])sn[i].textContent=D["stats-"+n+"-num"];' +
+    '    if(D["stats-"+n+"-label"]&&sl[i])sl[i].textContent=D["stats-"+n+"-label"];' +
+    '  });' +
+    '  if(D["about-heading"]){var e=q("#about h2");if(e)e.textContent=D["about-heading"];}' +
+    '  var ap=qa("#about p.text-gray-600");' +
+    '  if(D["about-para1"]&&ap[0])ap[0].innerHTML=D["about-para1"];' +
+    '  if(D["about-para2"]&&ap[1])ap[1].innerHTML=D["about-para2"];' +
+    '  if(D["about-para3"]&&ap[2])ap[2].innerHTML=D["about-para3"];' +
+    '  if(D["about-image"]){var e=q("#about img");if(e)e.src=D["about-image"];}' +
+    '  var sc=qa("#services .grid > div");' +
+    '  [1,2,3].forEach(function(n,i){var c=sc[i];if(!c)return;' +
+    '    if(D["svc"+n+"-title"]){var h=c.querySelector("h3");if(h)h.textContent=D["svc"+n+"-title"];}' +
+    '    if(D["svc"+n+"-desc"]){var p=c.querySelector("p");if(p)p.textContent=D["svc"+n+"-desc"];}' +
+    '    if(D["svc"+n+"-image"]){var bg=c.querySelector(\'[style*="background-image"]\');if(bg)bg.style.backgroundImage="url("+D["svc"+n+"-image"]+")";}' +
+    '  });' +
+    '  var tc=qa("#team .grid > div");' +
+    '  [1,2].forEach(function(n,i){var c=tc[i];if(!c)return;' +
+    '    if(D["team"+n+"-name"]){var h=c.querySelector("h3");if(h)h.textContent=D["team"+n+"-name"];}' +
+    '    if(D["team"+n+"-role"]){var p=c.querySelector("p.text-gold-500");if(p)p.textContent=D["team"+n+"-role"];}' +
+    '    if(D["team"+n+"-bio"]){var b=c.querySelector("p.text-gray-600");if(b)b.textContent=D["team"+n+"-bio"];}' +
+    '  });' +
+    '  if(D["quote-text"]){var e=q("#team .italic");if(e)e.textContent=D["quote-text"];}' +
+    '  if(D["quote-author"]){var e=q("#team .font-semibold.text-gold-400");if(e)e.textContent=D["quote-author"];}' +
+    '}' +
+    'function sendSection(sec){' +
+    '  document.querySelectorAll("[data-edit-section]").forEach(function(el){el.classList.remove("ve-active");});' +
+    '  document.querySelectorAll("[data-edit-section=\\""+sec+"\\"]").forEach(function(el){el.classList.add("ve-active");});' +
+    '  window.parent.postMessage({type:"section-click",section:sec},"*");' +
+    '}' +
+    'function setupOverlays(){' +
+    '  Object.entries(SEC_MAP).forEach(function(kv){' +
+    '    var id=kv[0],sk=kv[1],el=document.getElementById(id);if(!el)return;' +
+    '    el.setAttribute("data-edit-section",sk);' +
+    '    var b=document.createElement("div");b.className="ve-edit-badge";' +
+    '    b.innerHTML=\'<i class="fas fa-pencil-alt"></i> Edit \'+sk.charAt(0).toUpperCase()+sk.slice(1);' +
+    '    b.addEventListener("click",function(e){e.stopPropagation();sendSection(sk);});' +
+    '    if(getComputedStyle(el).position==="static")el.style.position="relative";' +
+    '    el.prepend(b);el.addEventListener("click",function(){sendSection(sk);});' +
+    '  });' +
+    '  var sb=document.querySelector("section.bg-navy-700.text-white.py-8");' +
+    '  if(sb){sb.setAttribute("data-edit-section","stats");' +
+    '    var b=document.createElement("div");b.className="ve-edit-badge";' +
+    '    b.innerHTML=\'<i class="fas fa-pencil-alt"></i> Edit Stats\';' +
+    '    b.addEventListener("click",function(e){e.stopPropagation();sendSection("stats");});' +
+    '    if(getComputedStyle(sb).position==="static")sb.style.position="relative";' +
+    '    sb.prepend(b);sb.addEventListener("click",function(){sendSection("stats");});' +
+    '  }' +
+    '}' +
+    'window.addEventListener("message",function(e){' +
+    '  var m=e.data;if(!m)return;' +
+    '  if(m.type==="apply-content")applyContent(m.data);' +
+    '  if(m.type==="highlight"){' +
+    '    document.querySelectorAll("[data-edit-section]").forEach(function(el){el.classList.remove("ve-active");});' +
+    '    if(m.section)document.querySelectorAll("[data-edit-section=\\""+m.section+"\\"]").forEach(function(el){el.classList.add("ve-active");});' +
+    '  }' +
+    '  if(m.type==="scroll-to"){' +
+    '    var map={hero:"home",stats:"home",about:"about",services:"services",team:"team",contact:"contact"};' +
+    '    var tid=map[m.section];if(tid){var t=document.getElementById(tid);if(t)t.scrollIntoView({behavior:"smooth",block:"start"});}' +
+    '  }' +
+    '});' +
+    'if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",setupOverlays);}' +
+    'else{setupOverlays();}' +
+    '})();<\/script>';
+  const _overlayScript = _overlayCss + '\n' + _overlayJs;
+
   return c.html(adminShell('Site Content', 'content', `
 <!-- Visual Content Editor — full viewport split layout -->
 <style>
@@ -339,7 +434,7 @@ admin.get('/content', requireAuth, async (c) => {
         <i class="fas fa-spinner fa-spin text-3xl" style="color:#C9A84C"></i>
         Loading preview…
       </div>
-      <iframe id="ve-iframe" src="/admin/content/preview" title="Site Preview"></iframe>
+      <iframe id="ve-iframe" title="Site Preview"></iframe>
       <div class="ve-highlight-notice" id="ve-notice">
         <i class="fas fa-mouse-pointer"></i> Click any section to edit it
       </div>
@@ -405,9 +500,9 @@ async function saveAllContent() {
     const d = await r.json();
     if (d.ok !== false) {
       showFlash('Saved & published!', true);
-      // Tell iframe to refresh its content
+      // Push updated content into iframe for live preview
       const iframe = document.getElementById('ve-iframe');
-      iframe.contentWindow.postMessage({type:'content-saved', data: veData}, '*');
+      if (iframe.contentWindow) iframe.contentWindow.postMessage({type:'apply-content', data: veData}, '*');
     } else {
       showFlash('Save failed — try again', false);
     }
@@ -418,8 +513,15 @@ async function saveAllContent() {
 }
 
 function collectPanelValues() {
+  // Collect regular text/textarea fields
   document.querySelectorAll('#ve-panel-inner [data-field]').forEach(el => {
     veData[el.dataset.field] = el.value;
+  });
+  // Collect img picker URL inputs (identified by data-ve-field on their wrapper)
+  document.querySelectorAll('#ve-panel-inner .img-picker[data-ve-field]').forEach(wrapper => {
+    const field = wrapper.dataset.veField;
+    const urlInput = wrapper.querySelector('.ip-url-pane input');
+    if (urlInput) veData[field] = urlInput.value;
   });
 }
 
@@ -516,22 +618,6 @@ function setDevice(dev) {
 // ─── Listen for messages from the iframe ─────────────────────────────────────
 window.addEventListener('message', e => {
   if (e.data?.type === 'section-click') openSection(e.data.section);
-  if (e.data?.type === 'iframe-ready') {
-    document.getElementById('ve-iframe-loading').style.display = 'none';
-    document.getElementById('ve-notice').style.display = 'flex';
-    // Push current data into iframe for live preview
-    const iframe = document.getElementById('ve-iframe');
-    iframe.contentWindow.postMessage({type:'load-content', data: veData}, '*');
-  }
-});
-
-// iframe loaded fallback
-document.getElementById('ve-iframe').addEventListener('load', () => {
-  setTimeout(() => {
-    document.getElementById('ve-iframe-loading').style.display = 'none';
-    const iframe = document.getElementById('ve-iframe');
-    iframe.contentWindow.postMessage({type:'load-content', data: veData}, '*');
-  }, 400);
 });
 
 // ─── Panel HTML builders ──────────────────────────────────────────────────────
@@ -582,15 +668,19 @@ function ft(field, label, placeholder = '', rows = 3) {
 }
 function fimg(field, label, placeholder = '') {
   const val = veData[field] || '';
-  const tid = 'thumb-' + field.replace(/[^a-z0-9]/gi,'-');
+  const pickerId = 'vep-' + field.replace(/[^a-z0-9]/gi,'-');
+  // Use the shared imgPickerHTML widget (URL tab + Upload tab)
+  // setterExpr: update veData AND refresh the live iframe preview
+  const setterExpr = \`veData['\${field}']=url;document.getElementById('ve-iframe')?.contentWindow?.postMessage({type:'apply-content',data:veData},'*')\`;
+  const pickerHtml = imgPickerHTML(pickerId, val, setterExpr);
+  // Inject data-ve-field into the root picker div so collectPanelValues() can sync it
+  const pickerWithAttr = pickerHtml.replace(
+    \`data-picker="\${pickerId}"\`,
+    \`data-picker="\${pickerId}" data-ve-field="\${field}"\`
+  );
   return \`<div class="ve-field">
     <label class="ve-label">\${label}</label>
-    <div class="ve-img-row">
-      <input class="ve-input" data-field="\${field}" data-imgthumb="\${tid}"
-        value="\${esc(val)}" placeholder="\${esc(placeholder || 'https://...')}"
-        oninput="veData['\${field}']=this.value; updateThumb(this)"/>
-      <img id="\${tid}" class="ve-img-thumb \${val?'has-img':''}" src="\${esc(val)}" alt=""/>
-    </div>
+    \${pickerWithAttr}
   </div>\`;
 }
 
@@ -764,8 +854,38 @@ function buildPanel(sec) {
 }
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
+// OVERLAY_JS is injected by the server into this script as a JSON-encoded string
+// (see the \${JSON.stringify(_overlayScript)} interpolation below)
+const OVERLAY_JS = \${JSON.stringify(_overlayScript)};
+
+async function loadPreviewIntoIframe() {
+  const loading = document.getElementById('ve-iframe-loading');
+  const notice  = document.getElementById('ve-notice');
+  const iframe  = document.getElementById('ve-iframe');
+  loading.style.display = 'flex';
+  try {
+    const r = await fetch('/');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    let html = await r.text();
+    // Inject overlay before </body>
+    html = html.replace('</body>', OVERLAY_JS + '</body>');
+    iframe.srcdoc = html;
+    // Wait for iframe to load then push content data
+    iframe.onload = function() {
+      loading.style.display = 'none';
+      notice.style.display = 'flex';
+      if (veData && Object.keys(veData).length) {
+        iframe.contentWindow.postMessage({type:'apply-content', data: veData}, '*');
+      }
+    };
+  } catch(err) {
+    loading.innerHTML = '<div style="color:#ef4444;padding:20px;text-align:center"><i class="fas fa-exclamation-triangle text-2xl mb-2 block"></i>Preview failed: ' + err.message + '</div>';
+  }
+}
+
 async function init() {
   await loadContent();
+  await loadPreviewIntoIframe();
   // Open hero panel by default
   openSection('hero');
 }
@@ -775,304 +895,6 @@ document.addEventListener('DOMContentLoaded', init);
 `))
 })
 
-// ─── Preview page (homepage + edit overlay) ───────────────────────────────────
-admin.get('/content/preview', requireAuth, async (c) => {
-  const kv = c.env?.BF_STORE
-  const siteContent: any = kv ? (await kvGet(kv, 'site_content', {})) : {}
-
-  // Inject the edit-mode overlay script into the full homepage HTML
-  const overlayScript = `
-<style>
-  [data-edit-section] { position:relative; transition:outline .15s; cursor:pointer; }
-  [data-edit-section]:hover { outline: 3px solid rgba(201,168,76,.7); outline-offset: 2px; }
-  [data-edit-section].ve-active { outline: 3px solid #C9A84C !important; outline-offset: 2px; }
-  .ve-edit-badge {
-    position:absolute; top:8px; right:8px; z-index:9999;
-    background:#1B2A4A; color:#fff;
-    padding:4px 10px 4px 8px; border-radius:20px;
-    font-size:11px; font-weight:700; cursor:pointer;
-    display:flex; align-items:center; gap:5px;
-    box-shadow:0 2px 8px rgba(0,0,0,.25); pointer-events:all;
-    opacity:0; transition:opacity .15s;
-    white-space:nowrap;
-  }
-  [data-edit-section]:hover .ve-edit-badge { opacity:1; }
-  .ve-edit-badge i { color:#C9A84C; }
-</style>
-<script>
-(function(){
-  // Map section IDs to edit section keys
-  const SEC_MAP = {
-    'home':     'hero',
-    'about':    'about',
-    'services': 'services',
-    'team':     'team',
-    'contact':  'contact',
-  };
-
-  function applyContent(data) {
-    const D = data || {};
-    // Hero
-    if (D['hero-headline']) {
-      const h1 = document.querySelector('#home h1');
-      if (h1) h1.innerHTML = D['hero-headline'].replace('\\n','<br/>');
-    }
-    if (D['hero-subheadline']) {
-      const sub = document.querySelector('#home .text-gold-400.font-semibold.tracking-widest');
-      if (sub) sub.textContent = D['hero-subheadline'];
-    }
-    if (D['hero-desc']) {
-      const desc = document.querySelector('#home p.text-xl');
-      if (desc) desc.textContent = D['hero-desc'];
-    }
-    if (D['cta1']) {
-      const cta = document.querySelector('#home a[href="#products"]');
-      if (cta) cta.innerHTML = '<i class="fas fa-search mr-2"></i>' + D['cta1'];
-    }
-    if (D['cta2']) {
-      const cta2 = document.querySelector('#home a[href="#contact"]');
-      if (cta2) cta2.innerHTML = '<i class="fas fa-envelope mr-2"></i>' + D['cta2'];
-    }
-    if (D['hero-bg']) {
-      const hero = document.getElementById('home');
-      if (hero) hero.style.backgroundImage = 'url(' + D['hero-bg'] + ')';
-    }
-    // Stats bar
-    const statNums = document.querySelectorAll('section.bg-navy-700.text-white.py-8 .text-3xl');
-    const statLabels = document.querySelectorAll('section.bg-navy-700.text-white.py-8 .text-sm.text-white\\/70');
-    [1,2,3,4].forEach((n,i) => {
-      if (D['stats-'+n+'-num']   && statNums[i])   statNums[i].textContent   = D['stats-'+n+'-num'];
-      if (D['stats-'+n+'-label'] && statLabels[i]) statLabels[i].textContent = D['stats-'+n+'-label'];
-    });
-    // About
-    if (D['about-heading']) {
-      const h = document.querySelector('#about h2');
-      if (h) h.textContent = D['about-heading'];
-    }
-    const paras = document.querySelectorAll('#about .text-gray-600');
-    if (D['about-para1'] && paras[0]) paras[0].innerHTML = D['about-para1'];
-    if (D['about-para2'] && paras[1]) paras[1].innerHTML = D['about-para2'];
-    if (D['about-para3'] && paras[2]) paras[2].innerHTML = D['about-para3'];
-    if (D['about-image']) {
-      const img = document.querySelector('#about img');
-      if (img) img.src = D['about-image'];
-    }
-    // Services
-    const svcCards = document.querySelectorAll('#services .grid.md\\:grid-cols-3 > div');
-    [1,2,3].forEach((n,i) => {
-      const card = svcCards[i]; if (!card) return;
-      if (D['svc'+n+'-title']) { const h3 = card.querySelector('h3'); if(h3) h3.textContent = D['svc'+n+'-title']; }
-      if (D['svc'+n+'-desc'])  { const p  = card.querySelector('p');  if(p)  p.textContent  = D['svc'+n+'-desc']; }
-      if (D['svc'+n+'-image']) { const bg = card.querySelector('[style*="background-image"]'); if(bg) bg.style.backgroundImage = 'url('+D['svc'+n+'-image']+')'; }
-    });
-    // Team
-    const teamCards = document.querySelectorAll('#team .grid.md\\:grid-cols-2 > div');
-    [1,2].forEach((n,i) => {
-      const card = teamCards[i]; if (!card) return;
-      if (D['team'+n+'-name']) { const h3 = card.querySelector('h3'); if(h3) h3.textContent = D['team'+n+'-name']; }
-      if (D['team'+n+'-role']) { const p  = card.querySelector('p.text-gold-500'); if(p) p.textContent = D['team'+n+'-role']; }
-      if (D['team'+n+'-bio'])  { const bio= card.querySelector('p.text-gray-600'); if(bio) bio.textContent = D['team'+n+'-bio']; }
-    });
-    if (D['quote-text'])   { const q = document.querySelector('#team .italic'); if(q) q.textContent = D['quote-text']; }
-    if (D['quote-author']) { const a = document.querySelector('#team .font-semibold.text-gold-400'); if(a) a.textContent = D['quote-author']; }
-    // Contact
-    if (D['phone'])   { document.querySelectorAll('a[href^="tel"]').forEach(el => { el.textContent = D['phone']; }); }
-    if (D['address']) { const addr = document.querySelector('#contact .text-white\\/75'); if(addr) addr.textContent = D['address']; }
-  }
-
-  function setupOverlays() {
-    Object.entries(SEC_MAP).forEach(([id, secKey]) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.setAttribute('data-edit-section', secKey);
-      // Inject edit badge
-      const badge = document.createElement('div');
-      badge.className = 've-edit-badge';
-      badge.innerHTML = '<i class="fas fa-pencil-alt"></i> Edit ' + secKey;
-      badge.onclick = (e) => { e.stopPropagation(); sendSection(secKey); };
-      // Make section position:relative if not already
-      const pos = getComputedStyle(el).position;
-      if (pos === 'static') el.style.position = 'relative';
-      el.prepend(badge);
-
-      el.addEventListener('click', () => sendSection(secKey));
-    });
-
-    // Also add stats bar
-    const statsBar = document.querySelector('section.bg-navy-700.text-white.py-8');
-    if (statsBar) {
-      statsBar.setAttribute('data-edit-section','stats');
-      const b2 = document.createElement('div');
-      b2.className = 've-edit-badge';
-      b2.innerHTML = '<i class="fas fa-pencil-alt"></i> Edit stats';
-      b2.onclick = (e) => { e.stopPropagation(); sendSection('stats'); };
-      if (getComputedStyle(statsBar).position === 'static') statsBar.style.position = 'relative';
-      statsBar.prepend(b2);
-      statsBar.addEventListener('click', () => sendSection('stats'));
-    }
-  }
-
-  function sendSection(sec) {
-    // Highlight active section
-    document.querySelectorAll('[data-edit-section]').forEach(el => el.classList.remove('ve-active'));
-    document.querySelectorAll('[data-edit-section="' + sec + '"]').forEach(el => el.classList.add('ve-active'));
-    window.parent.postMessage({type:'section-click', section: sec}, '*');
-  }
-
-  // Listen for commands from parent
-  window.addEventListener('message', (e) => {
-    const msg = e.data;
-    if (!msg) return;
-    if (msg.type === 'load-content') {
-      applyContent(msg.data);
-    }
-    if (msg.type === 'content-saved') {
-      applyContent(msg.data);
-    }
-    if (msg.type === 'highlight') {
-      document.querySelectorAll('[data-edit-section]').forEach(el => el.classList.remove('ve-active'));
-      if (msg.section) {
-        document.querySelectorAll('[data-edit-section="' + msg.section + '"]').forEach(el => el.classList.add('ve-active'));
-      }
-    }
-    if (msg.type === 'scroll-to') {
-      const secToId = { hero:'home', stats:'home', about:'about', services:'services', team:'team', contact:'contact' };
-      const targetId = secToId[msg.section];
-      if (targetId) {
-        const el = document.getElementById(targetId);
-        if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
-      }
-    }
-  });
-
-  // Signal parent we are ready
-  window.parent.postMessage({type:'iframe-ready'}, '*');
-
-  // Run after DOM ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupOverlays);
-  } else {
-    setupOverlays();
-  }
-})();
-</script>`;
-
-  // Preview page — fetches the homepage HTML client-side then injects edit overlays
-  const OVERLAY_STYLE = `
-<style>
-  [data-edit-section]{position:relative;transition:outline .15s;cursor:pointer;}
-  [data-edit-section]:hover{outline:3px solid rgba(201,168,76,.65);outline-offset:2px;}
-  [data-edit-section].ve-active{outline:3px solid #C9A84C!important;outline-offset:2px;}
-  .ve-edit-badge{position:absolute;top:8px;right:8px;z-index:9000;background:#1B2A4A;color:#fff;padding:4px 10px 4px 8px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,.3);opacity:0;transition:opacity .15s;white-space:nowrap;}
-  [data-edit-section]:hover .ve-edit-badge{opacity:1;}
-  .ve-edit-badge i{color:#C9A84C;}
-</style>`;
-
-  return c.html(`<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Preview</title>
-  <style>html,body{margin:0;padding:0;height:100%;overflow-x:hidden;}</style>
-</head>
-<body style="margin:0;padding:0;">
-<script>
-(async function(){
-  try {
-    const r = await fetch('/');
-    let html = await r.text();
-    // Inject overlay style just before </head>
-    html = html.replace('</head>', ${"`"}${OVERLAY_STYLE}${"`"} + '</head>');
-    document.open(); document.write(html); document.close();
-  } catch(e) {
-    document.body.innerHTML='<p style="padding:20px;color:red">Preview error: '+e.message+'</p>';
-    return;
-  }
-
-  // ── Overlay logic (runs after document.write completes) ──────────────────
-  const SEC_MAP = {home:'hero', about:'about', services:'services', team:'team', contact:'contact'};
-
-  function applyContent(D) {
-    if (!D) return;
-    if (D['hero-headline'])    { const el=document.querySelector('#home h1'); if(el) el.innerHTML=D['hero-headline'].replace(/\\n/g,'<br/>'); }
-    if (D['hero-subheadline']) { const el=document.querySelector('#home .text-gold-400.font-semibold.tracking-widest'); if(el) el.textContent=D['hero-subheadline']; }
-    if (D['hero-desc'])        { const el=document.querySelector('#home p.text-xl'); if(el) el.textContent=D['hero-desc']; }
-    if (D['cta1'])             { const el=document.querySelector('#home a[href="#products"]'); if(el) el.innerHTML='<i class="fas fa-search mr-2"></i>'+D['cta1']; }
-    if (D['cta2'])             { const el=document.querySelector('#home a[href="#contact"]'); if(el) el.innerHTML='<i class="fas fa-envelope mr-2"></i>'+D['cta2']; }
-    if (D['hero-bg'])          { const el=document.getElementById('home'); if(el) el.style.backgroundImage='url('+D['hero-bg']+')'; }
-    // Stats
-    const statNums   = document.querySelectorAll('section.bg-navy-700.text-white.py-8 .text-3xl');
-    const statLabels = document.querySelectorAll('section.bg-navy-700.text-white.py-8 .text-sm.text-white\\/70');
-    [1,2,3,4].forEach(function(n,i){ if(D['stats-'+n+'-num']&&statNums[i]) statNums[i].textContent=D['stats-'+n+'-num']; if(D['stats-'+n+'-label']&&statLabels[i]) statLabels[i].textContent=D['stats-'+n+'-label']; });
-    // About
-    if (D['about-heading']) { const el=document.querySelector('#about h2'); if(el) el.textContent=D['about-heading']; }
-    var ap=document.querySelectorAll('#about p.text-gray-600');
-    if(D['about-para1']&&ap[0]) ap[0].innerHTML=D['about-para1'];
-    if(D['about-para2']&&ap[1]) ap[1].innerHTML=D['about-para2'];
-    if(D['about-para3']&&ap[2]) ap[2].innerHTML=D['about-para3'];
-    if(D['about-image']) { var im=document.querySelector('#about img'); if(im) im.src=D['about-image']; }
-    // Services
-    var sc=document.querySelectorAll('#services .grid.md\\:grid-cols-3>div');
-    [1,2,3].forEach(function(n,i){ var c=sc[i]; if(!c) return; if(D['svc'+n+'-title']){var h=c.querySelector('h3');if(h)h.textContent=D['svc'+n+'-title'];} if(D['svc'+n+'-desc']){var p=c.querySelector('p');if(p)p.textContent=D['svc'+n+'-desc'];} if(D['svc'+n+'-image']){var bg=c.querySelector('[style*="background-image"]');if(bg)bg.style.backgroundImage='url('+D['svc'+n+'-image']+')';} });
-    // Team
-    var tc=document.querySelectorAll('#team .grid.md\\:grid-cols-2>div');
-    [1,2].forEach(function(n,i){ var c=tc[i]; if(!c) return; if(D['team'+n+'-name']){var h=c.querySelector('h3');if(h)h.textContent=D['team'+n+'-name'];} if(D['team'+n+'-role']){var p=c.querySelector('p.text-gold-500');if(p)p.textContent=D['team'+n+'-role'];} if(D['team'+n+'-bio']){var b=c.querySelector('p.text-gray-600');if(b)b.textContent=D['team'+n+'-bio'];} });
-    if(D['quote-text'])  { var q=document.querySelector('#team .italic');  if(q) q.textContent=D['quote-text']; }
-    if(D['quote-author']){ var a=document.querySelector('#team .font-semibold.text-gold-400'); if(a) a.textContent=D['quote-author']; }
-  }
-
-  function sendSection(sec) {
-    document.querySelectorAll('[data-edit-section]').forEach(function(el){el.classList.remove('ve-active');});
-    document.querySelectorAll('[data-edit-section="'+sec+'"]').forEach(function(el){el.classList.add('ve-active');});
-    window.parent.postMessage({type:'section-click',section:sec},'*');
-  }
-
-  function setupOverlays() {
-    Object.entries(SEC_MAP).forEach(function([id,secKey]){
-      var el=document.getElementById(id); if(!el) return;
-      el.setAttribute('data-edit-section',secKey);
-      var badge=document.createElement('div');
-      badge.className='ve-edit-badge';
-      badge.innerHTML='<i class="fas fa-pencil-alt"></i> Edit '+secKey;
-      badge.onclick=function(e){e.stopPropagation();sendSection(secKey);};
-      if(getComputedStyle(el).position==='static') el.style.position='relative';
-      el.prepend(badge);
-      el.addEventListener('click',function(){sendSection(secKey);});
-    });
-    // Stats bar
-    var sb=document.querySelector('section.bg-navy-700.text-white.py-8');
-    if(sb){
-      sb.setAttribute('data-edit-section','stats');
-      var b2=document.createElement('div');
-      b2.className='ve-edit-badge';
-      b2.innerHTML='<i class="fas fa-pencil-alt"></i> Edit stats';
-      b2.onclick=function(e){e.stopPropagation();sendSection('stats');};
-      if(getComputedStyle(sb).position==='static') sb.style.position='relative';
-      sb.prepend(b2);
-      sb.addEventListener('click',function(){sendSection('stats');});
-    }
-  }
-
-  window.addEventListener('message',function(e){
-    var msg=e.data; if(!msg) return;
-    if(msg.type==='load-content'||msg.type==='content-saved') applyContent(msg.data);
-    if(msg.type==='highlight'){
-      document.querySelectorAll('[data-edit-section]').forEach(function(el){el.classList.remove('ve-active');});
-      if(msg.section) document.querySelectorAll('[data-edit-section="'+msg.section+'"]').forEach(function(el){el.classList.add('ve-active');});
-    }
-    if(msg.type==='scroll-to'){
-      var m={hero:'home',stats:'home',about:'about',services:'services',team:'team',contact:'contact'};
-      var tid=m[msg.section]; if(tid){var t=document.getElementById(tid);if(t)t.scrollIntoView({behavior:'smooth',block:'start'});}
-    }
-  });
-
-  setupOverlays();
-  window.parent.postMessage({type:'iframe-ready'},'*');
-})();
-</script>
-</body>
-</html>`)
-})
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  AI CHATBOT TRAINING
@@ -3075,7 +2897,8 @@ function clearProdForm() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
-  // Reset category to first available option (populated dynamically)\n  applyCatVendorToModal('');
+  // Reset category to first available option (populated dynamically)
+  applyCatVendorToModal('');
   document.getElementById('pm-instock').checked = true;
   document.getElementById('pm-featured').checked = false;
   document.getElementById('pm-img-preview-wrap').style.display = 'none';
