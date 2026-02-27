@@ -616,7 +616,7 @@ function buildPanel(sec) {
       <div class="ve-section-body">
         \${fi('hero-headline',   'Main Headline', 'Premium Feed for Champions.')}
         \${fi('hero-subheadline','Sub-headline / Location Tag', 'Wellington · Loxahatchee · Palm Beach County')}
-        \${ft('hero-desc',       'Description Paragraph', 'Serving Wellington\'s equestrian community…')}
+        \${ft('hero-desc',       'Description Paragraph', 'Serving the Wellington equestrian community…')}
         \${fi('cta1',           'Primary Button Text', 'Find the Right Feed')}
         \${fi('cta2',           'Secondary Button Text', 'Contact Us')}
         \${fimg('hero-bg',      'Hero Background Image', 'https://…')}
@@ -654,7 +654,7 @@ function buildPanel(sec) {
         </div>
       </div>
       <div class="ve-section-body">
-        \${fi('about-heading', 'Section Heading', 'Wellington\'s Most Trusted Feed Store')}
+        \${fi('about-heading', 'Section Heading', 'Wellington Most Trusted Feed Store')}
         \${ft('about-para1',   'First Paragraph', 'Established in 2012…', 4)}
         \${ft('about-para2',   'Second Paragraph', 'In the summer of 2016…', 3)}
         \${ft('about-para3',   'Third Paragraph', 'Whether you own…', 3)}
