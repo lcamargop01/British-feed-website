@@ -669,7 +669,7 @@ async function deleteProduct(bi, pi) {
   renderProducts(allProducts);
 }
 
-loadProducts();
+document.addEventListener('DOMContentLoaded', loadProducts);
 </script>
 `))
 })
@@ -955,7 +955,7 @@ function switchTab(btn, tab) {
   document.getElementById('tab-' + tab).classList.add('active');
 }
 
-loadContent();
+document.addEventListener('DOMContentLoaded', loadContent);
 </script>
 `))
 })
@@ -1351,7 +1351,7 @@ function switchTab(btn, tab) {
   document.getElementById('tab-' + tab).classList.add('active');
 }
 
-loadChatbotData();
+document.addEventListener('DOMContentLoaded', loadChatbotData);
 </script>
 `))
 })
@@ -1542,7 +1542,7 @@ async function deleteReview(i) {
   renderReviews();
 }
 
-loadReviews();
+document.addEventListener('DOMContentLoaded', loadReviews);
 </script>
 `))
 })
@@ -1615,7 +1615,7 @@ async function clearAllInquiries() {
   loadInquiries();
 }
 
-loadInquiries();
+document.addEventListener('DOMContentLoaded', loadInquiries);
 </script>
 `))
 })
@@ -2936,7 +2936,7 @@ function showStatus(type, html) {
   el.innerHTML = html;
 }
 
-loadCatalog();
+document.addEventListener('DOMContentLoaded', loadCatalog);
 </script>
 `
 }
