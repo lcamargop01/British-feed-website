@@ -234,7 +234,7 @@ function getHTML(): string {
       <div class="hidden md:flex items-center gap-6 text-sm font-medium text-white/90">
         <a href="#about"    class="nav-link hover:text-gold-400 transition-colors">About</a>
         <a href="#products" class="nav-link hover:text-gold-400 transition-colors">Products</a>
-        <a href="/products" class="nav-link hover:text-gold-400 transition-colors flex items-center gap-1" title="Browse all 986 items">
+        <a href="/products" class="nav-link hover:text-gold-400 transition-colors flex items-center gap-1" title="Browse our product catalog">
           <i class="fas fa-list text-gold-400 text-xs"></i>Full Catalog
         </a>
         <a href="#services" class="nav-link hover:text-gold-400 transition-colors">Services</a>
@@ -256,7 +256,7 @@ function getHTML(): string {
       <a href="#about"    onclick="closeMobileMenu()" class="block py-2 hover:text-gold-400">About</a>
       <a href="#products" onclick="closeMobileMenu()" class="block py-2 hover:text-gold-400">Products</a>
       <a href="/products" class="block py-2 hover:text-gold-400 flex items-center gap-2">
-        <i class="fas fa-list text-xs" style="color:#C9A84C"></i>Full Catalog (986 items)
+        <i class="fas fa-list text-xs" style="color:#C9A84C"></i>Product Catalog
       </a>
       <a href="#services" onclick="closeMobileMenu()" class="block py-2 hover:text-gold-400">Services</a>
       <a href="#team"     onclick="closeMobileMenu()" class="block py-2 hover:text-gold-400">Our Team</a>
@@ -535,7 +535,7 @@ function getHTML(): string {
       <div class="inline-flex flex-col sm:flex-row items-center gap-4 bg-white rounded-2xl px-8 py-6 shadow-sm border border-gray-100">
         <div class="text-left">
           <div class="font-bold text-navy-700 text-base">Looking for something specific?</div>
-          <div class="text-gray-500 text-sm mt-0.5">Browse our complete inventory of 986 products with search & filters.</div>
+          <div class="text-gray-500 text-sm mt-0.5">Browse our complete product catalog with search & filters.</div>
         </div>
         <a href="/products" class="flex-shrink-0 bg-navy-700 hover:bg-navy-800 text-white font-bold px-6 py-3 rounded-xl transition-all hover:scale-105 flex items-center gap-2 whitespace-nowrap" style="background:#1B2A4A">
           <i class="fas fa-list"></i> Browse Full Catalog
@@ -1346,8 +1346,8 @@ function getProductsHTML(): string {
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Full Product Catalog | British Feed & Supplies — Wellington, FL</title>
-  <meta name="description" content="Browse all 986 products at British Feed & Supplies — Nutrena, Cavalor, Red Mills, Havens, hay, shavings, supplements, grooming, tack and more."/>
+  <title>Product Catalog | British Feed & Supplies — Wellington, FL</title>
+  <meta name="description" content="Browse our complete product catalog at British Feed & Supplies. Premium horse feeds, supplements, grooming, hay, bedding and more in Wellington, FL."/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -1356,8 +1356,8 @@ function getProductsHTML(): string {
       theme: {
         extend: {
           colors: {
-            navy:  { DEFAULT:'#1B2A4A', 50:'#EEF1F8', 700:'#1B2A4A', 800:'#0F1A30' },
-            gold:  { DEFAULT:'#C9A84C', 400:'#C9A84C', 500:'#A88A35' },
+            navy: { DEFAULT:'#1B2A4A', 50:'#EEF1F8', 100:'#D5DCF0', 700:'#1B2A4A', 800:'#0F1A30', 900:'#080F1C' },
+            gold: { DEFAULT:'#C9A84C', 300:'#E0C87A', 400:'#C9A84C', 500:'#A88A35', 600:'#876D22' },
             cream: { DEFAULT:'#FBF7F0', dark:'#F0E9D8' },
           },
           fontFamily: {
@@ -1370,366 +1370,739 @@ function getProductsHTML(): string {
   </script>
   <style>
     html { scroll-behavior:smooth; }
-    body { font-family:'Inter',sans-serif; background:#F8FAFC; }
-    .nav-sticky { position:sticky; top:0; z-index:50; background:rgba(27,42,74,0.97); backdrop-filter:blur(8px); }
-    .card-item { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:16px; transition:all .2s; }
-    .card-item:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(27,42,74,0.1); border-color:#C9A84C; }
-    .badge-cat { display:inline-block; padding:2px 9px; border-radius:20px; font-size:10.5px; font-weight:600; }
-    .in-stock  { background:#ECFDF5; color:#065F46; }
-    .out-stock { background:#F1F5F9; color:#94A3B8; }
-    .filter-btn { border:1.5px solid #e2e8f0; border-radius:8px; padding:6px 14px; font-size:12px; font-weight:500; cursor:pointer; transition:all .2s; background:#fff; color:#475569; white-space:nowrap; }
-    .filter-btn.active { background:#1B2A4A; color:#fff; border-color:#1B2A4A; }
-    .filter-btn:hover:not(.active) { border-color:#C9A84C; color:#1B2A4A; }
-    .search-input { border:1.5px solid #e2e8f0; border-radius:10px; padding:10px 16px 10px 42px; font-size:14px; width:100%; outline:none; transition:border .2s; }
-    .search-input:focus { border-color:#1B2A4A; box-shadow:0 0 0 3px rgba(27,42,74,0.08); }
-    #items-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
-    @media(max-width:640px){ #items-grid { grid-template-columns:1fr; } }
-    .sort-select { border:1.5px solid #e2e8f0; border-radius:8px; padding:8px 32px 8px 12px; font-size:13px; outline:none; background:#fff; cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 8px center; background-size:14px; }
-    .pagination-btn { padding:6px 12px; border:1.5px solid #e2e8f0; border-radius:8px; font-size:13px; cursor:pointer; background:#fff; transition:all .2s; }
-    .pagination-btn.active, .pagination-btn:hover { background:#1B2A4A; color:#fff; border-color:#1B2A4A; }
-    .pagination-btn:disabled { opacity:.4; cursor:not-allowed; }
-    .price-tag { color:#C9A84C; font-weight:700; font-size:15px; }
-    .plu-tag { font-size:10px; color:#94a3b8; font-family:monospace; }
+    body { font-family:'Inter',sans-serif; background:#F5F7FA; color:#1e293b; }
+    .nav-sticky { position:sticky; top:0; z-index:100; background:rgba(27,42,74,0.97); backdrop-filter:blur(12px); border-bottom:1px solid rgba(201,168,76,0.2); }
+
+    /* Product Cards */
+    .product-card {
+      background:#fff;
+      border:1px solid #e2e8f0;
+      border-radius:16px;
+      overflow:hidden;
+      transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
+      display:flex;
+      flex-direction:column;
+      cursor:pointer;
+    }
+    .product-card:hover {
+      transform:translateY(-4px);
+      box-shadow:0 20px 40px rgba(27,42,74,0.12);
+      border-color:#C9A84C;
+    }
+    .product-img-wrap {
+      position:relative;
+      background:linear-gradient(135deg, #f8f9fa 0%, #f0f4f8 100%);
+      padding:20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      height:180px;
+      overflow:hidden;
+    }
+    .product-img-wrap img {
+      max-height:140px;
+      max-width:100%;
+      object-fit:contain;
+      transition:transform 0.3s ease;
+    }
+    .product-card:hover .product-img-wrap img {
+      transform:scale(1.05);
+    }
+    .product-img-placeholder {
+      width:80px;
+      height:80px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:50%;
+      font-size:2rem;
+    }
+    .vendor-badge {
+      position:absolute;
+      top:10px;
+      left:10px;
+      background:rgba(27,42,74,0.85);
+      color:#C9A84C;
+      font-size:10px;
+      font-weight:700;
+      padding:3px 8px;
+      border-radius:20px;
+      letter-spacing:0.5px;
+      text-transform:uppercase;
+    }
+    .stock-badge {
+      position:absolute;
+      top:10px;
+      right:10px;
+      font-size:10px;
+      font-weight:700;
+      padding:3px 8px;
+      border-radius:20px;
+    }
+    .stock-in { background:#DCFCE7; color:#166534; }
+    .stock-low { background:#FEF9C3; color:#854D0E; }
+
+    /* Filter chips */
+    .filter-chip {
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      padding:6px 14px;
+      border-radius:24px;
+      font-size:12.5px;
+      font-weight:500;
+      cursor:pointer;
+      transition:all 0.2s;
+      border:1.5px solid #e2e8f0;
+      background:#fff;
+      color:#64748b;
+      white-space:nowrap;
+    }
+    .filter-chip:hover { border-color:#C9A84C; color:#1B2A4A; }
+    .filter-chip.active { background:#1B2A4A; color:#C9A84C; border-color:#1B2A4A; }
+    .filter-chip .count {
+      background:rgba(255,255,255,0.2);
+      border-radius:12px;
+      padding:1px 6px;
+      font-size:10px;
+    }
+    .filter-chip.active .count { background:rgba(201,168,76,0.2); }
+
+    /* Search */
+    .search-input {
+      width:100%;
+      padding:12px 16px 12px 44px;
+      border:2px solid #e2e8f0;
+      border-radius:12px;
+      font-size:15px;
+      outline:none;
+      transition:border-color 0.2s;
+      background:#fff;
+    }
+    .search-input:focus { border-color:#C9A84C; }
+
+    /* Modal */
+    .modal-backdrop {
+      position:fixed; inset:0;
+      background:rgba(0,0,0,0.6);
+      backdrop-filter:blur(4px);
+      z-index:200;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .modal-box {
+      background:#fff;
+      border-radius:20px;
+      max-width:680px;
+      width:100%;
+      max-height:90vh;
+      overflow-y:auto;
+      position:relative;
+    }
+    .modal-img-wrap {
+      background:linear-gradient(135deg, #f8f9fa 0%, #e8edf4 100%);
+      padding:30px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:220px;
+    }
+    .modal-img-wrap img { max-height:200px; max-width:100%; object-fit:contain; }
+
+    /* Sort select */
+    select.sort-select {
+      appearance:none;
+      padding:8px 32px 8px 14px;
+      border:1.5px solid #e2e8f0;
+      border-radius:10px;
+      font-size:13px;
+      background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 10px center;
+      cursor:pointer;
+      outline:none;
+      color:#1e293b;
+    }
+    select.sort-select:focus { border-color:#C9A84C; }
+
+    /* Availability bar */
+    .avail-bar {
+      background:linear-gradient(135deg, #1B2A4A, #2d4a7a);
+      color:white;
+      padding:10px 20px;
+      border-radius:10px;
+      font-size:13px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    /* Page numbers */
+    .page-btn {
+      width:36px; height:36px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:8px;
+      border:1.5px solid #e2e8f0;
+      background:#fff;
+      cursor:pointer;
+      font-size:13px;
+      font-weight:500;
+      transition:all 0.15s;
+    }
+    .page-btn:hover { border-color:#C9A84C; color:#1B2A4A; }
+    .page-btn.active { background:#1B2A4A; color:#C9A84C; border-color:#1B2A4A; }
+
+    /* Category icon colors */
+    .cat-grain     { background:#FFF7ED; color:#C2410C; }
+    .cat-hay       { background:#FEFCE8; color:#A16207; }
+    .cat-fly       { background:#F0FDF4; color:#15803D; }
+    .cat-grooming  { background:#FDF4FF; color:#9333EA; }
+    .cat-health    { background:#EFF6FF; color:#1D4ED8; }
+    .cat-digestive { background:#F0FDF4; color:#166534; }
+    .cat-stress    { background:#FFF1F2; color:#BE123C; }
+    .cat-energy    { background:#FFFBEB; color:#B45309; }
+    .cat-firstaid  { background:#FFF1F2; color:#DC2626; }
+    .cat-leather   { background:#FDF2F8; color:#9D174D; }
+    .cat-bedding   { background:#F5F3FF; color:#6D28D9; }
+    .cat-hoof      { background:#F0FDF4; color:#15803D; }
+    .cat-default   { background:#F8FAFC; color:#475569; }
+
+    @keyframes fade-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .fade-in { animation:fade-in 0.3s ease forwards; }
+
+    @media(max-width:640px) {
+      .product-img-wrap { height:140px; }
+      .modal-img-wrap { min-height:160px; padding:20px; }
+    }
   </style>
 </head>
 <body>
-  <!-- Nav -->
-  <nav class="nav-sticky py-3 px-6 flex items-center justify-between">
+
+<!-- ── Navigation ─────────────────────────────────────────────────────────── -->
+<nav class="nav-sticky">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
     <a href="/" class="flex items-center gap-3">
-      <img src="https://www.genspark.ai/api/files/s/P7DEplwl" alt="British Feed" class="h-8 brightness-0 invert" onerror="this.style.display='none'"/>
-      <span class="text-white font-bold text-base hidden sm:block" style="font-family:'Playfair Display',serif">British Feed & Supplies</span>
+      <div class="w-9 h-9 rounded-full bg-gold-400 flex items-center justify-center text-navy-700 font-bold text-sm">BF</div>
+      <span class="text-white font-serif text-lg font-semibold hidden sm:block">British Feed <span class="text-gold-400">&amp; Supplies</span></span>
     </a>
-    <div class="flex items-center gap-4">
-      <a href="/" class="text-white/80 hover:text-white text-sm font-medium transition-colors">
-        <i class="fas fa-arrow-left mr-1.5"></i>Back to Home
+    <div class="flex items-center gap-3">
+      <a href="/" class="text-gray-300 hover:text-white text-sm transition-colors flex items-center gap-1.5">
+        <i class="fas fa-home text-gold-400"></i>
+        <span class="hidden sm:inline">Home</span>
       </a>
-      <a href="tel:5616336003" class="hidden sm:flex items-center gap-2 bg-gold text-navy-700 font-bold text-sm px-4 py-2 rounded-lg hover:bg-yellow-400 transition-colors" style="color:#1B2A4A">
-        <i class="fas fa-phone"></i>(561) 633-6003
+      <a href="/#chat" class="bg-gold-400 hover:bg-gold-500 text-navy-700 font-semibold text-sm px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5">
+        <i class="fas fa-comment-dots"></i>
+        <span>Ask Our AI</span>
       </a>
-    </div>
-  </nav>
-
-  <!-- Hero bar -->
-  <div style="background:linear-gradient(135deg,#1B2A4A,#2D4A7A)" class="py-8 px-6 text-center text-white">
-    <h1 class="font-serif text-3xl font-bold mb-2">Complete Product Catalog</h1>
-    <p class="text-white/70 text-sm">British Feed & Supplies — Loxahatchee Groves, FL · (561) 633-6003</p>
-    <div class="flex items-center justify-center gap-6 mt-4 text-sm text-white/80">
-      <span id="total-count" class="flex items-center gap-1.5"><i class="fas fa-box"></i> Loading…</span>
-      <span class="flex items-center gap-1.5"><i class="fas fa-map-marker-alt"></i> 14589 Southern Blvd, Loxahatchee Groves</span>
     </div>
   </div>
+</nav>
 
-  <!-- Controls -->
-  <div class="max-w-screen-xl mx-auto px-4 py-5">
-    <!-- Search + sort row -->
-    <div class="flex flex-wrap gap-3 items-center mb-4">
-      <div class="relative flex-1 min-w-56">
-        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-        <input id="search" type="text" class="search-input" placeholder="Search products by name, brand, description…" oninput="applyFilters()"/>
-      </div>
-      <select id="sort-sel" class="sort-select" onchange="applyFilters()">
-        <option value="name-az">Name A–Z</option>
-        <option value="name-za">Name Z–A</option>
-        <option value="price-lo">Price Low–High</option>
-        <option value="price-hi">Price High–Low</option>
-        <option value="instock">In Stock First</option>
+<!-- ── Hero ───────────────────────────────────────────────────────────────── -->
+<div class="bg-gradient-to-br from-navy-700 via-navy-800 to-navy-900 text-white py-10 px-4">
+  <div class="max-w-7xl mx-auto text-center">
+    <div class="inline-flex items-center gap-2 bg-gold-400/20 text-gold-300 text-xs font-semibold px-4 py-1.5 rounded-full mb-4 border border-gold-400/30">
+      <i class="fas fa-horse"></i>
+      Wellington's Premier Equine Store
+    </div>
+    <h1 class="font-serif text-3xl sm:text-4xl font-bold mb-3">
+      Product <span class="text-gold-400">Catalog</span>
+    </h1>
+    <p class="text-slate-300 text-sm sm:text-base max-w-xl mx-auto mb-4">
+      Premium feeds, supplements, grooming, hay, bedding &amp; more — curated for South Florida's equestrians
+    </p>
+    <div class="inline-flex items-center gap-2 text-amber-300 text-xs font-medium bg-amber-400/10 border border-amber-400/20 rounded-lg px-4 py-2">
+      <i class="fas fa-phone-alt"></i>
+      Call <strong>(561) 633-6003</strong> to confirm availability &amp; current pricing
+    </div>
+  </div>
+</div>
+
+<!-- ── Main Content ────────────────────────────────────────────────────────── -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+
+  <!-- Search + Controls Row -->
+  <div class="flex flex-col sm:flex-row gap-3 mb-5">
+    <div class="relative flex-1">
+      <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+      <input type="text" id="searchInput" class="search-input" placeholder="Search products, brands, or categories..."/>
+      <button id="clearSearch" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 hidden text-lg leading-none">&times;</button>
+    </div>
+    <div class="flex gap-2 items-center">
+      <select id="sortSelect" class="sort-select">
+        <option value="default">Sort: Default</option>
+        <option value="name-asc">Name A–Z</option>
+        <option value="name-desc">Name Z–A</option>
+        <option value="price-asc">Price: Low–High</option>
+        <option value="price-desc">Price: High–Low</option>
+        <option value="category">By Category</option>
       </select>
-      <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
-        <input type="checkbox" id="instock-only" onchange="applyFilters()" class="w-4 h-4 rounded"/>
-        In stock only
-      </label>
-      <button onclick="clearFilters()" class="text-sm text-gray-400 hover:text-navy underline">Clear</button>
+      <button id="inStockToggle" class="filter-chip" onclick="toggleInStock()">
+        <i class="fas fa-check-circle text-xs"></i>
+        In Stock
+      </button>
     </div>
-
-    <!-- Category filter chips -->
-    <div class="flex flex-wrap gap-2 mb-5" id="cat-filters">
-      <button class="filter-btn active" data-cat="ALL" onclick="selectCat(this,'ALL')">All Categories</button>
-    </div>
-
-    <!-- Results info -->
-    <div class="flex items-center justify-between mb-4">
-      <div class="text-sm text-gray-500" id="results-info">Loading products…</div>
-      <div class="flex items-center gap-2" id="pagination-top"></div>
-    </div>
-
-    <!-- Grid -->
-    <div id="items-grid"></div>
-
-    <!-- Pagination bottom -->
-    <div class="flex items-center justify-center gap-2 mt-8" id="pagination-bottom"></div>
   </div>
 
-  <!-- Footer -->
-  <footer style="background:#1B2A4A" class="text-center py-8 mt-12">
-    <p class="text-white/60 text-sm">British Feed & Supplies · 14589 Southern Blvd, Palm West Plaza, Loxahatchee Groves, FL 33470</p>
-    <p class="text-white/40 text-xs mt-1">(561) 633-6003 · admin@britishfeed.com</p>
-    <a href="/" class="inline-block mt-4 text-gold text-sm hover:underline">← Return to Main Website</a>
-  </footer>
+  <!-- Category Filters -->
+  <div class="mb-5">
+    <div class="flex items-center gap-2 mb-3">
+      <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Browse by Category</span>
+      <button onclick="clearCategory()" class="text-xs text-gold-500 hover:text-gold-600 font-medium hidden" id="clearCatBtn">Clear filter</button>
+    </div>
+    <div class="flex flex-wrap gap-2" id="categoryFilters">
+      <!-- Injected by JS -->
+    </div>
+  </div>
+
+  <!-- Results Summary -->
+  <div class="flex items-center justify-between mb-4">
+    <div id="resultsInfo" class="text-sm text-slate-500"></div>
+    <div id="vendorFilters" class="flex flex-wrap gap-1.5"></div>
+  </div>
+
+  <!-- Product Grid -->
+  <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
+    <!-- Injected by JS -->
+  </div>
+
+  <!-- Empty State -->
+  <div id="emptyState" class="hidden text-center py-16">
+    <div class="text-6xl mb-4">🔍</div>
+    <h3 class="text-xl font-semibold text-slate-700 mb-2">No products found</h3>
+    <p class="text-slate-500 mb-4">Try adjusting your search or filters</p>
+    <button onclick="resetAll()" class="bg-navy-700 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-navy-800 transition-colors">
+      Clear All Filters
+    </button>
+  </div>
+
+  <!-- Pagination -->
+  <div id="pagination" class="flex items-center justify-center gap-1.5 py-4 flex-wrap"></div>
+
+  <!-- Availability Note -->
+  <div class="avail-bar mt-4 mb-8">
+    <i class="fas fa-info-circle text-gold-300 text-lg flex-shrink-0"></i>
+    <div>
+      <strong class="text-gold-300">Availability Notice:</strong>
+      <span class="text-slate-200"> Product availability and pricing change frequently. Call us at <strong class="text-white">(561) 633-6003</strong> or email <strong class="text-white">admin@britishfeed.com</strong> to confirm before visiting.</span>
+    </div>
+  </div>
+
+  <!-- Store Info Footer -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 text-center">
+    <div class="bg-white rounded-2xl p-5 border border-slate-100">
+      <i class="fas fa-map-marker-alt text-gold-400 text-2xl mb-2"></i>
+      <div class="font-semibold text-navy-700 text-sm">Location</div>
+      <div class="text-slate-500 text-xs mt-1">14589 Southern Blvd, Palm West Plaza<br/>Loxahatchee Groves, FL 33470</div>
+    </div>
+    <div class="bg-white rounded-2xl p-5 border border-slate-100">
+      <i class="fas fa-phone text-gold-400 text-2xl mb-2"></i>
+      <div class="font-semibold text-navy-700 text-sm">Call Us</div>
+      <a href="tel:+15616336003" class="text-gold-500 font-semibold text-sm mt-1 block hover:text-gold-600">(561) 633-6003</a>
+      <div class="text-slate-500 text-xs">Mon–Sat 8am–6pm, Sun 9am–4pm</div>
+    </div>
+    <div class="bg-white rounded-2xl p-5 border border-slate-100">
+      <i class="fas fa-truck text-gold-400 text-2xl mb-2"></i>
+      <div class="font-semibold text-navy-700 text-sm">Free Delivery</div>
+      <div class="text-slate-500 text-xs mt-1">On orders over $150<br/>Wellington &amp; surrounding areas</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Product Detail Modal ─────────────────────────────────────────────── -->
+<div id="productModal" class="modal-backdrop hidden" onclick="closeModalBg(event)">
+  <div class="modal-box">
+    <button onclick="closeModal()" class="absolute top-4 right-4 z-10 w-9 h-9 bg-slate-100 hover:bg-slate-200 rounded-full flex items-center justify-center text-slate-600 font-bold text-lg transition-colors">&times;</button>
+
+    <div class="modal-img-wrap" id="modalImgWrap">
+      <img id="modalImg" src="" alt="" onerror="this.style.display='none'; document.getElementById('modalImgFallback').style.display='flex'"/>
+      <div id="modalImgFallback" class="w-24 h-24 rounded-full flex items-center justify-center text-4xl" style="display:none"></div>
+    </div>
+
+    <div class="p-6">
+      <div class="flex flex-wrap gap-2 mb-3" id="modalBadges"></div>
+      <h2 class="font-serif text-2xl font-bold text-navy-700 mb-1" id="modalName"></h2>
+      <div class="text-slate-500 text-sm mb-4" id="modalVendorCat"></div>
+      <div class="text-3xl font-bold text-navy-700 mb-4" id="modalPrice"></div>
+
+      <div class="bg-slate-50 rounded-xl p-4 mb-4">
+        <h3 class="font-semibold text-slate-700 text-sm mb-2 flex items-center gap-2">
+          <i class="fas fa-info-circle text-gold-400"></i>
+          Product Information
+        </h3>
+        <p class="text-slate-600 text-sm leading-relaxed" id="modalDescription"></p>
+      </div>
+
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5 flex items-start gap-3">
+        <i class="fas fa-phone-alt text-amber-500 mt-0.5 flex-shrink-0"></i>
+        <div>
+          <div class="font-semibold text-amber-800 text-sm">Confirm Availability</div>
+          <div class="text-amber-700 text-xs mt-0.5">Call <strong>(561) 633-6003</strong> or email <strong>admin@britishfeed.com</strong> to confirm availability and current pricing before visiting.</div>
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <a href="tel:+15616336003" class="flex-1 bg-navy-700 hover:bg-navy-800 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm">
+          <i class="fas fa-phone-alt text-gold-400"></i>
+          Call to Order
+        </a>
+        <a href="/#chat" class="flex-1 border-2 border-navy-700 text-navy-700 hover:bg-navy-50 font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm">
+          <i class="fas fa-comment-dots text-gold-500"></i>
+          Ask Our AI
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
-const PAGE_SIZE = 48;
-let allItems = [];
+let allProducts = [];
 let filtered = [];
+let activeCat = '';
+let activeVendor = '';
+let inStockOnly = false;
 let currentPage = 1;
-let activeCat = 'ALL';
+const PAGE_SIZE = 40;
 
-// Category display names + icons
-const catMeta = {
-  'Cargill / Nutrena':              { icon:'fa-seedling',    color:'#276749' },
-  'Cavalor':                        { icon:'fa-horse',       color:'#1B2A4A' },
-  'Red Mills':                      { icon:'fa-fire',        color:'#DC2626' },
-  'Havens':                         { icon:'fa-leaf',        color:'#059669' },
-  'Crypto Aero':                    { icon:'fa-apple-alt',   color:'#7C3AED' },
-  'Emerald Valley':                 { icon:'fa-mountain',    color:'#047857' },
-  'Hay':                            { icon:'fa-wheat-alt',   color:'#D97706' },
-  'Shavings & Bedding':             { icon:'fa-layer-group', color:'#92400E' },
-  'Animal Health & Supplements':    { icon:'fa-heart-pulse', color:'#BE123C' },
-  'Digestive Health':               { icon:'fa-pills',       color:'#0891B2' },
-  'Fly Prevention':                 { icon:'fa-bug',         color:'#6B7280' },
-  'FLYPREVENTION':                  { icon:'fa-bug',         color:'#6B7280' },
-  'Farm Supplies':                  { icon:'fa-tractor',     color:'#92400E' },
-  'Grooming':                       { icon:'fa-scissors',    color:'#7C3AED' },
-  'Hoof & Coat':                    { icon:'fa-horse-head',  color:'#B45309' },
-  'HOOF/COAT':                      { icon:'fa-horse-head',  color:'#B45309' },
-  'Tack & Equipment':               { icon:'fa-wrench',      color:'#374151' },
-  'First Aid':                      { icon:'fa-kit-medical', color:'#DC2626' },
-  'FIRSTAID':                       { icon:'fa-kit-medical', color:'#DC2626' },
-  'Treats':                         { icon:'fa-star',        color:'#DB2777' },
-  'TREATS':                         { icon:'fa-star',        color:'#DB2777' },
-  'Wormers':                        { icon:'fa-syringe',     color:'#6D28D9' },
-  'WORMERS':                        { icon:'fa-syringe',     color:'#6D28D9' },
-  'Wormers (Poultry)':              { icon:'fa-syringe',     color:'#6D28D9' },
-  'WORMERS,POULTRY':                { icon:'fa-syringe',     color:'#6D28D9' },
-  'Stress Relief':                  { icon:'fa-spa',         color:'#0D9488' },
-  'STRESSRELIEF':                   { icon:'fa-spa',         color:'#0D9488' },
-  'Poultry':                        { icon:'fa-egg',         color:'#D97706' },
-  'POULTRY':                        { icon:'fa-egg',         color:'#D97706' },
-  'Beverages':                      { icon:'fa-mug-hot',     color:'#1D4ED8' },
-  'Equine America':                 { icon:'fa-flag-usa',    color:'#1D4ED8' },
-  'EQUINEAMERICA':                  { icon:'fa-flag-usa',    color:'#1D4ED8' },
-  'Buckeye Nutrition':              { icon:'fa-bucket',      color:'#B45309' },
-  'NUTRITIONBUCKE':                 { icon:'fa-bucket',      color:'#B45309' },
-  'Small Pets':                     { icon:'fa-paw',         color:'#7C3AED' },
-  'SMALLPETS':                      { icon:'fa-paw',         color:'#7C3AED' },
-  'Kent':                           { icon:'fa-boxes-stacked',color:'#374151' },
-  'Poulin Grain':                   { icon:'fa-seedling',    color:'#059669' },
-  'POULINGRAININ':                  { icon:'fa-seedling',    color:'#059669' },
-  'Total Equine':                   { icon:'fa-horse',       color:'#1B2A4A' },
-  'TOTALEQUINE':                    { icon:'fa-horse',       color:'#1B2A4A' },
-  'Grain&Forage':                   { icon:'fa-seedling',    color:'#276749' },
-  'Muscle&Joint':                   { icon:'fa-dumbbell',    color:'#BE123C' },
-  'Vitamins&Elec':                  { icon:'fa-capsules',    color:'#0891B2' },
-  'Misc(Toy/Cndy)':                 { icon:'fa-gift',        color:'#DB2777' },
+// Category config: [label, icon, bg-class]
+const CAT_CONFIG = {
+  'Grain & Feed':               ['🌾', 'cat-grain',     'Grain & Feed'],
+  'Hay':                        ['🌿', 'cat-hay',       'Hay'],
+  'Shavings & Bedding':         ['🪵', 'cat-bedding',   'Bedding'],
+  'Fly Prevention':             ['🛡️', 'cat-fly',       'Fly Control'],
+  'Grooming':                   ['✨', 'cat-grooming',  'Grooming'],
+  'Animal Health & Supplements':['💊', 'cat-health',    'Health'],
+  'Digestive Health':           ['🫀', 'cat-digestive', 'Digestive'],
+  'Stress Relief':              ['🌸', 'cat-stress',    'Calm & Stress'],
+  'Energy & Performance':       ['⚡', 'cat-energy',    'Performance'],
+  'First Aid & Liniments':      ['🩹', 'cat-firstaid',  'First Aid'],
+  'Leather Care':               ['👜', 'cat-leather',   'Leather Care'],
+  'Hoof & Coat':                ['🐴', 'cat-hoof',      'Hoof & Coat'],
+  'Cavalor':                    ['🏆', 'cat-grain',     'Cavalor'],
 };
 
-function catIcon(cat) {
-  return catMeta[cat]?.icon || 'fa-box';
-}
-function catColor(cat) {
-  return catMeta[cat]?.color || '#64748b';
+function catConfig(cat) {
+  return CAT_CONFIG[cat] || ['📦', 'cat-default', cat];
 }
 
-// Clean category name for display
-const catNameMap = {
-  'FLYPREVENTION': 'Fly Prevention',
-  'FIRSTAID': 'First Aid',
-  'HOOF/COAT': 'Hoof & Coat',
-  'STRESSRELIEF': 'Stress Relief',
-  'POULTRY': 'Poultry',
-  'WORMERS': 'Wormers',
-  'EQUINEAMERICA': 'Equine America',
-  'NUTRITIONBUCKE': 'Buckeye Nutrition',
-  'SMALLPETS': 'Small Pets',
-  'TREATS': 'Treats',
-  'POULINGRAININ': 'Poulin Grain',
-  'TOTALEQUINE': 'Total Equine',
-  'WORMERS,POULTRY': 'Wormers (Poultry)',
-  'Grain&Forage': 'Grain & Forage',
-  'Muscle&Joint': 'Muscle & Joint',
-  'Vitamins&Elec': 'Vitamins & Electrolytes',
-  'Misc(Toy/Cndy)': 'Misc / Toys',
-};
-function cleanCatName(cat) {
-  return catNameMap[cat] || cat;
+function getProductImage(product) {
+  const name = product.name.toLowerCase();
+  const vendor = (product.vendor || '').toLowerCase();
+  const cat = product.category.toLowerCase();
+
+  // Brand-specific image sources using jsDelivr CDN / manufacturer URLs
+  const imageMap = {
+    // Cavalor
+    'endurix': 'https://www.cavalor.com/media/catalog/product/e/n/endurix.jpg',
+    'fiberforce gastro': 'https://www.cavalor.com/media/catalog/product/f/i/fiberforce_gastro.jpg',
+    'fiberforce': 'https://www.cavalor.com/media/catalog/product/f/i/fiberforce.jpg',
+    'pianissimo': 'https://www.cavalor.com/media/catalog/product/p/i/pianissimo.jpg',
+    'performix': 'https://www.cavalor.com/media/catalog/product/p/e/performix.jpg',
+    'strucomix original': 'https://www.cavalor.com/media/catalog/product/s/t/strucomix_original.jpg',
+    'strucomix senior': 'https://www.cavalor.com/media/catalog/product/s/t/strucomix_senior.jpg',
+    'wholegain': 'https://www.cavalor.com/media/catalog/product/w/h/wholegain.jpg',
+    'cavalor nano-e': 'https://www.cavalor.com/media/catalog/product/n/a/nano-e.jpg',
+    // Red Mills  
+    'horse care 14 pellet': 'https://www.redmills.com/uploads/products/horse-care-14-pellet.jpg',
+    'horse care ultra': 'https://www.redmills.com/uploads/products/horse-care-ultra.jpg',
+    'cool n condition pellets': 'https://www.redmills.com/uploads/products/cool-n-condition-pellets.jpg',
+    'competition 14 mix': 'https://www.redmills.com/uploads/products/competition-14-mix.jpg',
+    'competition 12 mix': 'https://www.redmills.com/uploads/products/competition-12-mix.jpg',
+    'competition 10 mix': 'https://www.redmills.com/uploads/products/competition-10-mix.jpg',
+  };
+
+  const key = name.replace(/[^a-z0-9 ]/g, '').trim();
+  if (imageMap[key]) return imageMap[key];
+
+  return null; // Will show placeholder
+}
+
+function getPlaceholderEmoji(product) {
+  const cfg = catConfig(product.category);
+  return cfg[0];
+}
+
+function getPlaceholderBg(product) {
+  return catConfig(product.category)[1];
+}
+
+function formatPrice(p) {
+  return '$' + p.toFixed(2);
 }
 
 async function loadData() {
   try {
     const res = await fetch('/static/products-data.json');
-    allItems = await res.json();
-
-    // Build category buttons
-    const cats = [...new Set(allItems.map(i => i.category))].sort();
-    const container = document.getElementById('cat-filters');
-    cats.forEach(cat => {
-      const btn = document.createElement('button');
-      btn.className = 'filter-btn';
-      btn.dataset.cat = cat;
-      btn.onclick = function(){ selectCat(this, cat); };
-      btn.innerHTML = \`<i class="fas \${catIcon(cat)} mr-1" style="color:\${catColor(cat)}"></i>\${cleanCatName(cat)}\`;
-      container.appendChild(btn);
-    });
-
-    document.getElementById('total-count').innerHTML = \`<i class="fas fa-box"></i> \${allItems.length} Products\`;
+    if (!res.ok) throw new Error('Failed to load');
+    allProducts = await res.json();
+    buildCategoryFilters();
     applyFilters();
   } catch(e) {
-    document.getElementById('items-grid').innerHTML = '<div class="col-span-full text-center py-12 text-gray-400">Failed to load products. Please refresh.</div>';
+    console.error(e);
+    document.getElementById('productGrid').innerHTML = '<div class="col-span-full text-center py-12 text-red-500">Failed to load products. Please refresh the page.</div>';
   }
 }
 
-function selectCat(btn, cat) {
-  document.querySelectorAll('#cat-filters .filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+function buildCategoryFilters() {
+  const cats = {};
+  allProducts.forEach(p => { cats[p.category] = (cats[p.category] || 0) + 1; });
+
+  const sortedCats = Object.entries(cats).sort((a,b) => b[1] - a[1]);
+  const container = document.getElementById('categoryFilters');
+
+  // All button
+  const allBtn = document.createElement('button');
+  allBtn.className = 'filter-chip active';
+  allBtn.id = 'cat-btn-ALL';
+  allBtn.onclick = () => selectCategory('');
+  allBtn.innerHTML = \`<i class="fas fa-th-large text-xs"></i> All Products <span class="count">\${allProducts.length}</span>\`;
+  container.appendChild(allBtn);
+
+  sortedCats.forEach(([cat, count]) => {
+    const cfg = catConfig(cat);
+    const btn = document.createElement('button');
+    btn.className = 'filter-chip';
+    btn.id = 'cat-btn-' + cat.replace(/[^a-z0-9]/gi,'_');
+    btn.onclick = () => selectCategory(cat);
+    btn.innerHTML = \`\${cfg[0]} \${cfg[2]} <span class="count">\${count}</span>\`;
+    container.appendChild(btn);
+  });
+}
+
+function selectCategory(cat) {
   activeCat = cat;
+  activeVendor = '';
   currentPage = 1;
+
+  // Update chip styles
+  document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+  const activeId = cat ? 'cat-btn-' + cat.replace(/[^a-z0-9]/gi,'_') : 'cat-btn-ALL';
+  const activeEl = document.getElementById(activeId);
+  if (activeEl) activeEl.classList.add('active');
+
+  const clearBtn = document.getElementById('clearCatBtn');
+  if (clearBtn) clearBtn.classList.toggle('hidden', !cat);
+
+  applyFilters();
+}
+
+function clearCategory() { selectCategory(''); }
+
+function toggleInStock() {
+  inStockOnly = !inStockOnly;
+  currentPage = 1;
+  const btn = document.getElementById('inStockToggle');
+  btn.classList.toggle('active', inStockOnly);
   applyFilters();
 }
 
 function applyFilters() {
-  const q = document.getElementById('search').value.trim().toLowerCase();
-  const sort = document.getElementById('sort-sel').value;
-  const inStockOnly = document.getElementById('instock-only').checked;
+  const query = document.getElementById('searchInput').value.toLowerCase().trim();
+  const sort = document.getElementById('sortSelect').value;
 
-  filtered = allItems.filter(item => {
-    if (activeCat !== 'ALL' && item.category !== activeCat) return false;
-    if (inStockOnly && !item.inStock) return false;
-    if (q) {
-      const hay = ((item.displayName || item.name) + ' ' + item.category + ' ' + item.plu + ' ' + (item.vendorItem || '')).toLowerCase();
-      if (!hay.includes(q)) return false;
+  filtered = allProducts.filter(p => {
+    if (activeCat && p.category !== activeCat) return false;
+    if (activeVendor && p.vendor !== activeVendor) return false;
+    if (inStockOnly && !p.inStock) return false;
+    if (query) {
+      const searchStr = (p.name + ' ' + p.category + ' ' + (p.vendor||'') + ' ' + (p.description||'')).toLowerCase();
+      if (!searchStr.includes(query)) return false;
     }
     return true;
   });
 
   // Sort
-  filtered.sort((a, b) => {
-    if (sort === 'name-az') return a.name.localeCompare(b.name);
-    if (sort === 'name-za') return b.name.localeCompare(a.name);
-    if (sort === 'price-lo') return a.price - b.price;
-    if (sort === 'price-hi') return b.price - a.price;
-    if (sort === 'instock') return (b.inStock ? 1:0) - (a.inStock ? 1:0);
-    return 0;
-  });
+  if (sort === 'name-asc') filtered.sort((a,b) => a.name.localeCompare(b.name));
+  else if (sort === 'name-desc') filtered.sort((a,b) => b.name.localeCompare(a.name));
+  else if (sort === 'price-asc') filtered.sort((a,b) => a.price - b.price);
+  else if (sort === 'price-desc') filtered.sort((a,b) => b.price - a.price);
+  else if (sort === 'category') filtered.sort((a,b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
 
-  currentPage = 1;
-  renderPage();
+  renderResults();
+  renderPagination();
+  updateResultsInfo();
 }
 
-function clearFilters() {
-  document.getElementById('search').value = '';
-  document.getElementById('instock-only').checked = false;
-  document.getElementById('sort-sel').value = 'name-az';
-  activeCat = 'ALL';
-  document.querySelectorAll('#cat-filters .filter-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+function updateResultsInfo() {
+  const total = filtered.length;
+  const start = (currentPage-1)*PAGE_SIZE+1;
+  const end = Math.min(currentPage*PAGE_SIZE, total);
+  const el = document.getElementById('resultsInfo');
+  if (total === 0) {
+    el.textContent = 'No products found';
+  } else {
+    el.innerHTML = \`Showing <strong>\${start}–\${end}</strong> of <strong>\${total}</strong> products\`;
+  }
+}
+
+function renderResults() {
+  const grid = document.getElementById('productGrid');
+  const empty = document.getElementById('emptyState');
+  const page = filtered.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+
+  grid.innerHTML = page.map((p, i) => {
+    const imgUrl = getProductImage(p);
+    const emoji = getPlaceholderEmoji(p);
+    const bgCls = getPlaceholderBg(p);
+    const cfg = catConfig(p.category);
+
+    const imgContent = imgUrl
+      ? \`<img src="\${imgUrl}" alt="\${p.name}" loading="lazy" onerror="this.style.display='none'; this.nextSibling.style.display='flex'">\`
+      : '';
+    const placeholderStyle = imgUrl ? 'display:none' : 'display:flex';
+
+    return \`<div class="product-card fade-in" style="animation-delay:\${i*0.02}s" onclick="openModal(\${p.id})">
+      <div class="product-img-wrap">
+        \${p.vendor ? \`<div class="vendor-badge">\${p.vendor}</div>\` : ''}
+        \${imgContent}
+        <div class="\${bgCls} product-img-placeholder" style="\${placeholderStyle}">\${emoji}</div>
+      </div>
+      <div class="p-3 flex flex-col flex-1">
+        <div class="text-[10.5px] font-semibold text-slate-400 uppercase tracking-wider mb-1">\${cfg[2]}</div>
+        <div class="font-semibold text-slate-800 text-sm leading-tight mb-auto line-clamp-2">\${p.name}</div>
+        <div class="flex items-center justify-between mt-2.5">
+          <span class="font-bold text-navy-700 text-base">\${formatPrice(p.price)}</span>
+          <i class="fas fa-chevron-right text-gold-400 text-xs"></i>
+        </div>
+      </div>
+    </div>\`;
+  }).join('');
+
+  // Scroll to top of grid
+  grid.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function renderPagination() {
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const pag = document.getElementById('pagination');
+  if (totalPages <= 1) { pag.innerHTML = ''; return; }
+
+  let html = '';
+  if (currentPage > 1) {
+    html += \`<button class="page-btn" onclick="goPage(\${currentPage-1})"><i class="fas fa-chevron-left text-xs"></i></button>\`;
+  }
+
+  const range = [];
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || (i >= currentPage-2 && i <= currentPage+2)) {
+      range.push(i);
+    }
+  }
+  let last = 0;
+  range.forEach(i => {
+    if (last && i - last > 1) html += \`<span class="page-btn cursor-default">…</span>\`;
+    html += \`<button class="page-btn \${i===currentPage?'active':''}" onclick="goPage(\${i})">\${i}</button>\`;
+    last = i;
+  });
+
+  if (currentPage < totalPages) {
+    html += \`<button class="page-btn" onclick="goPage(\${currentPage+1})"><i class="fas fa-chevron-right text-xs"></i></button>\`;
+  }
+  pag.innerHTML = html;
+}
+
+function goPage(n) {
+  currentPage = n;
+  renderResults();
+  renderPagination();
+  updateResultsInfo();
+  window.scrollTo({ top:300, behavior:'smooth' });
+}
+
+function resetAll() {
+  activeCat = '';
+  activeVendor = '';
+  inStockOnly = false;
+  currentPage = 1;
+  document.getElementById('searchInput').value = '';
+  document.getElementById('sortSelect').value = 'default';
+  document.getElementById('inStockToggle').classList.remove('active');
+  document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+  const allBtn = document.getElementById('cat-btn-ALL');
+  if (allBtn) allBtn.classList.add('active');
+  document.getElementById('clearCatBtn').classList.add('hidden');
+  document.getElementById('clearSearch').classList.add('hidden');
   applyFilters();
 }
 
-function renderPage() {
-  const total = filtered.length;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  if (currentPage > totalPages) currentPage = totalPages;
-  const start = (currentPage - 1) * PAGE_SIZE;
-  const slice = filtered.slice(start, start + PAGE_SIZE);
+// Modal
+function openModal(id) {
+  const p = allProducts.find(x => x.id === id);
+  if (!p) return;
 
-  // Results info
-  document.getElementById('results-info').textContent = \`Showing \${start+1}–\${Math.min(start+PAGE_SIZE, total)} of \${total} products\`;
+  const cfg = catConfig(p.category);
+  const imgUrl = getProductImage(p);
 
-  // Grid
-  const grid = document.getElementById('items-grid');
-  if (!slice.length) {
-    grid.innerHTML = \`
-    <div class="col-span-full text-center py-16 text-gray-400">
-      <i class="fas fa-search text-4xl mb-3 block"></i>
-      <div class="font-medium mb-1">No products found</div>
-      <button onclick="clearFilters()" class="text-sm text-blue-500 hover:underline mt-2">Clear filters</button>
-    </div>\`;
+  // Image section
+  const imgEl = document.getElementById('modalImg');
+  const fallbackEl = document.getElementById('modalImgFallback');
+  const wrapEl = document.getElementById('modalImgWrap');
+
+  fallbackEl.textContent = cfg[0];
+  fallbackEl.className = cfg[1] + ' w-28 h-28 rounded-full flex items-center justify-center text-5xl';
+
+  if (imgUrl) {
+    imgEl.src = imgUrl;
+    imgEl.alt = p.name;
+    imgEl.style.display = 'block';
+    fallbackEl.style.display = 'none';
   } else {
-    grid.innerHTML = slice.map(item => {
-      // Use displayName if available, otherwise format the raw name
-      const dispName = item.displayName || formatProductName(item.name);
-      const stockBadge = item.inStock
-        ? \`<span class="badge-cat in-stock"><i class="fas fa-check-circle mr-1"></i>In Stock (\${item.qoh})</span>\`
-        : \`<span class="badge-cat out-stock"><i class="fas fa-clock mr-1"></i>Out of Stock</span>\`;
-      const icon = catIcon(item.category);
-      const color = catColor(item.category);
-      return \`
-      <div class="card-item flex flex-col">
-        <div class="flex items-start gap-3 mb-3">
-          <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:\${color}15">
-            <i class="fas \${icon} text-sm" style="color:\${color}"></i>
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="font-semibold text-gray-800 text-sm leading-snug">\${dispName}</div>
-            <div class="text-xs text-gray-400 mt-0.5">\${cleanCatName(item.category)}</div>
-          </div>
-        </div>
-        <div class="flex items-center justify-between mt-auto pt-2 border-t border-gray-50">
-          <div>
-            <div class="price-tag">\\$\${item.price.toFixed(2)}</div>
-            <div class="plu-tag">PLU #\${item.plu}</div>
-          </div>
-          \${stockBadge}
-        </div>
-      </div>\`;
-    }).join('');
+    imgEl.style.display = 'none';
+    fallbackEl.style.display = 'flex';
   }
 
-  // Pagination
-  renderPagination(totalPages);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function renderPagination(totalPages) {
-  const html = paginationHTML(totalPages);
-  document.getElementById('pagination-top').innerHTML = html;
-  document.getElementById('pagination-bottom').innerHTML = html;
-}
-
-function paginationHTML(totalPages) {
-  if (totalPages <= 1) return '';
-  let pages = [];
-  // Always show first, last, and pages near current
-  for (let i = 1; i <= totalPages; i++) {
-    if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) pages.push(i);
-    else if (pages[pages.length-1] !== '…') pages.push('…');
-  }
-  return \`
-    <button class="pagination-btn" \${currentPage===1?'disabled':''} onclick="goPage(\${currentPage-1})">
-      <i class="fas fa-chevron-left text-xs"></i>
-    </button>
-    \${pages.map(p => p === '…'
-      ? \`<span class="text-gray-400 px-1">…</span>\`
-      : \`<button class="pagination-btn \${p===currentPage?'active':''}" onclick="goPage(\${p})">\${p}</button>\`
-    ).join('')}
-    <button class="pagination-btn" \${currentPage===totalPages?'disabled':''} onclick="goPage(\${currentPage+1})">
-      <i class="fas fa-chevron-right text-xs"></i>
-    </button>
+  // Badges
+  const badges = document.getElementById('modalBadges');
+  badges.innerHTML = \`
+    <span class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full \${cfg[1]}">\${cfg[0]} \${p.category}</span>
+    \${p.vendor ? \`<span class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full bg-navy-50 text-navy-700">\${p.vendor}</span>\` : ''}
+    \${p.inStock ? \`<span class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full bg-green-50 text-green-700"><i class="fas fa-check-circle"></i> In Stock</span>\` : ''}
   \`;
+
+  document.getElementById('modalName').textContent = p.name;
+  document.getElementById('modalVendorCat').textContent = [p.vendor, p.category].filter(Boolean).join(' · ');
+  document.getElementById('modalPrice').textContent = formatPrice(p.price);
+  document.getElementById('modalDescription').textContent = p.description || 'No description available.';
+
+  document.getElementById('productModal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
 }
 
-function goPage(p) {
-  currentPage = p;
-  renderPage();
+function closeModal() {
+  document.getElementById('productModal').classList.add('hidden');
+  document.body.style.overflow = '';
 }
 
-function formatProductName(raw) {
-  // Smart formatter for concatenated uppercase product names from POS system
-  let s = raw || '';
-  // Insert space before digits following letters (not decimal)
-  s = s.replace(/([A-Za-z])(\d)/g, (_, a, b) => a + ' ' + b);
-  // Insert space after digits before letters (not decimal context)
-  s = s.replace(/(\d)([A-Za-z])/g, (_, a, b) => a + ' ' + b);
-  // Fix double spaces
-  s = s.replace(/\s+/g, ' ').trim();
-  // Title case (lowercase units)
-  const units = new Set(['lb','lbs','oz','kg','g','ml','l','gal','qt','fl','cc','mg','ft','lt','ct']);
-  const small = new Set(['and','or','the','a','an','of','in','for','with','to','by','at','w/','&']);
-  return s.split(' ').map((w, i) => {
-    const wl = w.toLowerCase();
-    if (units.has(wl)) return wl;
-    if (i > 0 && small.has(wl)) return wl;
-    return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-  }).join(' ');
+function closeModalBg(e) {
+  if (e.target.id === 'productModal') closeModal();
 }
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// Search event
+document.getElementById('searchInput').addEventListener('input', function() {
+  const clearBtn = document.getElementById('clearSearch');
+  clearBtn.classList.toggle('hidden', !this.value);
+  currentPage = 1;
+  applyFilters();
+});
+document.getElementById('clearSearch').addEventListener('click', function() {
+  document.getElementById('searchInput').value = '';
+  this.classList.add('hidden');
+  currentPage = 1;
+  applyFilters();
+});
+document.getElementById('sortSelect').addEventListener('change', () => { currentPage = 1; applyFilters(); });
 
 loadData();
 </script>
