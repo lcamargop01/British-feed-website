@@ -854,9 +854,9 @@ function buildPanel(sec) {
 }
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
-// OVERLAY_JS is injected by the server into this script as a JSON-encoded string
-// (see the \${JSON.stringify(_overlayScript)} interpolation below)
-const OVERLAY_JS = \${JSON.stringify(_overlayScript)};
+// OVERLAY_JS is computed server-side. We escape </script> → <\/script> so the
+// browser HTML parser doesn't prematurely close this <script> block.
+const OVERLAY_JS = ${JSON.stringify(_overlayScript).replace(/<\/script>/gi, '<\\/script>')};
 
 async function loadPreviewIntoIframe() {
   const loading = document.getElementById('ve-iframe-loading');
