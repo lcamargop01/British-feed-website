@@ -1570,6 +1570,16 @@ function getProductsHTML(): string {
     .cat-leather   { background:#FDF2F8; color:#9D174D; }
     .cat-bedding   { background:#F5F3FF; color:#6D28D9; }
     .cat-hoof      { background:#F0FDF4; color:#15803D; }
+    .cat-supp      { background:#EFF6FF; color:#1D4ED8; }
+    .cat-shampoo   { background:#FDF4FF; color:#7C3AED; }
+    .cat-oil       { background:#FFFBEB; color:#92400E; }
+    .cat-electro   { background:#ECFDF5; color:#065F46; }
+    .cat-clip      { background:#F1F5F9; color:#374151; }
+    .cat-gut       { background:#FFF0F3; color:#9F1239; }
+    .cat-psyl      { background:#F0FFF4; color:#14532D; }
+    .cat-flyctl    { background:#DCFCE7; color:#166534; }
+    .cat-lini      { background:#FFF1F2; color:#DC2626; }
+    .cat-haycube   { background:#FEFCE8; color:#854D0E; }
     .cat-default   { background:#F8FAFC; color:#475569; }
 
     @keyframes fade-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
@@ -1778,19 +1788,33 @@ const PAGE_SIZE = 40;
 
 // Category config: [label, icon, bg-class]
 const CAT_CONFIG = {
+  // Legacy categories
   'Grain & Feed':               ['🌾', 'cat-grain',     'Grain & Feed'],
-  'Hay':                        ['🌿', 'cat-hay',       'Hay'],
-  'Shavings & Bedding':         ['🪵', 'cat-bedding',   'Bedding'],
   'Fly Prevention':             ['🛡️', 'cat-fly',       'Fly Control'],
-  'Grooming':                   ['✨', 'cat-grooming',  'Grooming'],
   'Animal Health & Supplements':['💊', 'cat-health',    'Health'],
   'Digestive Health':           ['🫀', 'cat-digestive', 'Digestive'],
   'Stress Relief':              ['🌸', 'cat-stress',    'Calm & Stress'],
   'Energy & Performance':       ['⚡', 'cat-energy',    'Performance'],
   'First Aid & Liniments':      ['🩹', 'cat-firstaid',  'First Aid'],
-  'Leather Care':               ['👜', 'cat-leather',   'Leather Care'],
   'Hoof & Coat':                ['🐴', 'cat-hoof',      'Hoof & Coat'],
   'Cavalor':                    ['🏆', 'cat-grain',     'Cavalor'],
+  // Current price-list categories
+  'Horse Feed':                 ['🌾', 'cat-grain',     'Horse Feed'],
+  'Hay':                        ['🌿', 'cat-hay',       'Hay'],
+  'Hay Cubes & Pellets':        ['🟡', 'cat-haycube',   'Hay Cubes'],
+  'Shavings & Bedding':         ['🪵', 'cat-bedding',   'Bedding'],
+  'Fly Sprays':                 ['🛡️', 'cat-fly',       'Fly Sprays'],
+  'Fly Control Supplements':    ['🐛', 'cat-flyctl',    'Fly Control'],
+  'Supplements':                ['💊', 'cat-supp',      'Supplements'],
+  'Gut Health':                 ['🫀', 'cat-gut',       'Gut Health'],
+  'Psyllium Supplements':       ['🌱', 'cat-psyl',      'Psyllium'],
+  'Electrolytes':               ['⚡', 'cat-electro',   'Electrolytes'],
+  'Liniments & Topicals':       ['🩹', 'cat-lini',      'Liniments'],
+  'Grooming':                   ['✨', 'cat-grooming',  'Grooming'],
+  'Shampoo & Coat Care':        ['🧴', 'cat-shampoo',   'Shampoo'],
+  'Oils':                       ['🫙', 'cat-oil',       'Oils'],
+  'Leather Care':               ['👜', 'cat-leather',   'Leather Care'],
+  'Clippers & Tools':           ['✂️', 'cat-clip',      'Clippers'],
 };
 
 function catConfig(cat) {
