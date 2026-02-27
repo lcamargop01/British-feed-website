@@ -116,28 +116,52 @@ admin.get('/', requireAuth, async (c) => {
     </div>
   </div>
 
-  <!-- Quick actions -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <!-- Quick actions — Product Catalog -->
+  <div class="mb-2 flex items-center gap-2">
+    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Product Catalog</div>
+    <div class="flex-1 border-t border-gray-100"></div>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <a href="/admin/catalog" class="card hover:shadow-md transition-all group cursor-pointer block border-2 border-navy/10 hover:border-navy/30">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#EEF1F8">
+          <i class="fas fa-table-list text-navy group-hover:scale-110 transition-transform"></i>
+        </div>
+        <div>
+          <div class="font-semibold text-gray-800 text-sm">Catalog Manager</div>
+          <div class="text-xs text-gray-400">Edit products, images &amp; videos</div>
+        </div>
+      </div>
+      <div class="text-xs text-gray-500">${productCount} products · CSV import/export · image upload</div>
+    </a>
     <a href="/admin/products" class="card hover:shadow-md transition-all group cursor-pointer block">
       <div class="flex items-center gap-3 mb-3">
         <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#EEF1F8">
           <i class="fas fa-boxes-stacked text-navy group-hover:scale-110 transition-transform"></i>
         </div>
         <div>
-          <div class="font-semibold text-gray-800 text-sm">Manage Products</div>
-          <div class="text-xs text-gray-400">Add, edit, reorder</div>
+          <div class="font-semibold text-gray-800 text-sm">Legacy Brands</div>
+          <div class="text-xs text-gray-400">Manage brand groups</div>
         </div>
       </div>
-      <div class="text-xs text-gray-500">${productCount} products across ${brandCount} brands</div>
+      <div class="text-xs text-gray-500">${brandCount} brands configured</div>
     </a>
+  </div>
+
+  <!-- Quick actions — Site Management -->
+  <div class="mb-2 flex items-center gap-2">
+    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Site Management</div>
+    <div class="flex-1 border-t border-gray-100"></div>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
     <a href="/admin/chatbot" class="card hover:shadow-md transition-all group cursor-pointer block">
       <div class="flex items-center gap-3 mb-3">
         <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#F0FFF4">
           <i class="fas fa-robot text-green-600 group-hover:scale-110 transition-transform"></i>
         </div>
         <div>
-          <div class="font-semibold text-gray-800 text-sm">Train AI Chatbot</div>
-          <div class="text-xs text-gray-400">Knowledge base & prompts</div>
+          <div class="font-semibold text-gray-800 text-sm">AI Chatbot</div>
+          <div class="text-xs text-gray-400">Knowledge base &amp; rules</div>
         </div>
       </div>
       <div class="text-xs text-gray-500">${kbCount} knowledge entries</div>
@@ -145,14 +169,26 @@ admin.get('/', requireAuth, async (c) => {
     <a href="/admin/content" class="card hover:shadow-md transition-all group cursor-pointer block">
       <div class="flex items-center gap-3 mb-3">
         <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#FBF5E6">
-          <i class="fas fa-pen-to-square" style="color:#C9A84C" class="group-hover:scale-110 transition-transform"></i>
+          <i class="fas fa-pen-to-square text-amber-600 group-hover:scale-110 transition-transform"></i>
         </div>
         <div>
-          <div class="font-semibold text-gray-800 text-sm">Edit Site Content</div>
+          <div class="font-semibold text-gray-800 text-sm">Site Content</div>
           <div class="text-xs text-gray-400">Hero, About, Services</div>
         </div>
       </div>
-      <div class="text-xs text-gray-500">Update any page text or image</div>
+      <div class="text-xs text-gray-500">Edit any page text or image</div>
+    </a>
+    <a href="/admin/reviews" class="card hover:shadow-md transition-all group cursor-pointer block">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:#FFFBEB">
+          <i class="fas fa-star text-yellow-500 group-hover:scale-110 transition-transform"></i>
+        </div>
+        <div>
+          <div class="font-semibold text-gray-800 text-sm">Reviews</div>
+          <div class="text-xs text-gray-400">Manage star ratings</div>
+        </div>
+      </div>
+      <div class="text-xs text-gray-500">${reviewCount} reviews · avg ${avgRating}★</div>
     </a>
     <a href="/admin/inquiries" class="card hover:shadow-md transition-all group cursor-pointer block">
       <div class="flex items-center gap-3 mb-3">
@@ -160,7 +196,7 @@ admin.get('/', requireAuth, async (c) => {
           <i class="fas fa-envelope text-red-500 group-hover:scale-110 transition-transform"></i>
         </div>
         <div>
-          <div class="font-semibold text-gray-800 text-sm">Customer Inquiries</div>
+          <div class="font-semibold text-gray-800 text-sm">Inquiries</div>
           <div class="text-xs text-gray-400">Contact form submissions</div>
         </div>
       </div>
@@ -205,16 +241,16 @@ admin.get('/', requireAuth, async (c) => {
     <h2 class="font-semibold text-white mb-3 flex items-center gap-2"><i class="fas fa-lightbulb text-yellow-400"></i> Getting Started</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
       <div class="bg-white bg-opacity-10 rounded-xl p-4">
-        <div class="text-yellow-300 font-semibold mb-1">1. Add Products</div>
-        <div class="text-blue-100 text-xs">Go to Products → click "Add Brand" or "Add Product" to populate the catalog customers see</div>
+        <div class="text-yellow-300 font-semibold mb-1">1. Manage the Catalog</div>
+        <div class="text-blue-100 text-xs">Go to <strong>Catalog Manager</strong> → edit products, upload images, import/export CSV, or use Legacy Brands for brand grouping</div>
       </div>
       <div class="bg-white bg-opacity-10 rounded-xl p-4">
         <div class="text-yellow-300 font-semibold mb-1">2. Train the Chatbot</div>
-        <div class="text-blue-100 text-xs">Go to AI Chatbot → add Q&A pairs, custom rules, or test the bot before publishing</div>
+        <div class="text-blue-100 text-xs">Go to <strong>AI Chatbot</strong> → add Q&A pairs, custom rules, or test the bot before publishing</div>
       </div>
       <div class="bg-white bg-opacity-10 rounded-xl p-4">
         <div class="text-yellow-300 font-semibold mb-1">3. Update Site Content</div>
-        <div class="text-blue-100 text-xs">Go to Site Content → edit hero headline, about text, services, team bios, and more</div>
+        <div class="text-blue-100 text-xs">Go to <strong>Site Content</strong> → edit hero headline, about text, services, team bios, reviews &amp; more</div>
       </div>
     </div>
   </div>

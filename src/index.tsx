@@ -904,8 +904,11 @@ function getHTML(): string {
         </div>
       </div>
     </div>
-    <div class="border-t border-white/10 pt-6 text-center text-xs text-white/30">
-      © 2025 British Feed & Supplies. All rights reserved. | 14589 Southern Blvd, Loxahatchee Groves, FL 33470
+    <div class="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-white/30">
+      <span>© 2025 British Feed &amp; Supplies. All rights reserved. | 14589 Southern Blvd, Loxahatchee Groves, FL 33470</span>
+      <a href="/admin/login" class="hover:text-gold-400 transition-colors flex items-center gap-1 opacity-50 hover:opacity-100">
+        <i class="fas fa-lock text-[10px]"></i> Admin
+      </a>
     </div>
   </div>
 </footer>
