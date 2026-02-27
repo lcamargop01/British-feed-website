@@ -935,6 +935,123 @@ async function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+// ─── Image picker helpers (needed by fimg() in buildPanel) ───────────────────
+async function uploadHomepageImage(file, statusEl) {
+  if (!file) return null;
+  if (file.size > 800 * 1024) {
+    if (statusEl) statusEl.textContent = 'File too large (max 800 KB)';
+    return null;
+  }
+  const fd = new FormData();
+  fd.append('image', file);
+  if (statusEl) statusEl.textContent = 'Uploading…';
+  try {
+    const r = await fetch('/admin/api/catalog/upload-image', {method:'POST', body:fd});
+    const d = await r.json();
+    if (d.ok) {
+      if (statusEl) statusEl.textContent = 'Uploaded';
+      return d.imgUrl;
+    }
+    if (statusEl) statusEl.textContent = 'Upload failed: ' + (d.error||'unknown');
+  } catch(e) {
+    if (statusEl) statusEl.textContent = 'Error: ' + e.message;
+  }
+  return null;
+}
+
+function imgPickerHTML(pickerId, currentUrl, setterExpr) {
+  const hasImg = !!(currentUrl && currentUrl.length > 0 && currentUrl !== 'https://\u2026');
+  const urlPaneHide = hasImg ? 'hidden' : '';
+  const urlTabStyle = hasImg ? '' : 'background:#1B2A4A;color:#fff';
+  const thumbHTML = hasImg
+    ? \`<img src="\${esc(currentUrl)}" alt="" class="h-10 w-16 object-cover rounded-md border border-gray-200"/>\`
+    : '';
+  const checkBadge = hasImg
+    ? \`<span class="ml-auto text-xs text-green-600 flex items-center gap-1"><i class="fas fa-check-circle"></i>Image set</span>\`
+    : '';
+  return \`<div class="img-picker" data-picker="\${pickerId}">
+    <div class="flex gap-1 mb-1.5">
+      <button type="button" onclick="switchImgPickerTab('\${pickerId}','url')"
+        class="ip-tab-url px-2.5 py-1 rounded-md text-xs font-medium transition-colors bg-gray-100 text-gray-600"
+        style="\${urlTabStyle}"><i class="fas fa-link mr-1"></i>URL</button>
+      <button type="button" onclick="switchImgPickerTab('\${pickerId}','upload')"
+        class="ip-tab-upload px-2.5 py-1 rounded-md text-xs font-medium transition-colors bg-gray-100 text-gray-600"><i class="fas fa-upload mr-1"></i>Upload</button>
+      \${checkBadge}
+    </div>
+    <div class="ip-url-pane \${urlPaneHide}">
+      <input type="text" value="\${esc(currentUrl||'')}" placeholder="https://example.com/image.jpg"
+        class="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs font-mono"
+        onchange="(function(url){\${setterExpr}})(this.value); refreshPickerStatus('\${pickerId}',this.value)"/>
+    </div>
+    <div class="ip-upload-pane hidden">
+      <div class="border-2 border-dashed border-gray-200 rounded-lg px-3 py-3 text-center text-xs text-gray-400 hover:border-blue-300 transition-colors"
+        ondragover="event.preventDefault()"
+        ondrop="handleImgPickerDrop(event,'\${pickerId}',function(url){\${setterExpr}})">
+        <i class="fas fa-cloud-upload-alt text-base text-gray-300 mb-1 block"></i>
+        Drag &amp; drop or
+        <label class="text-blue-600 font-semibold cursor-pointer hover:underline">
+          browse<input type="file" accept="image/*" class="hidden"
+            onchange="handleImgPickerFile(event,'\${pickerId}',function(url){\${setterExpr}})"/>
+        </label>
+        <div class="text-gray-300 mt-0.5">JPG · PNG · WebP · max 800 KB</div>
+      </div>
+      <div class="ip-upload-status text-xs text-gray-400 mt-1"></div>
+    </div>
+    <div class="ip-thumb mt-1.5">\${thumbHTML}</div>
+  </div>\`;
+}
+
+function switchImgPickerTab(id, tab) {
+  const picker = document.querySelector(\`[data-picker="\${id}"]\`);
+  if (!picker) return;
+  picker.querySelector('.ip-url-pane').classList.toggle('hidden', tab !== 'url');
+  picker.querySelector('.ip-upload-pane').classList.toggle('hidden', tab !== 'upload');
+  picker.querySelector('.ip-tab-url').style.cssText = tab === 'url' ? 'background:#1B2A4A;color:#fff' : '';
+  picker.querySelector('.ip-tab-upload').style.cssText = tab === 'upload' ? 'background:#1B2A4A;color:#fff' : '';
+}
+
+function refreshPickerStatus(id, url) {
+  const picker = document.querySelector(\`[data-picker="\${id}"]\`);
+  if (!picker) return;
+  const thumb = picker.querySelector('.ip-thumb');
+  if (url) {
+    thumb.innerHTML = \`<img src="\${esc(url)}" alt="" class="h-10 w-16 object-cover rounded-md border border-gray-200"/>\`;
+  } else {
+    thumb.innerHTML = '';
+  }
+}
+
+async function handleImgPickerFile(event, id, onChangeFn) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const picker = document.querySelector(\`[data-picker="\${id}"]\`);
+  const statusEl = picker ? picker.querySelector('.ip-upload-status') : null;
+  const url = await uploadHomepageImage(file, statusEl);
+  if (url) {
+    if (typeof onChangeFn === 'function') onChangeFn(url);
+    const urlInput = picker ? picker.querySelector('.ip-url-pane input') : null;
+    if (urlInput) urlInput.value = url;
+    refreshPickerStatus(id, url);
+    switchImgPickerTab(id, 'url');
+  }
+}
+
+async function handleImgPickerDrop(event, id, onChangeFn) {
+  event.preventDefault();
+  const file = event.dataTransfer.files[0];
+  if (!file) return;
+  const picker = document.querySelector(\`[data-picker="\${id}"]\`);
+  const statusEl = picker ? picker.querySelector('.ip-upload-status') : null;
+  const url = await uploadHomepageImage(file, statusEl);
+  if (url) {
+    if (typeof onChangeFn === 'function') onChangeFn(url);
+    const urlInput = picker ? picker.querySelector('.ip-url-pane input') : null;
+    if (urlInput) urlInput.value = url;
+    refreshPickerStatus(id, url);
+    switchImgPickerTab(id, 'url');
+  }
+}
 </script>
 `))
 })
