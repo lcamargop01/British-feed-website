@@ -1453,7 +1453,7 @@ function getProductsHTML(): string {
     }
     .vendor-btn:hover { background:#F8FAFC; color:#1B2A4A; }
     .vendor-btn.active { color:#1B2A4A; font-weight:600; }
-    .vendor-btn.active::before { content:'✓ '; color:#C9A84C; }
+    .vendor-btn.active { padding-left:1.75rem; position:relative; } .vendor-btn.active::before { content:''; background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='%23C9A84C' d='M1 6l4 4L11 2'/%3E%3C/svg%3E") no-repeat center/12px; width:16px; height:16px; position:absolute; left:0.5rem; top:50%; transform:translateY(-50%); }
     .vendor-count { font-size:10px; font-weight:600; background:#f1f5f9; color:#94a3b8; padding:1px 6px; border-radius:8px; }
 
     /* Mobile filter toggle */
@@ -1750,7 +1750,7 @@ function getProductsHTML(): string {
 
       <!-- Empty State -->
       <div id="emptyState" class="hidden text-center py-16">
-        <div class="text-5xl mb-4">🔍</div>
+        <div class="text-5xl mb-4 text-slate-300"><i class="fas fa-search"></i></div>
         <h3 class="text-xl font-semibold text-slate-700 mb-2">No products found</h3>
         <p class="text-slate-500 mb-4">Try adjusting your search or filters</p>
         <button onclick="resetAll()" class="bg-navy-700 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-navy-800 transition-colors">
@@ -1859,30 +1859,30 @@ const PAGE_SIZE = 40;
 
 // ── Storefront Category Groups ──────────────────────────────────────────────────
 const GROUPS = [
-  { key:'Horse Feed',       label:'Horse Feed',        icon:'🌾', bgClass:'cat-grain',   subcats:['Horse Feed'] },
-  { key:'Hay',              label:'Hay',                icon:'🌿', bgClass:'cat-hay',     subcats:['Hay','Hay Cubes & Pellets'] },
-  { key:'Supplements',      label:'Supplements',        icon:'💊', bgClass:'cat-supp',    subcats:['Supplements','Gut Health','Electrolytes','Psyllium Supplements'] },
-  { key:'Shavings & Bedding',label:'Shavings & Bedding',icon:'🪵', bgClass:'cat-bedding', subcats:['Shavings & Bedding'] },
-  { key:'Supplies',         label:'Supplies',           icon:'🧴', bgClass:'cat-supplies',subcats:['Shampoo & Coat Care','Fly Sprays','Fly Control Supplements','Grooming','Clippers & Tools','Leather Care','Oils','Liniments & Topicals'] },
+  { key:'Horse Feed',       label:'Horse Feed',        icon:'', bgClass:'cat-grain',   subcats:['Horse Feed'] },
+  { key:'Hay',              label:'Hay',                icon:'', bgClass:'cat-hay',     subcats:['Hay','Hay Cubes & Pellets'] },
+  { key:'Supplements',      label:'Supplements',        icon:'', bgClass:'cat-supp',    subcats:['Supplements','Gut Health','Electrolytes','Psyllium Supplements'] },
+  { key:'Shavings & Bedding',label:'Shavings & Bedding',icon:'', bgClass:'cat-bedding', subcats:['Shavings & Bedding'] },
+  { key:'Supplies',         label:'Supplies',           icon:'', bgClass:'cat-supplies',subcats:['Shampoo & Coat Care','Fly Sprays','Fly Control Supplements','Grooming','Clippers & Tools','Leather Care','Oils','Liniments & Topicals'] },
 ];
 
 // ── Category config fallback ────────────────────────────────────────────────────
 const CAT_CONFIG_EXTRA = {
-  'Horse Feed':['🌾','cat-grain','Horse Feed'],'Hay':['🌿','cat-hay','Hay'],'Hay Cubes & Pellets':['🟡','cat-haycube','Hay Cubes'],
-  'Shavings & Bedding':['🪵','cat-bedding','Bedding'],'Supplements':['💊','cat-supp','Supplements'],'Gut Health':['🫀','cat-gut','Gut Health'],
-  'Psyllium Supplements':['🌱','cat-psyl','Psyllium'],'Electrolytes':['⚡','cat-electro','Electrolytes'],
-  'Shampoo & Coat Care':['🧴','cat-shampoo','Shampoo'],'Fly Sprays':['🛡️','cat-fly','Fly Sprays'],
-  'Fly Control Supplements':['🐛','cat-flyctl','Fly Control'],'Grooming':['✨','cat-grooming','Grooming'],
-  'Clippers & Tools':['✂️','cat-clip','Clippers'],'Leather Care':['👜','cat-leather','Leather Care'],
-  'Oils':['🫙','cat-oil','Oils'],'Liniments & Topicals':['🩹','cat-lini','Liniments'],
+  'Horse Feed':['','cat-grain','Horse Feed'],'Hay':['','cat-hay','Hay'],'Hay Cubes & Pellets':['','cat-haycube','Hay Cubes'],
+  'Shavings & Bedding':['','cat-bedding','Bedding'],'Supplements':['','cat-supp','Supplements'],'Gut Health':['','cat-gut','Gut Health'],
+  'Psyllium Supplements':['','cat-psyl','Psyllium'],'Electrolytes':['','cat-electro','Electrolytes'],
+  'Shampoo & Coat Care':['','cat-shampoo','Shampoo'],'Fly Sprays':['','cat-fly','Fly Sprays'],
+  'Fly Control Supplements':['','cat-flyctl','Fly Control'],'Grooming':['','cat-grooming','Grooming'],
+  'Clippers & Tools':['','cat-clip','Clippers'],'Leather Care':['','cat-leather','Leather Care'],
+  'Oils':['','cat-oil','Oils'],'Liniments & Topicals':['','cat-lini','Liniments'],
   // Legacy
-  'Grain & Feed':['🌾','cat-grain','Grain & Feed'],
+  'Grain & Feed':['','cat-grain','Grain & Feed'],
 };
 
 function catConfig(cat) {
   if (CAT_CONFIG_EXTRA[cat]) return CAT_CONFIG_EXTRA[cat];
   for (const g of GROUPS) { if (g.subcats.includes(cat)) return [g.icon, g.bgClass, cat]; }
-  return ['📦','cat-default',cat];
+  return ['','cat-default',cat];
 }
 
 function getProductImage(product) {
@@ -2123,7 +2123,7 @@ function openModal(id) {
   const p=allProducts.find(x=>x.id===id); if(!p)return;
   const cfg=catConfig(p.category), imgUrl=getProductImage(p);
   const imgEl=document.getElementById('modalImg'), fallbackEl=document.getElementById('modalImgFallback');
-  fallbackEl.textContent=cfg[0]; fallbackEl.className=cfg[1]+' w-28 h-28 rounded-full flex items-center justify-center text-5xl';
+  fallbackEl.innerHTML='<i class=\"fas fa-box text-4xl\"></i>'; fallbackEl.className=cfg[1]+' w-28 h-28 rounded-full flex items-center justify-center';
   if(imgUrl){imgEl.src=imgUrl;imgEl.alt=p.name;imgEl.style.display='block';fallbackEl.style.display='none';}
   else{imgEl.style.display='none';fallbackEl.style.display='flex';}
   document.getElementById('modalBadges').innerHTML=\`
