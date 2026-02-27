@@ -1289,6 +1289,11 @@ admin.get('/api/public/:key', async (c) => {
     }
     return c.json({ products: [], source: 'empty', count: 0 })
   }
+  // Public homepage-sections
+  if (key === 'homepage-sections') {
+    const data = await kvGet(kv, 'homepage_sections', null)
+    return c.json({ ok: true, data })
+  }
   // Only expose safe keys to the public
   const allowed = ['products', 'reviews', 'site_content', 'chatbot_rules', 'catalog_products']
   if (!allowed.includes(key)) return c.json({ error: 'Not found' }, 404)
@@ -1418,6 +1423,37 @@ admin.get('/api/catalog/image/:key', async (c) => {
   })
 })
 
+// ═══════════════════════════════════════════════════════════════════════════
+//  HOMEPAGE EDITOR
+// ═══════════════════════════════════════════════════════════════════════════
+
+// GET /admin/homepage — editor UI
+admin.get('/homepage', requireAuth, async (c) => {
+  return c.html(adminShell('Homepage Editor', 'homepage', getHomepageEditorHTML()))
+})
+
+// GET /admin/api/homepage — load saved homepage content
+admin.get('/api/homepage', requireAuth, async (c) => {
+  const kv = c.env?.BF_STORE
+  const data = await kvGet(kv, 'homepage_content', null)
+  return c.json({ ok: true, data })
+})
+
+// PUT /admin/api/homepage — save homepage content
+admin.put('/api/homepage', requireAuth, async (c) => {
+  const kv = c.env?.BF_STORE
+  const body = await c.req.json()
+  await kvPut(kv, 'homepage_content', body)
+  return c.json({ ok: true })
+})
+
+// Public API — homepage content (for index.tsx)
+admin.get('/api/public/homepage', async (c) => {
+  const kv = c.env?.BF_STORE
+  const data = await kvGet(kv, 'homepage_content', null)
+  return c.json({ ok: true, data })
+})
+
 // Public API — catalog products (for /products page)
 admin.get('/api/public/catalog', async (c) => {
   const kv = c.env?.BF_STORE
@@ -1426,6 +1462,27 @@ admin.get('/api/public/catalog', async (c) => {
     return c.json({ products: kvProds })
   }
   return c.json({ products: [] })
+})
+
+// ─── Homepage Sections API ───────────────────────────────────────────────────
+// GET /admin/homepage-sections — editor UI
+admin.get('/homepage-sections', requireAuth, async (c) => {
+  return c.html(adminShell('Homepage Sections', 'homepage-sections', getHomepageSectionsHTML()))
+})
+
+// GET /admin/api/homepage-sections — load saved sections config
+admin.get('/api/homepage-sections', requireAuth, async (c) => {
+  const kv = c.env?.BF_STORE
+  const data = await kvGet(kv, 'homepage_sections', null)
+  return c.json({ ok: true, data })
+})
+
+// PUT /admin/api/homepage-sections — save sections config
+admin.put('/api/homepage-sections', requireAuth, async (c) => {
+  const kv = c.env?.BF_STORE
+  const body = await c.req.json()
+  await kvPut(kv, 'homepage_sections', body)
+  return c.json({ ok: true })
 })
 
 // ─── Catalog Manager HTML ────────────────────────────────────────────────────
@@ -2526,6 +2583,544 @@ document.addEventListener('DOMContentLoaded', loadCatalog);
 //  SHARED LAYOUT
 // ═══════════════════════════════════════════════════════════════════════════
 
+// ─── Homepage Sections Editor ────────────────────────────────────────────────
+function getHomepageSectionsHTML(): string {
+  return `
+<div class="p-6 max-w-5xl mx-auto" id="hs-app">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        <i class="fas fa-store" style="color:#C9A84C"></i> Homepage Sections
+      </h1>
+      <p class="text-gray-500 text-sm mt-1">
+        Control what appears in each product section on the public homepage.
+        All changes pull directly from the Catalog Manager.
+      </p>
+    </div>
+    <button onclick="saveAll()" id="saveBtn"
+      class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-all"
+      style="background:#1B2A4A">
+      <i class="fas fa-save"></i> Save &amp; Publish
+    </button>
+  </div>
+
+  <!-- Status banner -->
+  <div id="statusBar" class="hidden mb-4 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2"></div>
+
+  <!-- Loading state -->
+  <div id="loadingState" class="flex items-center justify-center py-20 text-gray-400">
+    <i class="fas fa-spinner fa-spin text-2xl mr-3"></i> Loading catalog data...
+  </div>
+
+  <!-- Main editor (shown after load) -->
+  <div id="editorMain" class="hidden space-y-8">
+
+    <!-- ── GRAIN BRANDS section ── -->
+    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100" style="background:#FAFBFC">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:#1B2A4A">
+            <i class="fas fa-tag text-xs" style="color:#C9A84C"></i>
+          </div>
+          <div>
+            <div class="font-bold text-gray-900 text-sm">Grain Brands</div>
+            <div class="text-xs text-gray-400">Brand cards shown in the "Grain Brands" homepage section</div>
+          </div>
+        </div>
+        <span id="grainCount" class="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full"></span>
+      </div>
+      <div class="p-6">
+        <p class="text-xs text-gray-500 mb-4">
+          <i class="fas fa-info-circle text-blue-400 mr-1"></i>
+          Select which <strong>vendors</strong> appear as brand cards. Products from the catalog are grouped by vendor.
+          Drag to reorder.
+        </p>
+        <div id="grainVendorList" class="space-y-2"></div>
+        <button onclick="addVendorCard()" class="mt-3 flex items-center gap-2 text-sm text-navy-700 font-medium hover:text-gold-500 transition-colors">
+          <i class="fas fa-plus-circle"></i> Add vendor card
+        </button>
+      </div>
+    </div>
+
+    <!-- ── HAY SELECTION section ── -->
+    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100" style="background:#FAFBFC">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:#15803D">
+            <i class="fas fa-tag text-xs text-white"></i>
+          </div>
+          <div>
+            <div class="font-bold text-gray-900 text-sm">Hay Selection</div>
+            <div class="text-xs text-gray-400">Individual hay types listed under 3-string and 2-string bale groups</div>
+          </div>
+        </div>
+      </div>
+      <div class="p-6 grid md:grid-cols-2 gap-6">
+        <div>
+          <div class="font-semibold text-gray-700 text-sm mb-2 flex items-center gap-2">
+            <i class="fas fa-cubes text-green-500 text-xs"></i> 3-String Bales (100–110 lbs)
+          </div>
+          <div id="hay3List" class="space-y-2 mb-2"></div>
+          <button onclick="addHayItem('hay3List')" class="text-xs text-navy-700 font-medium hover:text-gold-500 transition-colors flex items-center gap-1">
+            <i class="fas fa-plus-circle"></i> Add item
+          </button>
+        </div>
+        <div>
+          <div class="font-semibold text-gray-700 text-sm mb-2 flex items-center gap-2">
+            <i class="fas fa-box text-amber-500 text-xs"></i> 2-String Bales (48–60 lbs)
+          </div>
+          <div id="hay2List" class="space-y-2 mb-2"></div>
+          <button onclick="addHayItem('hay2List')" class="text-xs text-navy-700 font-medium hover:text-gold-500 transition-colors flex items-center gap-1">
+            <i class="fas fa-plus-circle"></i> Add item
+          </button>
+        </div>
+      </div>
+      <div class="px-6 pb-4">
+        <label class="text-xs font-semibold text-gray-600 block mb-1">Availability note (shown below hay cards)</label>
+        <input id="hayNote" type="text" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+          placeholder="e.g. Hay availability varies by season. Call (561) 633-6003..."/>
+      </div>
+    </div>
+
+    <!-- ── SHAVINGS & BEDDING section ── -->
+    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100" style="background:#FAFBFC">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:#92400E">
+            <i class="fas fa-tag text-xs text-white"></i>
+          </div>
+          <div>
+            <div class="font-bold text-gray-900 text-sm">Shavings &amp; Bedding</div>
+            <div class="text-xs text-gray-400">Product cards shown in the Shavings &amp; Bedding section</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-400">Pull from catalog</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="shavingsCatalogToggle" class="sr-only peer" onchange="toggleShavingsMode()">
+            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-navy-700" style="--tw-peer-checked-bg:#1B2A4A"></div>
+          </label>
+        </div>
+      </div>
+      <div class="p-6">
+        <!-- Catalog mode -->
+        <div id="shavingsCatalogMode" class="hidden">
+          <p class="text-xs text-blue-600 bg-blue-50 rounded-lg px-3 py-2 mb-4 flex items-center gap-2">
+            <i class="fas fa-sync-alt"></i>
+            <span>Showing all products from the <strong>Shavings &amp; Bedding</strong> catalog category automatically.</span>
+          </p>
+          <div id="shavingsCatalogPreview" class="grid sm:grid-cols-2 gap-2 text-xs text-gray-500"></div>
+        </div>
+        <!-- Manual mode -->
+        <div id="shavingsManualMode">
+          <p class="text-xs text-gray-500 mb-3">Manually define each shavings product card:</p>
+          <div id="shavingsList" class="space-y-2 mb-2"></div>
+          <button onclick="addShavingsItem()" class="text-xs text-navy-700 font-medium hover:text-gold-500 transition-colors flex items-center gap-1">
+            <i class="fas fa-plus-circle"></i> Add product
+          </button>
+        </div>
+        <p class="text-xs text-gray-400 mt-3 italic"><i class="fas fa-plus-circle text-gold-400 mr-1"></i>
+          <input id="shavingsNote" type="text" class="border-0 outline-none bg-transparent text-xs text-gray-400 italic w-full"
+            placeholder="Footer note, e.g. Additional options available under special order..."/></p>
+      </div>
+    </div>
+
+    <!-- ── SUPPLEMENTS section ── -->
+    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100" style="background:#FAFBFC">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:#6D28D9">
+            <i class="fas fa-tag text-xs text-white"></i>
+          </div>
+          <div>
+            <div class="font-bold text-gray-900 text-sm">Supplements &amp; Additives</div>
+            <div class="text-xs text-gray-400">Products shown in the Supplements section</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-400">Pull from catalog</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="suppsCatalogToggle" class="sr-only peer" onchange="toggleSuppsMode()">
+            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all" style="background:var(--supp-bg,#e5e7eb)"></div>
+          </label>
+        </div>
+      </div>
+      <div class="p-6">
+        <!-- Catalog mode -->
+        <div id="suppsCatalogMode" class="hidden">
+          <p class="text-xs text-blue-600 bg-blue-50 rounded-lg px-3 py-2 mb-3 flex items-center gap-2">
+            <i class="fas fa-sync-alt"></i>
+            <span>Showing top products from catalog categories: Supplements, Gut Health, Electrolytes, Psyllium.</span>
+          </p>
+          <div class="mb-3">
+            <label class="text-xs font-semibold text-gray-600 block mb-1">Max products to show</label>
+            <input id="suppsMaxCount" type="number" min="3" max="24" value="12"
+              class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm w-24"/>
+          </div>
+          <div id="suppsCatalogPreview" class="grid sm:grid-cols-2 gap-1.5 text-xs text-gray-500 max-h-48 overflow-y-auto"></div>
+        </div>
+        <!-- Manual mode -->
+        <div id="suppsManualMode">
+          <p class="text-xs text-gray-500 mb-3">Manually define each supplement card:</p>
+          <div id="suppsList" class="space-y-2 mb-2"></div>
+          <button onclick="addSuppsItem()" class="text-xs text-navy-700 font-medium hover:text-gold-500 transition-colors flex items-center gap-1">
+            <i class="fas fa-plus-circle"></i> Add product
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /editorMain -->
+</div>
+
+<script>
+// ── State ────────────────────────────────────────────────────────────────────
+let allCatalog = [];
+let allVendors = [];
+let cfg = {
+  grainVendors: [], // [{vendor, tag, color, logoUrl, imgUrl}]
+  hay3: [],         // string[]
+  hay2: [],         // string[]
+  hayNote: 'Hay availability varies by season. Call (561) 633-6003 or visit the store to check current stock and pricing.',
+  shavingsCatalog: false,
+  shavings: [],     // [{name, desc, icon}]
+  shavingsNote: 'Additional options available under special order — ask us!',
+  suppsCatalog: false,
+  suppsMax: 12,
+  supps: [],        // [{name, cat, desc}]
+};
+
+// Default fallbacks (match current hardcoded values)
+const DEFAULT_GRAIN_VENDORS = [
+  {vendor:'Nutrena',      tag:'SafeChoice · ProForce · Triumph',      color:'#e8f0fe', logoUrl:'https://nutrenaworld.com/wp-content/themes/nutrena/img/logo.svg',         imgUrl:'https://sspark.genspark.ai/cfimages?u1=Inli4Vrc%2Bq7q%2Bhejp2YDAGwFAIaUPxW7K%2FwGYXRV7M%2FosuAUR1Dg%2F0CYc7d60OG48eic0M3S7QLmL7rjvtV13G6oK3uyoFxL%2F6mCxQ%2BPP0S%2BoyvO&u2=KfyuzNFlfV1IBWO5&width=600'},
+  {vendor:'Pro Elite',    tag:'Performance · Senior · Growth',         color:'#fef9e8', logoUrl:'https://proelitehorsefeed.com/wp-content/uploads/2021/10/ProElite_Logo_Reversed.png', imgUrl:'https://sspark.genspark.ai/cfimages?u1=UxSf44ASGNVschWMwLtxVTJm3%2BRiUSyER74fAAsvVIMvRn1hKeSeK4y%2BjKNE8jwMaOERwhJljHYQcYwWUmC1zwynUJr1ADAMOeXYd7zaFrqolHnB&u2=5%2BTutAkigKGikiTN&width=600'},
+  {vendor:'Cavalor',      tag:'Performix · FiberGastro · Strucomix',   color:'#f0f7ff', logoUrl:'https://cavalor.com/wp-content/uploads/2022/09/cavalor-logo.svg',          imgUrl:'https://sspark.genspark.ai/cfimages?u1=onNaXY4%2FhbZvy5YUkL6RJRe7GDYh%2FXQ%2F9jUCePwxorXO0SXh9sJ4V5ZlP8bfJnaEM4xvG77mMoaKrx2Kh4NABnoukeaffKYGZCZbO8v6anEF9nDmP8mcozZwUEkzk0ZJI0S3JYPVUJekW5Q%2FTQ7Wo1Ym%2F384PTiYCw%3D%3D&u2=HvaCFz89bIhAFLwE&width=600'},
+  {vendor:'Red Mills',    tag:'Competition · Horse Care · Comfort',    color:'#fff0f0', logoUrl:'https://www.redmillshorse.com/wp-content/uploads/2019/01/logo.png',        imgUrl:'https://sspark.genspark.ai/cfimages?u1=7osbNYU1ox8HmUk%2Ff45sEFuifDuvcNmaipEgpuBsDXSH2IHPavx1l1F8XyLl6hGDuY9d7%2BNMCEuIiPfiM%2BXq2K%2BeZndZ3qLBoOkpr7yNJg%3D%3D&u2=2MbM4LT9HP0TC4eI&width=600'},
+  {vendor:'Havens',       tag:'Endurance · Gastro · Cool Mix',         color:'#f0fff4', logoUrl:'', imgUrl:'https://sspark.genspark.ai/cfimages?u1=dhrtoOORdnVmpeg5tu7Vf6iZPYmcuNy2bGs4%2F7HVf9X7%2FqSEKc8h4k8BEc2V5IGz%2BZu3%2FCtD5Qu55n%2F526YoYwwmmVccVgPnmttMjJxE%2FQk%3D&u2=7nQSyV4Lh9alc6Az&width=600'},
+  {vendor:'Buckeye',      tag:'EQ8 · Cadence Ultra · Safe N Easy',     color:'#fff8f0', logoUrl:'', imgUrl:'https://sspark.genspark.ai/cfimages?u1=9XhtqN4rYmnFIf9UGMrzL7a9c7Ql2XBXrI6%2BK3o57loRQp60kAcf3xQdI%2BlJC9wcQvXchR9jZmirwQJGcDU%2B5FrgA86yTp6np7%2FN%2BLwuscUFAo2fjOxUxzIVKU4cPngVqwZepEz%2FUKNZINWBMvefKj9PnA%3D%3D&u2=ruqOATUPxWic6yRH&width=600'},
+  {vendor:'Crypto Aero',  tag:'Wholefood · All Natural',               color:'#f4fff0', logoUrl:'', imgUrl:'https://sspark.genspark.ai/cfimages?u1=UUsiXOiA0Ei8p%2FfKKGgbk1xAySyI%2FiMwtVhDYyrYBbgpnGA1ZJtkrAhHHwCYX1JzMYoWCDxVgQn44pKRN%2Bml1gVbJzt6nT4%2F%2B%2BDhAQJwPC%2BdZw%3D%3D&u2=QDzJUpsrG0A2lDdk&width=600'},
+  {vendor:'Kent Sentinel',tag:'Quality Grain Feeds',                   color:'#f5f0ff', logoUrl:'', imgUrl:'https://sspark.genspark.ai/cfimages?u1=Vxz9lWjwxf2ZDBQw4sfUrkXEXV%2FJcZJZ%2FlYvsjswpMWnkrFwvhy8fUCTlInJHfSAcgbZhxIOUmLFM3lX4GvrTZqxqRl7aGNdVnzq9B9g7wZDh59ixKMAQk8Gp6G6Q1qmrlP2hg1jjhE%3D&u2=rkES%2F33%2By4pHTknJ&width=600'},
+];
+const DEFAULT_HAY3 = ['Alfalfa','2nd Cut Grassy Timothy','1st Cut Timothy','2nd Cut Orchard','2nd Cut Timothy'];
+const DEFAULT_HAY2 = ['Special Reserve T/A','Premium T/A','Supergrass (Straight Orchard)','Quebec T/A','Twyla T/A (Heavy Alfalfa)','Peanut Hay (High Protein)','Valley Green O/T/A','Alberta Timothy (Straight)','2nd Cut Alberta Timothy'];
+const DEFAULT_SHAVINGS = [
+  {name:'WD Fine',        desc:'Very fine shavings — 7–8 cu. ft. per bag. Excellent dust control.',        icon:'fa-feather'},
+  {name:'WD Flake',       desc:'Medium flake shavings — 8–9 cu. ft. Classic barn-fresh feel.',             icon:'fa-layer-group'},
+  {name:'WD Pelleted',    desc:'Compressed pellets that expand with water — highly absorbent.',             icon:'fa-circle'},
+  {name:'Fast Track Blend',desc:'Mix of fine & medium flake — 8 cu. ft. Best of both worlds.',            icon:'fa-star'},
+  {name:'Fast Track Fine',desc:'Fine flake — 7 cu. ft. Ideal for sensitive respiratory horses.',           icon:'fa-wind'},
+  {name:'World Cup',      desc:'Large flake — 9–10 cu. ft. Show-quality bedding.',                        icon:'fa-trophy'},
+  {name:'Showtime Large', desc:'Large flake — 9–10 cu. ft. Perfect for stall presentation.',              icon:'fa-award'},
+  {name:'King Large',     desc:'Very large flake — 9.5 cu. ft. Maximum cushion & comfort.',               icon:'fa-crown'},
+  {name:'Baled Straw',    desc:'45–50 lbs bales. Natural, traditional bedding option.',                   icon:'fa-seedling'},
+];
+const DEFAULT_SUPPS = [
+  {name:'Cavalor Hepato Liq',           cat:'Liver Support',      desc:'Liquid liver support supplement. Detoxifies and supports optimal liver function, especially for horses in heavy training.'},
+  {name:'Cavalor Bronchix Pure',        cat:'Respiratory',        desc:'Natural respiratory support for horses with airway sensitivity, dust allergies, or those competing in dusty arenas.'},
+  {name:'Cavalor Sozen',                cat:'Calming',            desc:'Natural calming supplement to reduce nervousness and stress without affecting alertness or performance.'},
+  {name:'Cavalor Muscle Force',         cat:'Muscle Support',     desc:'Supports muscle development and recovery. Ideal for performance horses needing topline and muscle tone improvement.'},
+  {name:'Cavalor Vitamino',             cat:'Vitamins & Minerals',desc:'Complete vitamin and mineral supplement to balance rations and fill nutritional gaps in hay and forage diets.'},
+  {name:'Max-E-Glo Rice Bran',          cat:'Weight & Coat',      desc:'Stabilized rice bran supplement for healthy weight gain, improved coat shine, and extra energy without excess starch.'},
+  {name:"Horseshoer's Secret",          cat:'Hoof Health',        desc:'Pelleted hoof supplement with biotin, zinc, and methionine to support strong, healthy hoof growth and quality.'},
+  {name:'Sand Clear',                   cat:'Digestive',          desc:'Monthly psyllium treatment to help clear sand and dirt from the digestive tract — essential for Florida horses.'},
+  {name:'SandPurge Psyllium Pellets',   cat:'Digestive',          desc:'Psyllium-based pellets that support natural sand removal from the hindgut. Easy-to-feed pelleted form.'},
+  {name:'Vita-E & Selenium',            cat:'Antioxidant',        desc:'Essential antioxidant combination for muscle function, immune support, and reproductive health in horses.'},
+  {name:'Topline Xtreme',               cat:'Topline',            desc:'High-protein supplement formulated specifically to build and maintain topline muscle in performance and show horses.'},
+  {name:'CocoSoya Oil',                 cat:'Weight & Coat',      desc:'Blend of coconut and soy oils providing omega fatty acids for calorie-dense weight gain and brilliant coat shine.'},
+];
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+async function init() {
+  // Load catalog products
+  try {
+    const r = await fetch('/admin/api/catalog');
+    if (r.ok) { const d = await r.json(); allCatalog = d.products || []; }
+  } catch(e) {}
+  allVendors = [...new Set(allCatalog.map(p => p.vendor).filter(Boolean))].sort();
+
+  // Load saved config
+  try {
+    const r = await fetch('/admin/api/homepage-sections');
+    if (r.ok) { const d = await r.json(); if (d.data) Object.assign(cfg, d.data); }
+  } catch(e) {}
+
+  // Apply defaults if first time (nothing saved yet)
+  if (!cfg.grainVendors.length) cfg.grainVendors = JSON.parse(JSON.stringify(DEFAULT_GRAIN_VENDORS));
+  if (!cfg.hay3.length) cfg.hay3 = [...DEFAULT_HAY3];
+  if (!cfg.hay2.length) cfg.hay2 = [...DEFAULT_HAY2];
+  if (!cfg.shavings.length) cfg.shavings = JSON.parse(JSON.stringify(DEFAULT_SHAVINGS));
+  if (!cfg.supps.length) cfg.supps = JSON.parse(JSON.stringify(DEFAULT_SUPPS));
+
+  renderAll();
+  document.getElementById('loadingState').classList.add('hidden');
+  document.getElementById('editorMain').classList.remove('hidden');
+}
+
+function renderAll() {
+  renderGrainVendors();
+  renderHayList('hay3List', cfg.hay3);
+  renderHayList('hay2List', cfg.hay2);
+  document.getElementById('hayNote').value = cfg.hayNote || '';
+  renderShavings();
+  renderSupps();
+  document.getElementById('shavingsNote').value = cfg.shavingsNote || '';
+  // Toggles
+  const shTog = document.getElementById('shavingsCatalogToggle');
+  shTog.checked = !!cfg.shavingsCatalog;
+  shTog.dispatchEvent(new Event('change'));
+  const supTog = document.getElementById('suppsCatalogToggle');
+  supTog.checked = !!cfg.suppsCatalog;
+  supTog.dispatchEvent(new Event('change'));
+  document.getElementById('suppsMaxCount').value = cfg.suppsMax || 12;
+  document.getElementById('grainCount').textContent = cfg.grainVendors.length + ' vendors';
+}
+
+// ── Grain Vendors ─────────────────────────────────────────────────────────────
+function renderGrainVendors() {
+  const el = document.getElementById('grainVendorList');
+  el.innerHTML = '';
+  cfg.grainVendors.forEach((v, i) => {
+    const row = document.createElement('div');
+    row.className = 'flex items-start gap-2 p-3 bg-gray-50 rounded-lg border border-gray-100';
+    // Count products for this vendor in catalog
+    const prodCount = allCatalog.filter(p => p.vendor === v.vendor).length;
+    const catalogBadge = prodCount ? \`<span class="ml-1 text-xs text-green-600 bg-green-50 rounded-full px-2 py-0.5">\${prodCount} in catalog</span>\` : \`<span class="ml-1 text-xs text-amber-600 bg-amber-50 rounded-full px-2 py-0.5">not in catalog</span>\`;
+    row.innerHTML = \`
+      <div class="flex-1 grid grid-cols-1 gap-2">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-xs text-gray-500 font-medium block mb-0.5">Vendor name \${catalogBadge}</label>
+            <input type="text" value="\${esc(v.vendor)}" placeholder="e.g. Nutrena"
+              class="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm"
+              onchange="cfg.grainVendors[\${i}].vendor=this.value; renderGrainVendors()"/>
+          </div>
+          <div>
+            <label class="text-xs text-gray-500 font-medium block mb-0.5">Subtitle tag line</label>
+            <input type="text" value="\${esc(v.tag)}" placeholder="e.g. SafeChoice · ProForce"
+              class="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm"
+              onchange="cfg.grainVendors[\${i}].tag=this.value"/>
+          </div>
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 font-medium block mb-0.5">Card background image URL</label>
+          <input type="text" value="\${esc(v.imgUrl||'')}" placeholder="https://..."
+            class="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm font-mono text-xs"
+            onchange="cfg.grainVendors[\${i}].imgUrl=this.value"/>
+        </div>
+      </div>
+      <button onclick="removeGrainVendor(\${i})" class="ml-1 mt-1 w-7 h-7 flex items-center justify-center rounded-lg text-red-400 hover:bg-red-50 flex-shrink-0 transition-colors" title="Remove">
+        <i class="fas fa-trash text-xs"></i>
+      </button>
+    \`;
+    el.appendChild(row);
+  });
+  document.getElementById('grainCount').textContent = cfg.grainVendors.length + ' vendors';
+}
+function addVendorCard() {
+  // Suggest first catalog vendor not already in list
+  const existing = cfg.grainVendors.map(v => v.vendor);
+  const suggestion = allVendors.find(v => !existing.includes(v)) || '';
+  cfg.grainVendors.push({vendor: suggestion, tag: '', color: '#f5f5f5', logoUrl: '', imgUrl: ''});
+  renderGrainVendors();
+}
+function removeGrainVendor(i) {
+  cfg.grainVendors.splice(i, 1);
+  renderGrainVendors();
+}
+
+// ── Hay lists ─────────────────────────────────────────────────────────────────
+function renderHayList(elId, arr) {
+  const el = document.getElementById(elId);
+  el.innerHTML = '';
+  arr.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'flex items-center gap-2';
+    row.innerHTML = \`
+      <input type="text" value="\${esc(item)}" placeholder="Hay type name"
+        class="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm"
+        onchange="\${elId==='hay3List'?'cfg.hay3':'cfg.hay2'}[\${i}]=this.value"/>
+      <button onclick="removeHayItem('\${elId}',\${i})" class="w-7 h-7 flex items-center justify-center rounded-lg text-red-400 hover:bg-red-50 transition-colors flex-shrink-0">
+        <i class="fas fa-trash text-xs"></i>
+      </button>
+    \`;
+    el.appendChild(row);
+  });
+}
+function addHayItem(elId) {
+  if (elId === 'hay3List') cfg.hay3.push('');
+  else cfg.hay2.push('');
+  renderHayList(elId, elId==='hay3List' ? cfg.hay3 : cfg.hay2);
+}
+function removeHayItem(elId, i) {
+  if (elId === 'hay3List') cfg.hay3.splice(i,1);
+  else cfg.hay2.splice(i,1);
+  renderHayList(elId, elId==='hay3List' ? cfg.hay3 : cfg.hay2);
+}
+
+// ── Shavings ──────────────────────────────────────────────────────────────────
+function toggleShavingsMode() {
+  const on = document.getElementById('shavingsCatalogToggle').checked;
+  cfg.shavingsCatalog = on;
+  document.getElementById('shavingsCatalogMode').classList.toggle('hidden', !on);
+  document.getElementById('shavingsManualMode').classList.toggle('hidden', on);
+  const tog = document.getElementById('shavingsCatalogToggle').nextElementSibling;
+  tog.style.background = on ? '#1B2A4A' : '';
+  if (on) renderShavingsCatalogPreview();
+}
+function renderShavingsCatalogPreview() {
+  const items = allCatalog.filter(p => p.category === 'Shavings & Bedding');
+  const el = document.getElementById('shavingsCatalogPreview');
+  el.innerHTML = items.length
+    ? items.map(p => \`<div class="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-1.5"><i class="fas fa-box text-xs text-amber-400"></i> \${esc(p.name)}</div>\`).join('')
+    : '<div class="text-amber-600 text-xs col-span-2">No Shavings & Bedding products found in catalog yet.</div>';
+}
+function renderShavings() {
+  const el = document.getElementById('shavingsList');
+  el.innerHTML = '';
+  cfg.shavings.forEach((s, i) => {
+    const row = document.createElement('div');
+    row.className = 'grid grid-cols-12 gap-2 p-3 bg-gray-50 rounded-lg border border-gray-100 items-start';
+    row.innerHTML = \`
+      <div class="col-span-3">
+        <label class="text-xs text-gray-500 block mb-0.5">Product name</label>
+        <input type="text" value="\${esc(s.name)}" class="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm"
+          onchange="cfg.shavings[\${i}].name=this.value"/>
+      </div>
+      <div class="col-span-7">
+        <label class="text-xs text-gray-500 block mb-0.5">Description</label>
+        <input type="text" value="\${esc(s.desc)}" class="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm"
+          onchange="cfg.shavings[\${i}].desc=this.value"/>
+      </div>
+      <div class="col-span-1">
+        <label class="text-xs text-gray-500 block mb-0.5">FA Icon</label>
+        <input type="text" value="\${esc(s.icon||'fa-box')}" class="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs font-mono"
+          onchange="cfg.shavings[\${i}].icon=this.value"/>
+      </div>
+      <div class="col-span-1 flex items-end justify-end pb-1">
+        <button onclick="removeShaving(\${i})" class="w-7 h-7 flex items-center justify-center rounded-lg text-red-400 hover:bg-red-50 transition-colors">
+          <i class="fas fa-trash text-xs"></i>
+        </button>
+      </div>
+    \`;
+    el.appendChild(row);
+  });
+}
+function addShavingsItem() {
+  cfg.shavings.push({name:'', desc:'', icon:'fa-box'});
+  renderShavings();
+}
+function removeShaving(i) {
+  cfg.shavings.splice(i,1);
+  renderShavings();
+}
+
+// ── Supplements ───────────────────────────────────────────────────────────────
+function toggleSuppsMode() {
+  const on = document.getElementById('suppsCatalogToggle').checked;
+  cfg.suppsCatalog = on;
+  document.getElementById('suppsCatalogMode').classList.toggle('hidden', !on);
+  document.getElementById('suppsManualMode').classList.toggle('hidden', on);
+  const tog = document.getElementById('suppsCatalogToggle').nextElementSibling;
+  tog.style.background = on ? '#6D28D9' : '';
+  if (on) renderSuppsCatalogPreview();
+}
+function renderSuppsCatalogPreview() {
+  const SUPP_CATS = ['Supplements','Gut Health','Electrolytes','Psyllium Supplements'];
+  const items = allCatalog.filter(p => SUPP_CATS.includes(p.category));
+  const max = parseInt(document.getElementById('suppsMaxCount').value) || 12;
+  const el = document.getElementById('suppsCatalogPreview');
+  el.innerHTML = items.slice(0, max).map(p => \`<div class="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-1.5"><i class="fas fa-capsules text-xs text-purple-400"></i> \${esc(p.name)}<span class="text-gray-300 ml-1">· \${esc(p.category)}</span></div>\`).join('')
+    || '<div class="text-amber-600 text-xs col-span-2">No supplement products found in catalog yet.</div>';
+}
+function renderSupps() {
+  const el = document.getElementById('suppsList');
+  el.innerHTML = '';
+  cfg.supps.forEach((s, i) => {
+    const row = document.createElement('div');
+    row.className = 'grid grid-cols-12 gap-2 p-3 bg-gray-50 rounded-lg border border-gray-100 items-start';
+    row.innerHTML = \`
+      <div class="col-span-4">
+        <label class="text-xs text-gray-500 block mb-0.5">Product name</label>
+        <input type="text" value="\${esc(s.name)}" class="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm"
+          onchange="cfg.supps[\${i}].name=this.value"/>
+      </div>
+      <div class="col-span-2">
+        <label class="text-xs text-gray-500 block mb-0.5">Category tag</label>
+        <input type="text" value="\${esc(s.cat)}" class="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm"
+          onchange="cfg.supps[\${i}].cat=this.value"/>
+      </div>
+      <div class="col-span-5">
+        <label class="text-xs text-gray-500 block mb-0.5">Description</label>
+        <input type="text" value="\${esc(s.desc)}" class="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm"
+          onchange="cfg.supps[\${i}].desc=this.value"/>
+      </div>
+      <div class="col-span-1 flex items-end justify-end pb-1">
+        <button onclick="removeSupp(\${i})" class="w-7 h-7 flex items-center justify-center rounded-lg text-red-400 hover:bg-red-50 transition-colors">
+          <i class="fas fa-trash text-xs"></i>
+        </button>
+      </div>
+    \`;
+    el.appendChild(row);
+  });
+}
+function addSuppsItem() {
+  cfg.supps.push({name:'', cat:'', desc:''});
+  renderSupps();
+}
+function removeSupp(i) {
+  cfg.supps.splice(i,1);
+  renderSupps();
+}
+
+// ── Save ──────────────────────────────────────────────────────────────────────
+async function saveAll() {
+  // Collect latest field values before saving
+  cfg.hayNote = document.getElementById('hayNote').value;
+  cfg.shavingsNote = document.getElementById('shavingsNote').value;
+  cfg.suppsMax = parseInt(document.getElementById('suppsMaxCount').value) || 12;
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+  try {
+    const r = await fetch('/admin/api/homepage-sections', {
+      method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(cfg)
+    });
+    const d = await r.json();
+    if (d.ok) {
+      showStatus('success', '<i class="fas fa-check-circle mr-2"></i>Saved and published to the homepage!');
+    } else {
+      showStatus('error', '<i class="fas fa-exclamation-circle mr-2"></i>Save failed — try again.');
+    }
+  } catch(e) {
+    showStatus('error', '<i class="fas fa-exclamation-circle mr-2"></i>Network error: ' + e.message);
+  }
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-save"></i> Save & Publish';
+}
+
+function showStatus(type, html) {
+  const el = document.getElementById('statusBar');
+  el.className = 'mb-4 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2 ' +
+    (type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200');
+  el.innerHTML = html;
+  el.classList.remove('hidden');
+  if (type === 'success') setTimeout(() => el.classList.add('hidden'), 4000);
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+`
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+
 function adminShell(title: string, activeTab: string, body: string): string {
   return `<!DOCTYPE html>
 <html lang="en">
@@ -2612,6 +3207,7 @@ function adminShell(title: string, activeTab: string, body: string): string {
       <a href="/admin/catalog"    class="sidebar-link ${activeTab==='catalog'  ?'active':''}"><i class="fas fa-table-list w-4 text-center text-sm"></i> Catalog Manager</a>
       <div class="px-3 pt-3 pb-1"><div class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Site Management</div></div>
       <a href="/admin/content"    class="sidebar-link ${activeTab==='content'  ?'active':''}"><i class="fas fa-pen-to-square w-4 text-center text-sm"></i> Site Content</a>
+      <a href="/admin/homepage-sections" class="sidebar-link ${activeTab==='homepage-sections'?'active':''}"><i class="fas fa-store w-4 text-center text-sm"></i> Homepage Sections</a>
       <a href="/admin/chatbot"    class="sidebar-link ${activeTab==='chatbot'  ?'active':''}"><i class="fas fa-robot w-4 text-center text-sm"></i> AI Chatbot</a>
       <a href="/admin/reviews"    class="sidebar-link ${activeTab==='reviews'  ?'active':''}"><i class="fas fa-star w-4 text-center text-sm"></i> Reviews</a>
       <a href="/admin/inquiries"  class="sidebar-link ${activeTab==='inquiries'?'active':''}"><i class="fas fa-envelope w-4 text-center text-sm"></i> Inquiries</a>

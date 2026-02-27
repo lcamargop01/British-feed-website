@@ -435,26 +435,27 @@ function getHTML(): string {
     </div>
 
     <!-- GRAIN BRAND CARDS -->
+    <!-- GRAIN BRANDS — populated by loadHomepageSections() -->
     <div id="cat-grain" class="product-category mb-12">
       <h3 class="text-2xl font-serif font-bold text-navy-700 mb-6 flex items-center gap-3">
         Grain Brands
         <span class="text-sm font-sans font-normal text-gray-400 ml-2">— click a brand to see all products</span>
       </h3>
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div id="grainBrandsGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         ${brandCards()}
       </div>
     </div>
 
-    <!-- HAY -->
+    <!-- HAY — populated by loadHomepageSections() -->
     <div id="cat-hay" class="product-category mb-12">
       <h3 class="text-2xl font-serif font-bold text-navy-700 mb-6 flex items-center gap-3">Hay Selection</h3>
-      <div class="grid md:grid-cols-2 gap-6">
+      <div id="hayGrid" class="grid md:grid-cols-2 gap-6">
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 card-hover">
           <div class="flex items-center gap-3 mb-4">
             <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center"><i class="fas fa-cubes text-green-600"></i></div>
             <div><h4 class="font-bold text-navy-700">3-String Bales (100–110 lbs)</h4><p class="text-xs text-gray-400">Large format — bulk value</p></div>
           </div>
-          <div class="grid grid-cols-2 gap-2 text-sm">
+          <div id="hay3Items" class="grid grid-cols-2 gap-2 text-sm">
             ${['Alfalfa','2nd Cut Grassy Timothy','1st Cut Timothy','2nd Cut Orchard','2nd Cut Timothy'].map(h=>`<div class="product-item pl-3 py-1 text-gray-600">${h}</div>`).join('')}
           </div>
         </div>
@@ -463,21 +464,21 @@ function getHTML(): string {
             <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center"><i class="fas fa-box text-amber-600"></i></div>
             <div><h4 class="font-bold text-navy-700">2-String Bales (48–60 lbs)</h4><p class="text-xs text-gray-400">Convenient size — easy handling</p></div>
           </div>
-          <div class="grid grid-cols-2 gap-2 text-sm">
+          <div id="hay2Items" class="grid grid-cols-2 gap-2 text-sm">
             ${['Special Reserve T/A','Premium T/A','Supergrass (Straight Orchard)','Quebec T/A','Twyla T/A (Heavy Alfalfa)','Peanut Hay (High Protein)','Valley Green O/T/A','Alberta Timothy (Straight)','2nd Cut Alberta Timothy'].map(h=>`<div class="product-item pl-3 py-1 text-gray-600">${h}</div>`).join('')}
           </div>
         </div>
       </div>
-      <div class="mt-4 bg-gold-50 border border-gold-200 rounded-xl p-4 text-sm text-gray-600">
+      <div id="hayNoteBox" class="mt-4 bg-gold-50 border border-gold-200 rounded-xl p-4 text-sm text-gray-600">
         <i class="fas fa-info-circle text-gold-500 mr-2"></i>
         Hay availability varies by season. Call <strong>(561) 633-6003</strong> or visit the store to check current stock and pricing.
       </div>
     </div>
 
-    <!-- SHAVINGS -->
+    <!-- SHAVINGS — populated by loadHomepageSections() -->
     <div id="cat-shavings" class="product-category mb-12">
       <h3 class="text-2xl font-serif font-bold text-navy-700 mb-6 flex items-center gap-3">Shavings & Bedding</h3>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div id="shavingsGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         ${[
           {name:'WD Fine',desc:'Very fine shavings — 7–8 cu. ft. per bag. Excellent dust control.',icon:'fa-feather'},
           {name:'WD Flake',desc:'Medium flake shavings — 8–9 cu. ft. Classic barn-fresh feel.',icon:'fa-layer-group'},
@@ -499,13 +500,13 @@ function getHTML(): string {
             </div>
           </div>`).join('')}
       </div>
-      <p class="text-sm text-gray-500 mt-4 italic"><i class="fas fa-plus-circle text-gold-400 mr-1"></i>Additional options available under special order — ask us!</p>
+      <p id="shavingsNote" class="text-sm text-gray-500 mt-4 italic"><i class="fas fa-plus-circle text-gold-400 mr-1"></i>Additional options available under special order — ask us!</p>
     </div>
 
-    <!-- SUPPLEMENTS -->
+    <!-- SUPPLEMENTS — populated by loadHomepageSections() -->
     <div id="cat-supplements" class="product-category mb-12">
       <h3 class="text-2xl font-serif font-bold text-navy-700 mb-6 flex items-center gap-3">Supplements & Additives</h3>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div id="suppsGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         ${[
           {name:'Cavalor Hepato Liq',cat:'Liver Support',desc:'Liquid liver support supplement. Detoxifies and supports optimal liver function, especially for horses in heavy training.'},
           {name:'Cavalor Bronchix Pure',cat:'Respiratory',desc:'Natural respiratory support for horses with airway sensitivity, dust allergies, or those competing in dusty arenas.'},
@@ -529,8 +530,6 @@ function getHTML(): string {
           </div>`).join('')}
       </div>
     </div>
-
-    <!-- Browse Full Catalog CTA -->
     <div class="text-center mt-10 scroll-reveal">
       <div class="inline-flex flex-col sm:flex-row items-center gap-4 bg-white rounded-2xl px-8 py-6 shadow-sm border border-gray-100">
         <div class="text-left">
@@ -1133,6 +1132,105 @@ function addTypingIndicator(){
   document.getElementById('chat-messages').scrollTop = 9999;
   return div;
 }
+
+// ─── Homepage Sections — live loader ─────────────────────────────────────────
+// Fetches admin-saved section config from KV and re-renders each product section.
+// Falls back silently to the hardcoded defaults already in the DOM if fetch fails.
+async function loadHomepageSections() {
+  let s;
+  try {
+    const r = await fetch('/admin/api/public/homepage-sections');
+    if (!r.ok) return;
+    const d = await r.json();
+    if (!d.data) return;
+    s = d.data;
+  } catch(e) { return; }
+
+  // ── Grain Brands ─────────────────────────────────────────────────────────
+  if (s.grainVendors && s.grainVendors.length) {
+    const grid = document.getElementById('grainBrandsGrid');
+    if (grid) {
+      grid.innerHTML = s.grainVendors.map(v => {
+        const id = (v.vendor||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+        const hasBrandModal = !!document.getElementById('modal-'+id);
+        const clickAction = hasBrandModal ? \`openBrandModal('\${id}')\` : \`window.location='/products?q=\${encodeURIComponent(v.vendor||'')}'\`;
+        return \`
+        <div class="product-brand-card bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 cursor-pointer"
+             onclick="\${clickAction}">
+          <div class="h-28 bg-cover bg-center relative" style="background-image:url('\${v.imgUrl||''}');background-color:\${v.color||'#f5f5f5'}">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+            <div class="absolute bottom-2 left-3 right-3">
+              <div class="text-white font-bold text-sm drop-shadow">\${v.vendor||''}</div>
+            </div>
+          </div>
+          <div class="p-3">
+            <p class="text-xs text-gray-400">\${v.tag||''}</p>
+            <div class="mt-2 flex items-center gap-1 text-navy-700 text-xs font-semibold">
+              View Products <i class="fas fa-chevron-right text-gold-400 text-xs"></i>
+            </div>
+          </div>
+        </div>\`;
+      }).join('');
+    }
+  }
+
+  // ── Hay ───────────────────────────────────────────────────────────────────
+  if (s.hay3 && s.hay3.length) {
+    const el = document.getElementById('hay3Items');
+    if (el) el.innerHTML = s.hay3.filter(Boolean).map(h => \`<div class="product-item pl-3 py-1 text-gray-600">\${h}</div>\`).join('');
+  }
+  if (s.hay2 && s.hay2.length) {
+    const el = document.getElementById('hay2Items');
+    if (el) el.innerHTML = s.hay2.filter(Boolean).map(h => \`<div class="product-item pl-3 py-1 text-gray-600">\${h}</div>\`).join('');
+  }
+  if (s.hayNote) {
+    const box = document.getElementById('hayNoteBox');
+    if (box) box.innerHTML = \`<i class="fas fa-info-circle text-gold-500 mr-2"></i>\${s.hayNote}\`;
+  }
+
+  // ── Shavings ──────────────────────────────────────────────────────────────
+  const shavingsGrid = document.getElementById('shavingsGrid');
+  if (shavingsGrid) {
+    if (s.shavingsCatalog) {
+      // Pull from catalog — items pre-loaded by /products page script, skip for homepage
+      // (homepage doesn't load full catalog; just show note)
+      shavingsGrid.innerHTML = \`<p class="text-sm text-gray-400 col-span-3 italic">Shavings products are managed in the catalog. <a href="/products?cat=Shavings" class="underline text-navy-700">Browse all shavings.</a></p>\`;
+    } else if (s.shavings && s.shavings.length) {
+      shavingsGrid.innerHTML = s.shavings.map(sv => \`
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 card-hover flex gap-4">
+          <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+            <i class="fas \${sv.icon||'fa-box'} text-amber-600"></i>
+          </div>
+          <div>
+            <div class="font-bold text-navy-700 text-sm">\${sv.name||''}</div>
+            <div class="text-xs text-gray-500 mt-1">\${sv.desc||''}</div>
+          </div>
+        </div>\`).join('');
+    }
+  }
+  if (s.shavingsNote) {
+    const el = document.getElementById('shavingsNote');
+    if (el) el.innerHTML = \`<i class="fas fa-plus-circle text-gold-400 mr-1"></i>\${s.shavingsNote}\`;
+  }
+
+  // ── Supplements ───────────────────────────────────────────────────────────
+  const suppsGrid = document.getElementById('suppsGrid');
+  if (suppsGrid) {
+    if (s.suppsCatalog) {
+      suppsGrid.innerHTML = \`<p class="text-sm text-gray-400 col-span-3 italic">Supplement products are managed in the catalog. <a href="/products?cat=Supplements" class="underline text-navy-700">Browse all supplements.</a></p>\`;
+    } else if (s.supps && s.supps.length) {
+      suppsGrid.innerHTML = s.supps.map(sv => \`
+        <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 card-hover">
+          <div class="flex items-start justify-between mb-2">
+            <div class="font-bold text-navy-700 text-sm">\${sv.name||''}</div>
+            <span class="tag tag-special ml-2 flex-shrink-0">\${sv.cat||''}</span>
+          </div>
+          <p class="text-xs text-gray-500 leading-relaxed">\${sv.desc||''}</p>
+        </div>\`).join('');
+    }
+  }
+}
+loadHomepageSections();
 
 // ─── Scroll reveal ────────────────────────────────────────────────────────────
 const observer = new IntersectionObserver(entries => {
