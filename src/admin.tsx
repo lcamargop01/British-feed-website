@@ -259,100 +259,6 @@ admin.get('/products', requireAuth, (c) => c.redirect('/admin/catalog'))
 // ═══════════════════════════════════════════════════════════════════════════
 
 admin.get('/content', requireAuth, async (c) => {
-  // ── Overlay CSS+JS injected into the homepage srcdoc (server-side) ──────────
-  const _overlayCss = [
-    '<style>',
-    '[data-edit-section]{position:relative;cursor:pointer;}',
-    '[data-edit-section]:hover{outline:3px solid rgba(201,168,76,.7);outline-offset:2px;}',
-    '[data-edit-section].ve-active{outline:3px solid #C9A84C!important;outline-offset:2px;}',
-    '.ve-edit-badge{position:absolute;top:10px;right:10px;z-index:9000;background:#1B2A4A;' +
-      'color:#fff;padding:5px 12px 5px 9px;border-radius:20px;font-size:11px;font-weight:700;' +
-      'cursor:pointer;display:flex;align-items:center;gap:5px;box-shadow:0 2px 10px rgba(0,0,0,.3);' +
-      'opacity:0;transition:opacity .15s;white-space:nowrap;pointer-events:all;}',
-    '[data-edit-section]:hover .ve-edit-badge{opacity:1;}',
-    '.ve-edit-badge i{color:#C9A84C;}',
-    '#chat-widget,.cookie-banner,#chat-btn{display:none!important;}',
-    '</style>',
-  ].join('\n');
-  const _overlayJs = '<script>(function(){' +
-    'var SEC_MAP={home:"hero",about:"about",services:"services",team:"team",contact:"contact"};' +
-    'function applyContent(D){' +
-    '  if(!D)return;' +
-    '  var q=function(s){return document.querySelector(s);};' +
-    '  var qa=function(s){return document.querySelectorAll(s);};' +
-    '  var g=function(id){return document.getElementById(id);};' +
-    '  if(D["hero-headline"]){var e=q("#home h1");if(e)e.innerHTML=D["hero-headline"].replace(/\\n/g,"<br/>");}' +
-    '  if(D["hero-subheadline"]){var e=q("#home .text-gold-400");if(e)e.textContent=D["hero-subheadline"];}' +
-    '  if(D["hero-desc"]){var e=q("#home p.text-xl");if(e)e.textContent=D["hero-desc"];}' +
-    '  if(D["cta1"]){var e=q(\'#home a[href="#products"]\');if(e)e.innerHTML=\'<i class="fas fa-search mr-2"></i>\'+D["cta1"];}' +
-    '  if(D["cta2"]){var e=q(\'#home a[href="#contact"]\');if(e)e.innerHTML=\'<i class="fas fa-envelope mr-2"></i>\'+D["cta2"];}' +
-    '  if(D["hero-bg"]){var e=g("home");if(e)e.style.backgroundImage="url("+D["hero-bg"]+")";}' +
-    '  var sn=qa("section.bg-navy-700 .text-3xl"),sl=qa("section.bg-navy-700 .text-sm");' +
-    '  [1,2,3,4].forEach(function(n,i){' +
-    '    if(D["stats-"+n+"-num"]&&sn[i])sn[i].textContent=D["stats-"+n+"-num"];' +
-    '    if(D["stats-"+n+"-label"]&&sl[i])sl[i].textContent=D["stats-"+n+"-label"];' +
-    '  });' +
-    '  if(D["about-heading"]){var e=q("#about h2");if(e)e.textContent=D["about-heading"];}' +
-    '  var ap=qa("#about p.text-gray-600");' +
-    '  if(D["about-para1"]&&ap[0])ap[0].innerHTML=D["about-para1"];' +
-    '  if(D["about-para2"]&&ap[1])ap[1].innerHTML=D["about-para2"];' +
-    '  if(D["about-para3"]&&ap[2])ap[2].innerHTML=D["about-para3"];' +
-    '  if(D["about-image"]){var e=q("#about img");if(e)e.src=D["about-image"];}' +
-    '  var sc=qa("#services .grid > div");' +
-    '  [1,2,3].forEach(function(n,i){var c=sc[i];if(!c)return;' +
-    '    if(D["svc"+n+"-title"]){var h=c.querySelector("h3");if(h)h.textContent=D["svc"+n+"-title"];}' +
-    '    if(D["svc"+n+"-desc"]){var p=c.querySelector("p");if(p)p.textContent=D["svc"+n+"-desc"];}' +
-    '    if(D["svc"+n+"-image"]){var bg=c.querySelector(\'[style*="background-image"]\');if(bg)bg.style.backgroundImage="url("+D["svc"+n+"-image"]+")";}' +
-    '  });' +
-    '  var tc=qa("#team .grid > div");' +
-    '  [1,2].forEach(function(n,i){var c=tc[i];if(!c)return;' +
-    '    if(D["team"+n+"-name"]){var h=c.querySelector("h3");if(h)h.textContent=D["team"+n+"-name"];}' +
-    '    if(D["team"+n+"-role"]){var p=c.querySelector("p.text-gold-500");if(p)p.textContent=D["team"+n+"-role"];}' +
-    '    if(D["team"+n+"-bio"]){var b=c.querySelector("p.text-gray-600");if(b)b.textContent=D["team"+n+"-bio"];}' +
-    '  });' +
-    '  if(D["quote-text"]){var e=q("#team .italic");if(e)e.textContent=D["quote-text"];}' +
-    '  if(D["quote-author"]){var e=q("#team .font-semibold.text-gold-400");if(e)e.textContent=D["quote-author"];}' +
-    '}' +
-    'function sendSection(sec){' +
-    '  document.querySelectorAll("[data-edit-section]").forEach(function(el){el.classList.remove("ve-active");});' +
-    '  document.querySelectorAll("[data-edit-section=\\""+sec+"\\"]").forEach(function(el){el.classList.add("ve-active");});' +
-    '  window.parent.postMessage({type:"section-click",section:sec},"*");' +
-    '}' +
-    'function setupOverlays(){' +
-    '  Object.entries(SEC_MAP).forEach(function(kv){' +
-    '    var id=kv[0],sk=kv[1],el=document.getElementById(id);if(!el)return;' +
-    '    el.setAttribute("data-edit-section",sk);' +
-    '    var b=document.createElement("div");b.className="ve-edit-badge";' +
-    '    b.innerHTML=\'<i class="fas fa-pencil-alt"></i> Edit \'+sk.charAt(0).toUpperCase()+sk.slice(1);' +
-    '    b.addEventListener("click",function(e){e.stopPropagation();sendSection(sk);});' +
-    '    if(getComputedStyle(el).position==="static")el.style.position="relative";' +
-    '    el.prepend(b);el.addEventListener("click",function(){sendSection(sk);});' +
-    '  });' +
-    '  var sb=document.querySelector("section.bg-navy-700.text-white.py-8");' +
-    '  if(sb){sb.setAttribute("data-edit-section","stats");' +
-    '    var b=document.createElement("div");b.className="ve-edit-badge";' +
-    '    b.innerHTML=\'<i class="fas fa-pencil-alt"></i> Edit Stats\';' +
-    '    b.addEventListener("click",function(e){e.stopPropagation();sendSection("stats");});' +
-    '    if(getComputedStyle(sb).position==="static")sb.style.position="relative";' +
-    '    sb.prepend(b);sb.addEventListener("click",function(){sendSection("stats");});' +
-    '  }' +
-    '}' +
-    'window.addEventListener("message",function(e){' +
-    '  var m=e.data;if(!m)return;' +
-    '  if(m.type==="apply-content")applyContent(m.data);' +
-    '  if(m.type==="highlight"){' +
-    '    document.querySelectorAll("[data-edit-section]").forEach(function(el){el.classList.remove("ve-active");});' +
-    '    if(m.section)document.querySelectorAll("[data-edit-section=\\""+m.section+"\\"]").forEach(function(el){el.classList.add("ve-active");});' +
-    '  }' +
-    '  if(m.type==="scroll-to"){' +
-    '    var map={hero:"home",stats:"home",about:"about",services:"services",team:"team",contact:"contact"};' +
-    '    var tid=map[m.section];if(tid){var t=document.getElementById(tid);if(t)t.scrollIntoView({behavior:"smooth",block:"start"});}' +
-    '  }' +
-    '});' +
-    'if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",setupOverlays);}' +
-    'else{setupOverlays();}' +
-    '})();<\/script>';
-  const _overlayScript = _overlayCss + '\n' + _overlayJs;
 
   return c.html(adminShell('Site Content', 'content', `
 <!-- Visual Content Editor — full viewport split layout -->
@@ -434,7 +340,7 @@ admin.get('/content', requireAuth, async (c) => {
         <i class="fas fa-spinner fa-spin text-3xl" style="color:#C9A84C"></i>
         Loading preview…
       </div>
-      <iframe id="ve-iframe" title="Site Preview"></iframe>
+      <iframe id="ve-iframe" src="/admin/content/preview" title="Site Preview"></iframe>
       <div class="ve-highlight-notice" id="ve-notice">
         <i class="fas fa-mouse-pointer"></i> Click any section to edit it
       </div>
@@ -618,6 +524,15 @@ function setDevice(dev) {
 // ─── Listen for messages from the iframe ─────────────────────────────────────
 window.addEventListener('message', e => {
   if (e.data?.type === 'section-click') openSection(e.data.section);
+  if (e.data?.type === 'iframe-ready') {
+    // Preview loaded — hide spinner, show notice, push current data
+    document.getElementById('ve-iframe-loading').style.display = 'none';
+    document.getElementById('ve-notice').style.display = 'flex';
+    const iframe = document.getElementById('ve-iframe');
+    if (veData && Object.keys(veData).length && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({type:'apply-content', data: veData}, '*');
+    }
+  }
 });
 
 // ─── Panel HTML builders ──────────────────────────────────────────────────────
@@ -854,45 +769,149 @@ function buildPanel(sec) {
 }
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
-// OVERLAY_JS is computed server-side. We escape </script> → <\/script> so the
-// browser HTML parser doesn't prematurely close this <script> block.
-const OVERLAY_JS = ${JSON.stringify(_overlayScript).replace(/<\/script>/gi, '<\\/script>')};
-
-async function loadPreviewIntoIframe() {
-  const loading = document.getElementById('ve-iframe-loading');
-  const notice  = document.getElementById('ve-notice');
-  const iframe  = document.getElementById('ve-iframe');
-  loading.style.display = 'flex';
-  try {
-    const r = await fetch('/');
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    let html = await r.text();
-    // Inject overlay before </body>
-    html = html.replace('</body>', OVERLAY_JS + '</body>');
-    iframe.srcdoc = html;
-    // Wait for iframe to load then push content data
-    iframe.onload = function() {
-      loading.style.display = 'none';
-      notice.style.display = 'flex';
-      if (veData && Object.keys(veData).length) {
-        iframe.contentWindow.postMessage({type:'apply-content', data: veData}, '*');
-      }
-    };
-  } catch(err) {
-    loading.innerHTML = '<div style="color:#ef4444;padding:20px;text-align:center"><i class="fas fa-exclamation-triangle text-2xl mb-2 block"></i>Preview failed: ' + err.message + '</div>';
-  }
-}
+// The iframe uses src="/admin/content/preview" which serves the homepage with
+// overlays already injected server-side. The preview page posts "iframe-ready"
+// when its overlays are set up; we listen above in the message handler.
 
 async function init() {
   await loadContent();
-  await loadPreviewIntoIframe();
-  // Open hero panel by default
+  // Open hero panel immediately — iframe loads independently via src attribute
   openSection('hero');
+  // Fallback: if iframe-ready never fires (e.g. slow network), hide spinner after 12 s
+  setTimeout(function() {
+    const loading = document.getElementById('ve-iframe-loading');
+    if (loading && loading.style.display !== 'none') {
+      loading.style.display = 'none';
+      document.getElementById('ve-notice').style.display = 'flex';
+    }
+  }, 12000);
 }
 
 document.addEventListener('DOMContentLoaded', init);
 </script>
 `))
+})
+
+
+// ─── /admin/content/preview — serves homepage HTML with overlays injected ────
+// Used as iframe src so the browser loads it natively (no srcdoc size limits)
+admin.get('/content/preview', requireAuth, async (c) => {
+  try {
+    // Fetch the homepage from the same worker
+    const origin = new URL(c.req.url).origin
+    const homeRes = await fetch(origin + '/', { headers: { 'x-edit-preview': '1' } })
+    if (!homeRes.ok) throw new Error('Home fetch failed: ' + homeRes.status)
+    let html = await homeRes.text()
+
+    // Build the overlay script server-side (same as _overlayScript in /content)
+    const overlayCss = [
+      '<style>',
+      '[data-edit-section]{position:relative;cursor:pointer;}',
+      '[data-edit-section]:hover{outline:3px solid rgba(201,168,76,.7);outline-offset:2px;}',
+      '[data-edit-section].ve-active{outline:3px solid #C9A84C!important;outline-offset:2px;}',
+      '.ve-edit-badge{position:absolute;top:10px;right:10px;z-index:9000;background:#1B2A4A;' +
+        'color:#fff;padding:5px 12px 5px 9px;border-radius:20px;font-size:11px;font-weight:700;' +
+        'cursor:pointer;display:flex;align-items:center;gap:5px;box-shadow:0 2px 10px rgba(0,0,0,.3);' +
+        'opacity:0;transition:opacity .15s;white-space:nowrap;pointer-events:all;}',
+      '[data-edit-section]:hover .ve-edit-badge{opacity:1;}',
+      '.ve-edit-badge i{color:#C9A84C;}',
+      '#chat-widget,.cookie-banner,#chat-btn{display:none!important;}',
+      '</style>',
+    ].join('\n')
+
+    const overlayJs = '<script>(function(){' +
+      'var SEC_MAP={home:"hero",about:"about",services:"services",team:"team",contact:"contact"};' +
+      'function applyContent(D){' +
+      '  if(!D)return;' +
+      '  var q=function(s){return document.querySelector(s);};' +
+      '  var qa=function(s){return document.querySelectorAll(s);};' +
+      '  var g=function(id){return document.getElementById(id);};' +
+      '  if(D["hero-headline"]){var e=q("#home h1");if(e)e.innerHTML=D["hero-headline"].replace(/\\n/g,"<br/>");}' +
+      '  if(D["hero-subheadline"]){var e=q("#home .text-gold-400");if(e)e.textContent=D["hero-subheadline"];}' +
+      '  if(D["hero-desc"]){var e=q("#home p.text-xl");if(e)e.textContent=D["hero-desc"];}' +
+      '  if(D["cta1"]){var e=q(\'#home a[href="#products"]\');if(e)e.innerHTML=\'<i class="fas fa-search mr-2"></i>\'+D["cta1"];}' +
+      '  if(D["cta2"]){var e=q(\'#home a[href="#contact"]\');if(e)e.innerHTML=\'<i class="fas fa-envelope mr-2"></i>\'+D["cta2"];}' +
+      '  if(D["hero-bg"]){var e=g("home");if(e)e.style.backgroundImage="url("+D["hero-bg"]+")";}' +
+      '  var sn=qa("section.bg-navy-700 .text-3xl"),sl=qa("section.bg-navy-700 .text-sm");' +
+      '  [1,2,3,4].forEach(function(n,i){' +
+      '    if(D["stats-"+n+"-num"]&&sn[i])sn[i].textContent=D["stats-"+n+"-num"];' +
+      '    if(D["stats-"+n+"-label"]&&sl[i])sl[i].textContent=D["stats-"+n+"-label"];' +
+      '  });' +
+      '  if(D["about-heading"]){var e=q("#about h2");if(e)e.textContent=D["about-heading"];}' +
+      '  var ap=qa("#about p.text-gray-600");' +
+      '  if(D["about-para1"]&&ap[0])ap[0].innerHTML=D["about-para1"];' +
+      '  if(D["about-para2"]&&ap[1])ap[1].innerHTML=D["about-para2"];' +
+      '  if(D["about-para3"]&&ap[2])ap[2].innerHTML=D["about-para3"];' +
+      '  if(D["about-image"]){var e=q("#about img");if(e)e.src=D["about-image"];}' +
+      '  var sc=qa("#services .grid > div");' +
+      '  [1,2,3].forEach(function(n,i){var c=sc[i];if(!c)return;' +
+      '    if(D["svc"+n+"-title"]){var h=c.querySelector("h3");if(h)h.textContent=D["svc"+n+"-title"];}' +
+      '    if(D["svc"+n+"-desc"]){var p=c.querySelector("p");if(p)p.textContent=D["svc"+n+"-desc"];}' +
+      '    if(D["svc"+n+"-image"]){var bg=c.querySelector(\'[style*="background-image"]\');if(bg)bg.style.backgroundImage="url("+D["svc"+n+"-image"]+")";}' +
+      '  });' +
+      '  var tc=qa("#team .grid > div");' +
+      '  [1,2].forEach(function(n,i){var c=tc[i];if(!c)return;' +
+      '    if(D["team"+n+"-name"]){var h=c.querySelector("h3");if(h)h.textContent=D["team"+n+"-name"];}' +
+      '    if(D["team"+n+"-role"]){var p=c.querySelector("p.text-gold-500");if(p)p.textContent=D["team"+n+"-role"];}' +
+      '    if(D["team"+n+"-bio"]){var b=c.querySelector("p.text-gray-600");if(b)b.textContent=D["team"+n+"-bio"];}' +
+      '  });' +
+      '  if(D["quote-text"]){var e=q("#team .italic");if(e)e.textContent=D["quote-text"];}' +
+      '  if(D["quote-author"]){var e=q("#team .font-semibold.text-gold-400");if(e)e.textContent=D["quote-author"];}' +
+      '}' +
+      'function sendSection(sec){' +
+      '  document.querySelectorAll("[data-edit-section]").forEach(function(el){el.classList.remove("ve-active");});' +
+      '  document.querySelectorAll("[data-edit-section=\\""+sec+"\\"]").forEach(function(el){el.classList.add("ve-active");});' +
+      '  window.parent.postMessage({type:"section-click",section:sec},"*");' +
+      '}' +
+      'function setupOverlays(){' +
+      '  Object.entries(SEC_MAP).forEach(function(kv){' +
+      '    var id=kv[0],sk=kv[1],el=document.getElementById(id);if(!el)return;' +
+      '    el.setAttribute("data-edit-section",sk);' +
+      '    var b=document.createElement("div");b.className="ve-edit-badge";' +
+      '    b.innerHTML=\'<i class="fas fa-pencil-alt"></i> Edit \'+sk.charAt(0).toUpperCase()+sk.slice(1);' +
+      '    b.addEventListener("click",function(e){e.stopPropagation();sendSection(sk);});' +
+      '    if(getComputedStyle(el).position==="static")el.style.position="relative";' +
+      '    el.prepend(b);el.addEventListener("click",function(){sendSection(sk);});' +
+      '  });' +
+      '  var sb=document.querySelector("section.bg-navy-700.text-white.py-8");' +
+      '  if(sb){sb.setAttribute("data-edit-section","stats");' +
+      '    var b=document.createElement("div");b.className="ve-edit-badge";' +
+      '    b.innerHTML=\'<i class="fas fa-pencil-alt"></i> Edit Stats\';' +
+      '    b.addEventListener("click",function(e){e.stopPropagation();sendSection("stats");});' +
+      '    if(getComputedStyle(sb).position==="static")sb.style.position="relative";' +
+      '    sb.prepend(b);sb.addEventListener("click",function(){sendSection("stats");});' +
+      '  }' +
+      '  // Signal parent that iframe is interactive' +
+      '  window.parent.postMessage({type:"iframe-ready"},"*");' +
+      '}' +
+      'window.addEventListener("message",function(e){' +
+      '  var m=e.data;if(!m)return;' +
+      '  if(m.type==="apply-content")applyContent(m.data);' +
+      '  if(m.type==="highlight"){' +
+      '    document.querySelectorAll("[data-edit-section]").forEach(function(el){el.classList.remove("ve-active");});' +
+      '    if(m.section)document.querySelectorAll("[data-edit-section=\\""+m.section+"\\"]").forEach(function(el){el.classList.add("ve-active");});' +
+      '  }' +
+      '  if(m.type==="scroll-to"){' +
+      '    var map={hero:"home",stats:"home",about:"about",services:"services",team:"team",contact:"contact"};' +
+      '    var tid=map[m.section];if(tid){var t=document.getElementById(tid);if(t)t.scrollIntoView({behavior:"smooth",block:"start"});}' +
+      '  }' +
+      '});' +
+      'if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",setupOverlays);}' +
+      'else{setupOverlays();}' +
+      '})();<\/script>'
+
+    // Inject overlay into the homepage HTML
+    html = html.replace('</body>', overlayCss + '\n' + overlayJs + '\n</body>')
+
+    return new Response(html, {
+      headers: { 'Content-Type': 'text/html; charset=UTF-8', 'X-Frame-Options': 'SAMEORIGIN' }
+    })
+  } catch (err: any) {
+    return new Response(`<html><body style="font-family:sans-serif;padding:40px;color:#ef4444">
+      <h2>Preview failed</h2><p>${err.message}</p>
+      <button onclick="location.reload()" style="background:#1B2A4A;color:#fff;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;margin-top:12px">Retry</button>
+    </body></html>`, { headers: { 'Content-Type': 'text/html' } })
+  }
 })
 
 
