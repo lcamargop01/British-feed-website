@@ -1294,6 +1294,15 @@ admin.get('/api/public/:key', async (c) => {
     const data = await kvGet(kv, 'homepage_sections', null)
     return c.json({ ok: true, data })
   }
+  // Public categories / vendors
+  if (key === 'categories') {
+    const data = await kvGet(kv, 'catalog_categories', null)
+    return c.json({ ok: true, data })
+  }
+  if (key === 'vendors') {
+    const data = await kvGet(kv, 'catalog_vendors', null)
+    return c.json({ ok: true, data })
+  }
   // Only expose safe keys to the public
   const allowed = ['products', 'reviews', 'site_content', 'chatbot_rules', 'catalog_products']
   if (!allowed.includes(key)) return c.json({ error: 'Not found' }, 404)
@@ -1485,6 +1494,44 @@ admin.put('/api/homepage-sections', requireAuth, async (c) => {
   return c.json({ ok: true })
 })
 
+// ─── Categories & Vendors API ─────────────────────────────────────────────────
+admin.get('/categories-vendors', requireAuth, async (c) => {
+  return c.html(adminShell('Categories & Vendors', 'categories-vendors', getCatVendorHTML()))
+})
+admin.get('/api/categories', requireAuth, async (c) => {
+  const kv = c.env?.BF_STORE
+  const data = await kvGet(kv, 'catalog_categories', null)
+  return c.json({ ok: true, data })
+})
+admin.put('/api/categories', requireAuth, async (c) => {
+  const kv = c.env?.BF_STORE
+  const body = await c.req.json()
+  await kvPut(kv, 'catalog_categories', body)
+  return c.json({ ok: true })
+})
+admin.get('/api/vendors', requireAuth, async (c) => {
+  const kv = c.env?.BF_STORE
+  const data = await kvGet(kv, 'catalog_vendors', null)
+  return c.json({ ok: true, data })
+})
+admin.put('/api/vendors', requireAuth, async (c) => {
+  const kv = c.env?.BF_STORE
+  const body = await c.req.json()
+  await kvPut(kv, 'catalog_vendors', body)
+  return c.json({ ok: true })
+})
+// Public endpoints so the product catalog page can read them too
+admin.get('/api/public/categories', async (c) => {
+  const kv = c.env?.BF_STORE
+  const data = await kvGet(kv, 'catalog_categories', null)
+  return c.json({ ok: true, data })
+})
+admin.get('/api/public/vendors', async (c) => {
+  const kv = c.env?.BF_STORE
+  const data = await kvGet(kv, 'catalog_vendors', null)
+  return c.json({ ok: true, data })
+})
+
 // ─── Catalog Manager HTML ────────────────────────────────────────────────────
 function getCatalogManagerHTML(): string {
   return `
@@ -1593,28 +1640,29 @@ function getCatalogManagerHTML(): string {
 
         <!-- Category -->
         <div>
-          <label class="form-label">Category *</label>
+          <label class="form-label" style="display:flex;align-items:center;justify-content:space-between;">
+            <span>Category *</span>
+            <a href="/admin/categories-vendors" target="_blank"
+              style="font-size:10px;font-weight:500;color:#C9A84C;text-decoration:none;display:flex;align-items:center;gap:3px;">
+              <i class="fas fa-cog"></i> Manage categories
+            </a>
+          </label>
           <select id="pm-category" class="form-input">
-            <option value="Grain &amp; Feed">Grain &amp; Feed</option>
-            <option value="Hay">Hay</option>
-            <option value="Shavings &amp; Bedding">Shavings &amp; Bedding</option>
-            <option value="Fly Prevention">Fly Prevention</option>
-            <option value="Grooming">Grooming</option>
-            <option value="Animal Health &amp; Supplements">Animal Health &amp; Supplements</option>
-            <option value="Digestive Health">Digestive Health</option>
-            <option value="Stress Relief">Stress Relief</option>
-            <option value="Energy &amp; Performance">Energy &amp; Performance</option>
-            <option value="First Aid &amp; Liniments">First Aid &amp; Liniments</option>
-            <option value="Leather Care">Leather Care</option>
-            <option value="Hoof &amp; Coat">Hoof &amp; Coat</option>
-            <option value="Cavalor">Cavalor</option>
+            <option value="">Loading…</option>
           </select>
         </div>
 
         <!-- Vendor -->
         <div>
-          <label class="form-label">Vendor / Brand</label>
-          <input id="pm-vendor" class="form-input" placeholder="e.g. Nutrena, Absorbine, Farnam"/>
+          <label class="form-label" style="display:flex;align-items:center;justify-content:space-between;">
+            <span>Vendor / Brand</span>
+            <a href="/admin/categories-vendors" target="_blank"
+              style="font-size:10px;font-weight:500;color:#C9A84C;text-decoration:none;display:flex;align-items:center;gap:3px;">
+              <i class="fas fa-cog"></i> Manage vendors
+            </a>
+          </label>
+          <input id="pm-vendor" class="form-input" list="pm-vendor-list" placeholder="e.g. Nutrena, Absorbine, Farnam" autocomplete="off"/>
+          <datalist id="pm-vendor-list"></datalist>
         </div>
 
         <!-- Price -->
@@ -1826,6 +1874,38 @@ const CAT_PAGE_SIZE = 25;
 // We use the public free API key for demo; in production set via admin settings
 const IMGBB_KEY = 'a1c8e5f3b2d9047e6f4a7b8c3d2e1f0a'; // placeholder - will use server-side upload
 
+// ── Load categories & vendors into the product modal dropdowns ────────────
+async function loadCatVendorLists() {
+  // Categories → populate #pm-category select
+  try {
+    const r = await fetch('/admin/api/categories');
+    if (r.ok) {
+      const d = await r.json();
+      const cats = d.data || [];
+      const sel = document.getElementById('pm-category');
+      if (cats.length) {
+        const prev = sel.value;
+        sel.innerHTML = cats.map(c => \`<option value="\${c.name.replace(/"/g,'&quot;')}">\${c.name}</option>\`).join('');
+        // restore previously selected value if still valid
+        if (prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
+      }
+    }
+  } catch(e) {}
+
+  // Vendors → populate #pm-vendor-list datalist
+  try {
+    const r = await fetch('/admin/api/vendors');
+    if (r.ok) {
+      const d = await r.json();
+      const vendors = d.data || [];
+      const dl = document.getElementById('pm-vendor-list');
+      if (dl && vendors.length) {
+        dl.innerHTML = vendors.map(v => \`<option value="\${v.name.replace(/"/g,'&quot;')}"></option>\`).join('');
+      }
+    }
+  } catch(e) {}
+}
+
 // ── Load catalog ────────────────────────────────────────────────────────
 async function loadCatalog() {
   showStatus('info', '<i class="fas fa-spinner fa-spin"></i> Loading catalog…');
@@ -1849,6 +1929,8 @@ async function loadCatalog() {
     \`;
     document.getElementById('cat-count').textContent = '0 products';
   }
+  // Always load the cat/vendor dropdowns regardless of catalog state
+  loadCatVendorLists();
 }
 
 // ── Import static catalog into KV ────────────────────────────────────────
@@ -2394,7 +2476,8 @@ function clearProdForm() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
-  document.getElementById('pm-category').value = 'Grain & Feed';
+  const catEl = document.getElementById('pm-category');
+  catEl.value = catEl.options[0]?.value || '';
   document.getElementById('pm-instock').checked = true;
   document.getElementById('pm-featured').checked = false;
   document.getElementById('pm-img-preview-wrap').style.display = 'none';
@@ -3119,6 +3202,473 @@ document.addEventListener('DOMContentLoaded', init);
 `
 }
 
+// ─── Categories & Vendors Manager ────────────────────────────────────────────
+function getCatVendorHTML(): string {
+  return `
+<div class="p-6 max-w-5xl mx-auto" id="cv-app">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        <i class="fas fa-tags" style="color:#C9A84C"></i> Categories &amp; Vendors
+      </h1>
+      <p class="text-gray-500 text-sm mt-1">
+        Manage the category and vendor lists used across the product catalog and product editor.
+      </p>
+    </div>
+    <button onclick="saveAll()" id="cv-saveBtn"
+      class="flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white"
+      style="background:#1B2A4A">
+      <i class="fas fa-save"></i> Save Changes
+    </button>
+  </div>
+
+  <!-- Status -->
+  <div id="cv-status" class="hidden mb-5 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2"></div>
+
+  <div id="cv-loading" class="flex items-center justify-center py-20 text-gray-400">
+    <i class="fas fa-spinner fa-spin text-2xl mr-3"></i> Loading…
+  </div>
+
+  <div id="cv-main" class="hidden grid lg:grid-cols-2 gap-8">
+
+    <!-- ═══ CATEGORIES ═══ -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between" style="background:#FAFBFC">
+        <div>
+          <div class="font-bold text-gray-900 flex items-center gap-2">
+            <i class="fas fa-folder-open text-gold-400"></i> Categories
+          </div>
+          <div class="text-xs text-gray-400 mt-0.5">Used as the "Category" field on every product</div>
+        </div>
+        <span id="cv-cat-count" class="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full"></span>
+      </div>
+
+      <div class="p-5">
+        <!-- Add new -->
+        <div class="flex gap-2 mb-4">
+          <input id="cv-new-cat" type="text" placeholder="New category name…"
+            class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm"
+            onkeydown="if(event.key==='Enter') addCategory()"/>
+          <button onclick="addCategory()"
+            class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white"
+            style="background:#1B2A4A">
+            <i class="fas fa-plus text-xs"></i> Add
+          </button>
+        </div>
+
+        <!-- Usage hint -->
+        <div class="text-xs text-blue-600 bg-blue-50 rounded-lg px-3 py-2 mb-4 flex items-center gap-2">
+          <i class="fas fa-info-circle"></i>
+          <span>Product counts shown below. Renaming a category will <strong>bulk-update</strong> all products using it.</span>
+        </div>
+
+        <!-- List -->
+        <div id="cv-cat-list" class="space-y-2 max-h-[520px] overflow-y-auto pr-1"></div>
+      </div>
+    </div>
+
+    <!-- ═══ VENDORS ═══ -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between" style="background:#FAFBFC">
+        <div>
+          <div class="font-bold text-gray-900 flex items-center gap-2">
+            <i class="fas fa-store text-gold-400"></i> Vendors
+          </div>
+          <div class="text-xs text-gray-400 mt-0.5">Used as the "Vendor / Brand" field on every product</div>
+        </div>
+        <span id="cv-vendor-count" class="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full"></span>
+      </div>
+
+      <div class="p-5">
+        <!-- Add new -->
+        <div class="flex gap-2 mb-4">
+          <input id="cv-new-vendor" type="text" placeholder="New vendor / brand name…"
+            class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm"
+            onkeydown="if(event.key==='Enter') addVendor()"/>
+          <button onclick="addVendor()"
+            class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white"
+            style="background:#1B2A4A">
+            <i class="fas fa-plus text-xs"></i> Add
+          </button>
+        </div>
+
+        <!-- Usage hint -->
+        <div class="text-xs text-blue-600 bg-blue-50 rounded-lg px-3 py-2 mb-4 flex items-center gap-2">
+          <i class="fas fa-info-circle"></i>
+          <span>Product counts shown below. Renaming a vendor will <strong>bulk-update</strong> all products using it.</span>
+        </div>
+
+        <!-- List -->
+        <div id="cv-vendor-list" class="space-y-2 max-h-[520px] overflow-y-auto pr-1"></div>
+      </div>
+    </div>
+
+  </div><!-- /cv-main -->
+
+  <!-- Rename confirmation modal -->
+  <div id="cv-rename-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6">
+      <h3 class="font-bold text-gray-900 text-lg mb-2 flex items-center gap-2">
+        <i class="fas fa-pencil-alt text-gold-400"></i> Rename <span id="cv-rename-type"></span>
+      </h3>
+      <p class="text-sm text-gray-500 mb-4">
+        This will also update all <strong id="cv-rename-count">0</strong> products that use
+        "<span id="cv-rename-old" class="font-semibold text-gray-800"></span>".
+      </p>
+      <input id="cv-rename-input" type="text"
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm mb-4"
+        placeholder="New name…" onkeydown="if(event.key==='Enter') confirmRename()"/>
+      <div class="flex gap-3 justify-end">
+        <button onclick="closeRenameModal()"
+          class="px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg">
+          Cancel
+        </button>
+        <button onclick="confirmRename()"
+          class="px-4 py-2 text-sm font-semibold text-white rounded-lg"
+          style="background:#1B2A4A">
+          <i class="fas fa-check mr-1"></i> Rename &amp; Update Products
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete confirmation modal -->
+  <div id="cv-delete-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6">
+      <h3 class="font-bold text-red-700 text-lg mb-2 flex items-center gap-2">
+        <i class="fas fa-trash-alt"></i> Delete <span id="cv-delete-type"></span>
+      </h3>
+      <p class="text-sm text-gray-600 mb-2">
+        Are you sure you want to delete
+        "<span id="cv-delete-name" class="font-semibold text-gray-900"></span>"?
+      </p>
+      <p class="text-sm text-amber-700 bg-amber-50 rounded-lg px-3 py-2 mb-5 flex items-start gap-2">
+        <i class="fas fa-exclamation-triangle mt-0.5"></i>
+        <span>
+          <strong id="cv-delete-count">0</strong> products currently use this <span id="cv-delete-type2"></span>.
+          Those products will keep their current value but it will no longer appear in the dropdown.
+        </span>
+      </p>
+      <div class="flex gap-3 justify-end">
+        <button onclick="closeDeleteModal()"
+          class="px-4 py-2 text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg">
+          Cancel
+        </button>
+        <button onclick="confirmDelete()"
+          class="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg">
+          <i class="fas fa-trash mr-1"></i> Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────────
+let cvCategories = [];  // [{name, color}]
+let cvVendors    = [];  // [{name, logoUrl, website}]
+let cvProducts   = [];  // full catalog for counts + bulk-rename
+
+// Rename/delete dialog state
+let renameCtx = null;  // {type:'cat'|'vendor', oldName, newName, idx}
+let deleteCtx = null;  // {type:'cat'|'vendor', name, idx}
+
+// Default categories seeded from the current catalog taxonomy
+const DEFAULT_CATEGORIES = [
+  'Horse Feed','Hay','Hay Cubes & Pellets','Shavings & Bedding',
+  'Supplements','Gut Health','Electrolytes','Psyllium Supplements',
+  'Shampoo & Coat Care','Fly Sprays','Fly Control Supplements',
+  'Grooming','Clippers & Tools','Leather Care','Oils','Liniments & Topicals',
+];
+const DEFAULT_VENDORS = [
+  'Nutrena','Pro Elite','Cavalor','Red Mills','Havens',
+  'Buckeye','Crypto Aero','Kent Sentinel','Absorbine','Farnam',
+  'Purina','Tribute','Standlee','Manna Pro',
+];
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+async function cvInit() {
+  // Load products for usage counts + bulk rename
+  try {
+    const r = await fetch('/admin/api/catalog');
+    if (r.ok) { const d = await r.json(); cvProducts = d.products || []; }
+  } catch(e) {}
+
+  // Load saved lists
+  try {
+    const [rc, rv] = await Promise.all([
+      fetch('/admin/api/categories'),
+      fetch('/admin/api/vendors'),
+    ]);
+    if (rc.ok) { const d = await rc.json(); if (d.data) cvCategories = d.data; }
+    if (rv.ok) { const d = await rv.json(); if (d.data) cvVendors = d.data; }
+  } catch(e) {}
+
+  // Seed defaults if nothing saved — merge with anything in catalog
+  if (!cvCategories.length) {
+    const fromCatalog = [...new Set(cvProducts.map(p => p.category).filter(Boolean))];
+    const merged = [...new Set([...DEFAULT_CATEGORIES, ...fromCatalog])].sort();
+    cvCategories = merged.map(name => ({ name }));
+  }
+  if (!cvVendors.length) {
+    const fromCatalog = [...new Set(cvProducts.map(p => p.vendor).filter(Boolean))];
+    const merged = [...new Set([...DEFAULT_VENDORS, ...fromCatalog])].sort();
+    cvVendors = merged.map(name => ({ name }));
+  }
+
+  document.getElementById('cv-loading').classList.add('hidden');
+  document.getElementById('cv-main').classList.remove('hidden');
+  renderAll();
+}
+
+function renderAll() {
+  renderCatList();
+  renderVendorList();
+}
+
+// ── Category list ─────────────────────────────────────────────────────────────
+function renderCatList() {
+  const el = document.getElementById('cv-cat-list');
+  const counts = {};
+  cvProducts.forEach(p => { if (p.category) counts[p.category] = (counts[p.category]||0)+1; });
+
+  el.innerHTML = cvCategories.map((cat, i) => {
+    const n = counts[cat.name] || 0;
+    return \`
+    <div class="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-gray-100 bg-gray-50 group hover:border-gray-300 transition-all">
+      <!-- Drag handle -->
+      <i class="fas fa-grip-vertical text-gray-300 text-xs cursor-grab w-3 flex-shrink-0"></i>
+
+      <!-- Name (editable inline) -->
+      <div class="flex-1 font-medium text-sm text-gray-800 truncate" title="\${esc(cat.name)}">\${esc(cat.name)}</div>
+
+      <!-- Count badge -->
+      <span class="text-xs px-2 py-0.5 rounded-full flex-shrink-0 \${n > 0 ? 'bg-navy-50 text-navy-700' : 'bg-gray-100 text-gray-400'}"
+        style="\${n > 0 ? 'background:#EEF1F8;color:#1B2A4A' : ''}">
+        \${n} product\${n !== 1 ? 's' : ''}
+      </span>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+        <button onclick="openRenameModal('cat',\${i})"
+          class="w-7 h-7 flex items-center justify-center rounded-lg text-blue-500 hover:bg-blue-50 transition-colors"
+          title="Rename">
+          <i class="fas fa-pencil-alt text-xs"></i>
+        </button>
+        <button onclick="openDeleteModal('cat',\${i})"
+          class="w-7 h-7 flex items-center justify-center rounded-lg text-red-400 hover:bg-red-50 transition-colors"
+          title="Delete">
+          <i class="fas fa-trash text-xs"></i>
+        </button>
+      </div>
+    </div>\`;
+  }).join('') || '<div class="text-sm text-gray-400 text-center py-6">No categories yet. Add one above.</div>';
+
+  document.getElementById('cv-cat-count').textContent = cvCategories.length + ' categories';
+}
+
+// ── Vendor list ───────────────────────────────────────────────────────────────
+function renderVendorList() {
+  const el = document.getElementById('cv-vendor-list');
+  const counts = {};
+  cvProducts.forEach(p => { if (p.vendor) counts[p.vendor] = (counts[p.vendor]||0)+1; });
+
+  el.innerHTML = cvVendors.map((v, i) => {
+    const n = counts[v.name] || 0;
+    return \`
+    <div class="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-gray-100 bg-gray-50 group hover:border-gray-300 transition-all">
+      <!-- Drag handle -->
+      <i class="fas fa-grip-vertical text-gray-300 text-xs cursor-grab w-3 flex-shrink-0"></i>
+
+      <!-- Name -->
+      <div class="flex-1 font-medium text-sm text-gray-800 truncate" title="\${esc(v.name)}">\${esc(v.name)}</div>
+
+      <!-- Product count -->
+      <span class="text-xs px-2 py-0.5 rounded-full flex-shrink-0"
+        style="\${n > 0 ? 'background:#EEF1F8;color:#1B2A4A' : 'background:#f1f5f9;color:#94a3b8'}">
+        \${n} product\${n !== 1 ? 's' : ''}
+      </span>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+        <button onclick="openRenameModal('vendor',\${i})"
+          class="w-7 h-7 flex items-center justify-center rounded-lg text-blue-500 hover:bg-blue-50 transition-colors"
+          title="Rename">
+          <i class="fas fa-pencil-alt text-xs"></i>
+        </button>
+        <button onclick="openDeleteModal('vendor',\${i})"
+          class="w-7 h-7 flex items-center justify-center rounded-lg text-red-400 hover:bg-red-50 transition-colors"
+          title="Delete">
+          <i class="fas fa-trash text-xs"></i>
+        </button>
+      </div>
+    </div>\`;
+  }).join('') || '<div class="text-sm text-gray-400 text-center py-6">No vendors yet. Add one above.</div>';
+
+  document.getElementById('cv-vendor-count').textContent = cvVendors.length + ' vendors';
+}
+
+// ── Add ───────────────────────────────────────────────────────────────────────
+function addCategory() {
+  const inp = document.getElementById('cv-new-cat');
+  const name = inp.value.trim();
+  if (!name) return;
+  if (cvCategories.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+    showCvStatus('error','<i class="fas fa-exclamation-circle mr-2"></i>Category "' + esc(name) + '" already exists.');
+    return;
+  }
+  cvCategories.push({ name });
+  inp.value = '';
+  renderCatList();
+  showCvStatus('info','<i class="fas fa-check-circle mr-2"></i>Category added. Click <strong>Save Changes</strong> to persist.');
+}
+function addVendor() {
+  const inp = document.getElementById('cv-new-vendor');
+  const name = inp.value.trim();
+  if (!name) return;
+  if (cvVendors.some(v => v.name.toLowerCase() === name.toLowerCase())) {
+    showCvStatus('error','<i class="fas fa-exclamation-circle mr-2"></i>Vendor "' + esc(name) + '" already exists.');
+    return;
+  }
+  cvVendors.push({ name });
+  inp.value = '';
+  renderVendorList();
+  showCvStatus('info','<i class="fas fa-check-circle mr-2"></i>Vendor added. Click <strong>Save Changes</strong> to persist.');
+}
+
+// ── Rename modal ──────────────────────────────────────────────────────────────
+function openRenameModal(type, idx) {
+  const item = type === 'cat' ? cvCategories[idx] : cvVendors[idx];
+  const counts = {};
+  const field = type === 'cat' ? 'category' : 'vendor';
+  cvProducts.forEach(p => { if (p[field]) counts[p[field]] = (counts[p[field]]||0)+1; });
+  renameCtx = { type, idx, oldName: item.name };
+  document.getElementById('cv-rename-type').textContent = type === 'cat' ? 'Category' : 'Vendor';
+  document.getElementById('cv-rename-old').textContent = item.name;
+  document.getElementById('cv-rename-count').textContent = counts[item.name] || 0;
+  document.getElementById('cv-rename-input').value = item.name;
+  document.getElementById('cv-rename-modal').classList.remove('hidden');
+  document.getElementById('cv-rename-modal').classList.add('flex');
+  setTimeout(() => document.getElementById('cv-rename-input').select(), 50);
+}
+function closeRenameModal() {
+  document.getElementById('cv-rename-modal').classList.add('hidden');
+  document.getElementById('cv-rename-modal').classList.remove('flex');
+  renameCtx = null;
+}
+async function confirmRename() {
+  if (!renameCtx) return;
+  const newName = document.getElementById('cv-rename-input').value.trim();
+  if (!newName || newName === renameCtx.oldName) { closeRenameModal(); return; }
+
+  const { type, idx, oldName } = renameCtx;
+  const field = type === 'cat' ? 'category' : 'vendor';
+
+  // Update the list
+  if (type === 'cat') cvCategories[idx].name = newName;
+  else cvVendors[idx].name = newName;
+
+  // Bulk-update products in memory
+  let updated = 0;
+  cvProducts.forEach(p => { if (p[field] === oldName) { p[field] = newName; updated++; } });
+
+  closeRenameModal();
+  renderAll();
+
+  // Save list + bulk-update catalog
+  await saveAll(true);
+  if (updated > 0) {
+    // Push updated catalog too
+    try {
+      await fetch('/admin/api/catalog', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ products: cvProducts }) });
+    } catch(e) {}
+    showCvStatus('success', \`<i class="fas fa-check-circle mr-2"></i>Renamed to "\${esc(newName)}" and updated \${updated} product\${updated!==1?'s':''}.\`);
+  }
+}
+
+// ── Delete modal ──────────────────────────────────────────────────────────────
+function openDeleteModal(type, idx) {
+  const item = type === 'cat' ? cvCategories[idx] : cvVendors[idx];
+  const field = type === 'cat' ? 'category' : 'vendor';
+  const count = cvProducts.filter(p => p[field] === item.name).length;
+  deleteCtx = { type, idx, name: item.name };
+  document.getElementById('cv-delete-type').textContent = type === 'cat' ? 'Category' : 'Vendor';
+  document.getElementById('cv-delete-type2').textContent = type === 'cat' ? 'category' : 'vendor';
+  document.getElementById('cv-delete-name').textContent = item.name;
+  document.getElementById('cv-delete-count').textContent = count;
+  document.getElementById('cv-delete-modal').classList.remove('hidden');
+  document.getElementById('cv-delete-modal').classList.add('flex');
+}
+function closeDeleteModal() {
+  document.getElementById('cv-delete-modal').classList.add('hidden');
+  document.getElementById('cv-delete-modal').classList.remove('flex');
+  deleteCtx = null;
+}
+async function confirmDelete() {
+  if (!deleteCtx) return;
+  const { type, idx } = deleteCtx;
+  if (type === 'cat') cvCategories.splice(idx, 1);
+  else cvVendors.splice(idx, 1);
+  closeDeleteModal();
+  renderAll();
+  await saveAll(true);
+  showCvStatus('success','<i class="fas fa-check-circle mr-2"></i>Deleted. Products keep their existing value.');
+}
+
+// ── Save ──────────────────────────────────────────────────────────────────────
+async function saveAll(silent = false) {
+  if (!silent) {
+    const btn = document.getElementById('cv-saveBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
+  }
+  try {
+    const [rc, rv] = await Promise.all([
+      fetch('/admin/api/categories', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(cvCategories) }),
+      fetch('/admin/api/vendors',    { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(cvVendors) }),
+    ]);
+    if (!silent) {
+      if (rc.ok && rv.ok) {
+        showCvStatus('success','<i class="fas fa-check-circle mr-2"></i>Saved! Changes will appear in the product editor immediately.');
+      } else {
+        showCvStatus('error','<i class="fas fa-exclamation-circle mr-2"></i>Save failed — try again.');
+      }
+    }
+  } catch(e) {
+    if (!silent) showCvStatus('error','<i class="fas fa-exclamation-circle mr-2"></i>Error: ' + e.message);
+  }
+  if (!silent) {
+    const btn = document.getElementById('cv-saveBtn');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+  }
+}
+
+function showCvStatus(type, html) {
+  const el = document.getElementById('cv-status');
+  const map = {
+    success: 'bg-green-50 text-green-700 border border-green-200',
+    error:   'bg-red-50 text-red-700 border border-red-200',
+    info:    'bg-blue-50 text-blue-700 border border-blue-200',
+  };
+  el.className = 'mb-5 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2 ' + (map[type]||map.info);
+  el.innerHTML = html;
+  el.classList.remove('hidden');
+  if (type === 'success') setTimeout(() => el.classList.add('hidden'), 5000);
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+document.addEventListener('DOMContentLoaded', cvInit);
+</script>
+`
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 
 function adminShell(title: string, activeTab: string, body: string): string {
@@ -3205,6 +3755,7 @@ function adminShell(title: string, activeTab: string, body: string): string {
       <a href="/admin"            class="sidebar-link ${activeTab==='dashboard'?'active':''}"><i class="fas fa-chart-line w-4 text-center text-sm"></i> Dashboard</a>
       <div class="px-3 pt-3 pb-1"><div class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Product Catalog</div></div>
       <a href="/admin/catalog"    class="sidebar-link ${activeTab==='catalog'  ?'active':''}"><i class="fas fa-table-list w-4 text-center text-sm"></i> Catalog Manager</a>
+      <a href="/admin/categories-vendors" class="sidebar-link ${activeTab==='categories-vendors'?'active':''}"><i class="fas fa-tags w-4 text-center text-sm"></i> Categories &amp; Vendors</a>
       <div class="px-3 pt-3 pb-1"><div class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Site Management</div></div>
       <a href="/admin/content"    class="sidebar-link ${activeTab==='content'  ?'active':''}"><i class="fas fa-pen-to-square w-4 text-center text-sm"></i> Site Content</a>
       <a href="/admin/homepage-sections" class="sidebar-link ${activeTab==='homepage-sections'?'active':''}"><i class="fas fa-store w-4 text-center text-sm"></i> Homepage Sections</a>
