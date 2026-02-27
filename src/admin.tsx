@@ -452,11 +452,12 @@ function openSection(sec) {
   // Render panel content
   document.getElementById('ve-panel-inner').innerHTML = buildPanel(sec);
   document.getElementById('ve-panel').classList.add('open');
-  // Tell iframe to highlight this section
+  // Tell iframe to highlight this section (guard: iframe may not be loaded yet)
   const iframe = document.getElementById('ve-iframe');
-  iframe.contentWindow.postMessage({type:'highlight', section: sec}, '*');
-  // Scroll iframe to section
-  iframe.contentWindow.postMessage({type:'scroll-to', section: sec}, '*');
+  if (iframe && iframe.contentWindow) {
+    iframe.contentWindow.postMessage({type:'highlight', section: sec}, '*');
+    iframe.contentWindow.postMessage({type:'scroll-to', section: sec}, '*');
+  }
   // Attach thumb preview for img fields
   document.querySelectorAll('#ve-panel-inner [data-field]').forEach(el => {
     if (el.dataset.imgthumb) {
@@ -471,7 +472,7 @@ function closePanel() {
   document.getElementById('ve-panel').classList.remove('open');
   document.querySelectorAll('.ve-section-btn').forEach(b => b.classList.remove('active'));
   const iframe = document.getElementById('ve-iframe');
-  iframe.contentWindow.postMessage({type:'highlight', section: null}, '*');
+  if (iframe && iframe.contentWindow) iframe.contentWindow.postMessage({type:'highlight', section: null}, '*');
 }
 
 function updateThumb(inputEl) {
@@ -525,13 +526,7 @@ function setDevice(dev) {
 window.addEventListener('message', e => {
   if (e.data?.type === 'section-click') openSection(e.data.section);
   if (e.data?.type === 'iframe-ready') {
-    // Preview loaded — hide spinner, show notice, push current data
-    document.getElementById('ve-iframe-loading').style.display = 'none';
-    document.getElementById('ve-notice').style.display = 'flex';
-    const iframe = document.getElementById('ve-iframe');
-    if (veData && Object.keys(veData).length && iframe.contentWindow) {
-      iframe.contentWindow.postMessage({type:'apply-content', data: veData}, '*');
-    }
+    showPreview();
   }
 });
 
@@ -773,18 +768,34 @@ function buildPanel(sec) {
 // overlays already injected server-side. The preview page posts "iframe-ready"
 // when its overlays are set up; we listen above in the message handler.
 
+function showPreview() {
+  const loading = document.getElementById('ve-iframe-loading');
+  const notice  = document.getElementById('ve-notice');
+  const iframe  = document.getElementById('ve-iframe');
+  if (!loading || loading.style.display === 'none') return; // already shown
+  loading.style.display = 'none';
+  if (notice) notice.style.display = 'flex';
+  // Push saved content data into the now-ready iframe
+  if (iframe && iframe.contentWindow && veData && Object.keys(veData).length) {
+    iframe.contentWindow.postMessage({type:'apply-content', data: veData}, '*');
+  }
+  if (iframe && iframe.contentWindow && veCurrentSection) {
+    iframe.contentWindow.postMessage({type:'highlight', section: veCurrentSection}, '*');
+  }
+}
+
 async function init() {
+  // Attach iframe.onload FIRST — most reliable trigger regardless of postMessage timing
+  const iframe = document.getElementById('ve-iframe');
+  if (iframe) {
+    iframe.addEventListener('load', showPreview);
+  }
+
   await loadContent();
-  // Open hero panel immediately — iframe loads independently via src attribute
+  // Open hero panel immediately — iframe loads independently via its src attribute
   openSection('hero');
-  // Fallback: if iframe-ready never fires (e.g. slow network), hide spinner after 12 s
-  setTimeout(function() {
-    const loading = document.getElementById('ve-iframe-loading');
-    if (loading && loading.style.display !== 'none') {
-      loading.style.display = 'none';
-      document.getElementById('ve-notice').style.display = 'flex';
-    }
-  }, 12000);
+  // Hard fallback: force-show after 10 s in case all else fails
+  setTimeout(showPreview, 10000);
 }
 
 document.addEventListener('DOMContentLoaded', init);
@@ -795,7 +806,8 @@ document.addEventListener('DOMContentLoaded', init);
 
 // ─── /admin/content/preview — serves homepage HTML with overlays injected ────
 // Used as iframe src so the browser loads it natively (no srcdoc size limits)
-admin.get('/content/preview', requireAuth, async (c) => {
+// No auth required — preview only serves homepage public content with edit overlays
+admin.get('/content/preview', async (c) => {
   try {
     // Fetch the homepage from the same worker
     const origin = new URL(c.req.url).origin
@@ -881,9 +893,11 @@ admin.get('/content/preview', requireAuth, async (c) => {
       '    if(getComputedStyle(sb).position==="static")sb.style.position="relative";' +
       '    sb.prepend(b);sb.addEventListener("click",function(){sendSection("stats");});' +
       '  }' +
-      '  // Signal parent that iframe is interactive' +
+      '  // Signal parent that iframe is interactive (DOMContentLoaded)' +
       '  window.parent.postMessage({type:"iframe-ready"},"*");' +
       '}' +
+      // Also fire on window.onload — gives parent page extra time to register listener
+      'window.addEventListener("load",function(){window.parent.postMessage({type:"iframe-ready"},"*");});' +
       'window.addEventListener("message",function(e){' +
       '  var m=e.data;if(!m)return;' +
       '  if(m.type==="apply-content")applyContent(m.data);' +
