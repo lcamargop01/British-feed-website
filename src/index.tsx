@@ -1736,6 +1736,12 @@ function getProductsHTML(): string {
         <p class="text-slate-600 text-sm leading-relaxed" id="modalDescription"></p>
       </div>
 
+      <!-- Extra details: features, bestFor, nutrition -->
+      <div id="modalExtra" class="mb-4"></div>
+
+      <!-- Video embed -->
+      <div id="modalVideoWrap" style="display:none" class="mb-4"></div>
+
       <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5 flex items-start gap-3">
         <i class="fas fa-phone-alt text-amber-500 mt-0.5 flex-shrink-0"></i>
         <div>
@@ -1789,6 +1795,10 @@ function catConfig(cat) {
 }
 
 function getProductImage(product) {
+  // First check if the admin has set a direct image URL or KV key
+  if (product.imageUrl) return product.imageUrl;
+  if (product.imageKey) return '/admin/api/catalog/image/' + product.imageKey;
+
   const name = product.name.toLowerCase();
   const vendor = (product.vendor || '').toLowerCase();
   const cat = product.category.toLowerCase();
@@ -1835,9 +1845,25 @@ function formatPrice(p) {
 
 async function loadData() {
   try {
-    const res = await fetch('/static/products-data.json');
-    if (!res.ok) throw new Error('Failed to load');
-    allProducts = await res.json();
+    // Try KV catalog first (admin-editable), fall back to static JSON
+    let products = null;
+    try {
+      const kvRes = await fetch('/admin/api/public/catalog');
+      if (kvRes.ok) {
+        const kvData = await kvRes.json();
+        if (kvData.products && kvData.products.length > 0) {
+          products = kvData.products;
+        }
+      }
+    } catch(e) { /* fall through to static */ }
+
+    if (!products) {
+      const res = await fetch('/static/products-data.json');
+      if (!res.ok) throw new Error('Failed to load');
+      products = await res.json();
+    }
+
+    allProducts = products;
     buildCategoryFilters();
     applyFilters();
   } catch(e) {
@@ -2073,6 +2099,47 @@ function openModal(id) {
   document.getElementById('modalVendorCat').textContent = [p.vendor, p.category].filter(Boolean).join(' · ');
   document.getElementById('modalPrice').textContent = formatPrice(p.price);
   document.getElementById('modalDescription').textContent = p.description || 'No description available.';
+
+  // Video section
+  const videoWrap = document.getElementById('modalVideoWrap');
+  if (p.videoUrl && videoWrap) {
+    let embedHtml = '';
+    const ytMatch = p.videoUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+    if (ytMatch) embedHtml = \`<iframe width="100%" height="220" src="https://www.youtube.com/embed/\${ytMatch[1]}" frameborder="0" allowfullscreen style="border-radius:10px;"></iframe>\`;
+    const vimeoMatch = p.videoUrl.match(/vimeo\.com\/(\d+)/);
+    if (vimeoMatch) embedHtml = \`<iframe width="100%" height="220" src="https://player.vimeo.com/video/\${vimeoMatch[1]}" frameborder="0" allowfullscreen style="border-radius:10px;"></iframe>\`;
+    if (!embedHtml && (p.videoUrl.includes('.mp4') || p.videoUrl.includes('.webm')))
+      embedHtml = \`<video src="\${p.videoUrl}" controls style="width:100%;max-height:220px;border-radius:10px;"></video>\`;
+    if (embedHtml) {
+      videoWrap.innerHTML = \`<div class="mt-4"><div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2"><i class="fas fa-play-circle text-purple-400 mr-1"></i> Product Video</div>\${embedHtml}</div>\`;
+      videoWrap.style.display = 'block';
+    } else {
+      videoWrap.innerHTML = '';
+      videoWrap.style.display = 'none';
+    }
+  } else if (videoWrap) {
+    videoWrap.innerHTML = '';
+    videoWrap.style.display = 'none';
+  }
+
+  // Additional details (features, bestFor, nutrition)
+  const extraWrap = document.getElementById('modalExtra');
+  if (extraWrap) {
+    let extraHtml = '';
+    if (p.bestFor) extraHtml += \`<div class="mt-3 text-sm"><span class="font-semibold text-navy">Best For: </span><span class="text-gray-600">\${p.bestFor}</span></div>\`;
+    if (p.features && p.features.length > 0) {
+      extraHtml += \`<div class="mt-3"><div class="text-sm font-semibold text-navy mb-1.5">Key Features:</div>
+      <ul class="list-disc list-inside text-sm text-gray-600 space-y-0.5">\${p.features.map((f: string) => \`<li>\${f}</li>\`).join('')}</ul></div>\`;
+    }
+    if (p.protein || p.fat || p.fiber) {
+      extraHtml += \`<div class="mt-3 flex gap-4">
+        \${p.protein ? \`<div class="text-center bg-blue-50 rounded-lg px-3 py-2"><div class="text-lg font-bold text-navy">\${p.protein}%</div><div class="text-xs text-gray-500">Protein</div></div>\` : ''}
+        \${p.fat ? \`<div class="text-center bg-amber-50 rounded-lg px-3 py-2"><div class="text-lg font-bold text-amber-700">\${p.fat}%</div><div class="text-xs text-gray-500">Fat</div></div>\` : ''}
+        \${p.fiber ? \`<div class="text-center bg-green-50 rounded-lg px-3 py-2"><div class="text-lg font-bold text-green-700">\${p.fiber}%</div><div class="text-xs text-gray-500">Fiber</div></div>\` : ''}
+      </div>\`;
+    }
+    extraWrap.innerHTML = extraHtml;
+  }
 
   document.getElementById('productModal').classList.remove('hidden');
   document.body.style.overflow = 'hidden';
