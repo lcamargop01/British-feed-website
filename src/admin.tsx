@@ -498,7 +498,7 @@ function renderProducts(data) {
               <span class="font-semibold text-sm text-gray-800">\${prod.name}</span>
               \${prod.featured ? '<span class="badge badge-amber text-xs">★ Featured</span>' : ''}
               \${prod.inStock === false ? '<span class="badge" style="background:#FEE2E2;color:#DC2626">Out of Stock</span>' : ''}
-              \${(prod.tags||[]).slice(0,3).map((t:string)=>\`<span class="badge badge-blue text-xs">\${t}</span>\`).join('')}
+              \${(prod.tags||[]).slice(0,3).map(function(t){ return \`<span class="badge badge-blue text-xs">\${t}</span>\`; }).join('')}
             </div>
             <div class="text-xs text-gray-500 truncate mt-0.5">\${prod.description||prod.shortDesc||''}</div>
             \${prod.price ? \`<div class="text-xs font-medium mt-0.5" style="color:#C9A84C">\${prod.price}</div>\` : ''}
@@ -1329,9 +1329,9 @@ async function loadHistory() {
   container.innerHTML = history.slice().reverse().slice(0,50).map(session => \`
   <div class="border border-gray-100 rounded-xl p-3 mb-3">
     <div class="text-xs text-gray-400 mb-2">\${session.date||''} · \${session.messages?.length||0} messages</div>
-    \${(session.messages||[]).slice(0,3).map((m:any) => \`
+    \${(session.messages||[]).slice(0,3).map(function(m) { return \`
       <div class="text-sm \${m.role==='user'?'text-navy font-medium':'text-gray-600'} mb-1">\${m.role==='user'?'Customer: ':'Bri: '}\${m.content?.slice(0,120)||''}\${m.content?.length>120?'…':''}</div>
-    \`).join('')}
+    \`; }).join('')}
     \${session.messages?.length > 3 ? \`<div class="text-xs text-gray-400">… and \${session.messages.length-3} more messages</div>\` : ''}
   </div>
   \`).join('');
@@ -2198,7 +2198,7 @@ async function loadCatalog() {
   if (data.products && data.products.length > 0) {
     catProducts = data.products;
     initCatalog();
-    showStatus('success', \`<i class="fas fa-check-circle"></i> Loaded \${catProducts.length} products.\`);
+    showStatus('success', '<i class="fas fa-check-circle"></i> Loaded ' + catProducts.length + ' products.');
     setTimeout(() => document.getElementById('catalog-status').classList.add('hidden'), 3000);
   } else {
     showStatus('warning', '<i class="fas fa-exclamation-triangle"></i> No products in store yet. Click <strong>"Import from Static"</strong> to load the product catalog.');
@@ -2251,14 +2251,14 @@ function exportCSV() {
   const rows = catProducts.map(p => [
     p.id, p.name, p.category, p.vendor||'', p.price||'',
     p.inStock !== false ? 'Yes' : 'No',
-    (p.description||'').replace(/"/g,'""'),
+    (p.description||'').replace(new RegExp('"','g'),'""'),
     p.imageUrl||'', p.videoUrl||'',
     p.protein||'', p.fat||'', p.fiber||'',
-    (p.bestFor||'').replace(/"/g,'""'),
-    Array.isArray(p.features) ? p.features.join('; ').replace(/"/g,'""') : '',
+    (p.bestFor||'').replace(new RegExp('"','g'),'""'),
+    Array.isArray(p.features) ? p.features.join('; ').replace(new RegExp('"','g'),'""') : '',
     p.featured ? 'Yes' : ''
   ]);
-  const csv = [headers, ...rows].map(r => r.map(v => \`"\${v}"\`).join(',')).join('\n');
+  const csv = [headers, ...rows].map(function(r){ return r.map(function(v){ return '"' + String(v).replace(new RegExp('"','g'),'""') + '"'; }).join(','); }).join('\\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -2275,10 +2275,10 @@ async function importCSV(input) {
   const file = input.files[0];
   if (!file) return;
   const text = await file.text();
-  const lines = text.split('\n').filter(l => l.trim());
+  const lines = text.split('\\n').filter(l => l.trim());
   if (lines.length < 2) { showStatus('error', 'CSV file appears empty or invalid.'); return; }
 
-  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,'').trim().toLowerCase());
+  const headers = lines[0].split(',').map(h => h.replace(new RegExp('^"','g'),'').replace(new RegExp('"$','g'),'').trim().toLowerCase());
   const nameIdx = headers.findIndex(h => h === 'name');
   const catIdx  = headers.findIndex(h => h === 'category');
   const priceIdx = headers.findIndex(h => h.includes('price'));
@@ -2406,7 +2406,7 @@ function renderCatalogTable() {
       : (p.imageKey
         ? \`<img src="/admin/api/catalog/image/\${p.imageKey}" alt="" style="width:40px;height:40px;object-fit:contain;border-radius:6px;border:1px solid #e2e8f0;" onerror="this.style.display='none'" />\`
         : \`<div style="width:40px;height:40px;background:#f1f5f9;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#94a3b8;" title="No image">📦</div>\`);
-    const escapedName = p.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    const escapedName = p.name.split("'").join("\\'");
 
     return \`<tr style="border-bottom:1px solid #f1f5f9; transition:background 0.15s;" onmouseover="this.style.background='#fafbff'" onmouseout="this.style.background=''">
       <td style="padding:10px 16px; font-size:11px; color:#94a3b8; font-weight:500;">#\${p.id}</td>
@@ -2640,9 +2640,9 @@ function previewVideoUrl(url) {
   const wrap = document.getElementById('pm-video-preview');
   if (!url) { wrap.style.display = 'none'; return; }
   let embedHtml = '';
-  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+  const ytMatch = url.match(new RegExp('(?:youtube\.com/watch\?v=|youtu\.be/)([\\w-]+)'));
   if (ytMatch) embedHtml = \`<iframe width="100%" height="180" src="https://www.youtube.com/embed/\${ytMatch[1]}" frameborder="0" allowfullscreen style="border-radius:8px;"></iframe>\`;
-  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+  const vimeoMatch = url.match(new RegExp('vimeo\.com/(\\d+)'));
   if (vimeoMatch) embedHtml = \`<iframe width="100%" height="180" src="https://player.vimeo.com/video/\${vimeoMatch[1]}" frameborder="0" allowfullscreen style="border-radius:8px;"></iframe>\`;
   if (!embedHtml && (url.includes('.mp4') || url.includes('.webm')))
     embedHtml = \`<video src="\${url}" controls style="width:100%;max-height:180px;border-radius:8px;"></video>\`;
@@ -2713,7 +2713,7 @@ function openEditProduct(id) {
   document.getElementById('pm-fat').value = p.fat || '';
   document.getElementById('pm-fiber').value = p.fiber || '';
   document.getElementById('pm-bestfor').value = p.bestFor || '';
-  document.getElementById('pm-features').value = Array.isArray(p.features) ? p.features.join('\n') : (p.features || '');
+  document.getElementById('pm-features').value = Array.isArray(p.features) ? p.features.join('\\n') : (p.features || '');
   document.getElementById('pm-featured').checked = p.featured || false;
 
   const imgUrl = p.imageUrl || (p.imageKey ? \`/admin/api/catalog/image/\${p.imageKey}\` : null);
@@ -2840,7 +2840,7 @@ async function saveProdModal() {
   }
 
   const features = document.getElementById('pm-features').value
-    .split('\n').map(s => s.trim()).filter(Boolean);
+    .split('\\n').map(s => s.trim()).filter(Boolean);
 
   const productData = {
     name,
