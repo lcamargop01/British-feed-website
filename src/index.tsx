@@ -193,7 +193,7 @@ app.post('/api/contact', async (c) => {
         method:  'POST',
         headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from:     'British Feed Leads <leads@britishfeed.com>',
+          from:     'British Feed Leads <onboarding@resend.dev>',
           to:       [toEmail],
           reply_to: email !== 'not provided' ? email : undefined,
           subject:  `New Lead: ${name} — ${subject}`,
