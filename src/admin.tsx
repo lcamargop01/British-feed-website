@@ -1847,7 +1847,7 @@ admin.post('/api/contact', async (c) => {
 
   // 3. Send email via Resend
   const resendKey  = c.env?.RESEND_API_KEY  || ''
-  const toEmail    = c.env?.NOTIFY_EMAIL    || 'admin@britishfeed.com'
+  const toEmail    = c.env?.NOTIFY_EMAIL    || 'inquiries@britishfeed.com'
   if (resendKey) {
     try {
       await fetch('https://api.resend.com/emails', {
