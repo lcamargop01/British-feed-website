@@ -11,6 +11,12 @@ type Bindings = {
   OPENAI_API_KEY: string
   OPENAI_BASE_URL: string
   ADMIN_PASSWORD: string
+  RESEND_API_KEY: string
+  TWILIO_ACCOUNT_SID: string
+  TWILIO_AUTH_TOKEN: string
+  TWILIO_FROM_NUMBER: string   // your Twilio phone number, e.g. +15005550006
+  NOTIFY_EMAIL: string         // destination email, e.g. admin@britishfeed.com
+  NOTIFY_PHONE: string         // destination SMS, e.g. +15616336003
 }
 
 export const admin = new Hono<{ Bindings: Bindings }>()
@@ -1791,13 +1797,96 @@ ${kbSection}`
   }
 })
 
-// ─── Public API — save contact form ──────────────────────────────────────────
+// ─── Public API — save contact form + send notifications ─────────────────────
 admin.post('/api/contact', async (c) => {
-  const kv = c.env?.BF_STORE
+  const kv   = c.env?.BF_STORE
   const body = await c.req.json()
+
+  const lead = {
+    ...body,
+    date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+    time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'America/New_York' }),
+  }
+
+  // 1. Persist to KV
   const contacts: any[] = await kvGet(kv, 'contacts', [])
-  contacts.push({ ...body, date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) })
+  contacts.push(lead)
   await kvPut(kv, 'contacts', contacts)
+
+  // 2. Build notification text
+  const name    = `${lead.firstName || ''} ${lead.lastName || ''}`.trim() || 'Unknown'
+  const subject = lead.subject  || 'General'
+  const phone   = lead.phone    || 'not provided'
+  const email   = lead.email    || 'not provided'
+  const message = lead.message  || ''
+
+  const smsBody =
+    `🐴 New British Feed Lead!\n` +
+    `Name: ${name}\n` +
+    `Phone: ${phone}\n` +
+    `Email: ${email}\n` +
+    `Topic: ${subject}\n` +
+    `Msg: ${message.slice(0, 120)}${message.length > 120 ? '…' : ''}`
+
+  const emailHtml =
+    `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#f9f9f9;">` +
+    `<div style="background:#1B2A4A;padding:16px 24px;border-radius:8px 8px 0 0;">` +
+    `<h2 style="color:#C9A84C;margin:0;font-size:18px;">🐴 New Contact Form Lead</h2>` +
+    `<p style="color:#fff;margin:4px 0 0;font-size:13px;">British Feed &amp; Supplies Website</p></div>` +
+    `<div style="background:#fff;padding:24px;border-radius:0 0 8px 8px;border:1px solid #e5e7eb;">` +
+    `<table style="width:100%;border-collapse:collapse;font-size:14px;">` +
+    `<tr><td style="padding:8px 0;color:#6b7280;width:120px;vertical-align:top;">Name</td><td style="padding:8px 0;font-weight:600;color:#111;">${name}</td></tr>` +
+    `<tr style="background:#f9fafb;"><td style="padding:8px 4px;color:#6b7280;vertical-align:top;">Phone</td><td style="padding:8px 4px;color:#111;"><a href="tel:${phone}" style="color:#1B2A4A;">${phone}</a></td></tr>` +
+    `<tr><td style="padding:8px 0;color:#6b7280;vertical-align:top;">Email</td><td style="padding:8px 0;color:#111;"><a href="mailto:${email}" style="color:#1B2A4A;">${email}</a></td></tr>` +
+    `<tr style="background:#f9fafb;"><td style="padding:8px 4px;color:#6b7280;vertical-align:top;">Topic</td><td style="padding:8px 4px;color:#111;">${subject}</td></tr>` +
+    `<tr><td style="padding:8px 0;color:#6b7280;vertical-align:top;">Date</td><td style="padding:8px 0;color:#111;">${lead.date} at ${lead.time} ET</td></tr>` +
+    `<tr style="background:#f9fafb;"><td style="padding:8px 4px;color:#6b7280;vertical-align:top;">Message</td><td style="padding:8px 4px;color:#111;white-space:pre-wrap;">${message}</td></tr>` +
+    `</table>` +
+    `<div style="margin-top:20px;padding:12px 16px;background:#FEF3C7;border-radius:8px;font-size:13px;color:#92400e;">` +
+    `⚡ Reply directly to this email to respond to the customer.</div></div></div>`
+
+  // 3. Send email via Resend
+  const resendKey  = c.env?.RESEND_API_KEY  || ''
+  const toEmail    = c.env?.NOTIFY_EMAIL    || 'admin@britishfeed.com'
+  if (resendKey) {
+    try {
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from:    'British Feed Leads <leads@britishfeed.com>',
+          to:      [toEmail],
+          reply_to: email !== 'not provided' ? email : undefined,
+          subject: `New Lead: ${name} — ${subject}`,
+          html:    emailHtml,
+        }),
+      })
+    } catch (_) {}
+  }
+
+  // 4. Send SMS via Twilio
+  const twilioSid   = c.env?.TWILIO_ACCOUNT_SID  || ''
+  const twilioToken = c.env?.TWILIO_AUTH_TOKEN    || ''
+  const twilioFrom  = c.env?.TWILIO_FROM_NUMBER   || ''
+  const toPhone     = c.env?.NOTIFY_PHONE         || '+15616336003'
+  if (twilioSid && twilioToken && twilioFrom) {
+    try {
+      const params = new URLSearchParams({
+        To:   toPhone,
+        From: twilioFrom,
+        Body: smsBody,
+      })
+      await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`, {
+        method:  'POST',
+        headers: {
+          'Authorization': 'Basic ' + btoa(`${twilioSid}:${twilioToken}`),
+          'Content-Type':  'application/x-www-form-urlencoded',
+        },
+        body: params.toString(),
+      })
+    } catch (_) {}
+  }
+
   return c.json({ ok: true, message: 'Thank you! We will contact you shortly.' })
 })
 
