@@ -997,7 +997,7 @@ function imgPickerHTML(pickerId, currentUrl, setterExpr) {
           browse<input type="file" accept="image/*" class="hidden"
             onchange="handleImgPickerFile(event,'\${pickerId}',function(url){\${setterExpr}})"/>
         </label>
-        <div class="text-gray-300 mt-0.5">JPG · PNG · WebP · max 800 KB</div>
+        <div class="text-gray-300 mt-0.5">JPG · PNG · WebP · max 4 MB</div>
       </div>
       <div class="ip-upload-status text-xs text-gray-400 mt-1"></div>
     </div>
@@ -3649,7 +3649,7 @@ function imgPickerHTML(pickerId, currentUrl, setterExpr) {
           browse<input type="file" accept="image/*" class="hidden"
             onchange="handleImgPickerFile(event,'\${pickerId}',function(url){\${setterExpr}})"/>
         </label>
-        <div class="text-gray-300 mt-0.5">JPG · PNG · WebP · max 800 KB</div>
+        <div class="text-gray-300 mt-0.5">JPG · PNG · WebP · max 4 MB</div>
       </div>
       <div class="ip-upload-status text-xs text-gray-400 mt-1"></div>
     </div>
