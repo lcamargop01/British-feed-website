@@ -8,12 +8,6 @@ type Bindings = {
   OPENAI_BASE_URL: string
   BF_STORE: KVNamespace
   ADMIN_PASSWORD: string
-  RESEND_API_KEY: string
-  TWILIO_ACCOUNT_SID: string
-  TWILIO_AUTH_TOKEN: string
-  TWILIO_FROM_NUMBER: string
-  NOTIFY_EMAIL: string
-  NOTIFY_PHONE: string
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -152,74 +146,32 @@ app.post('/api/contact', async (c) => {
     } catch {}
   }
 
-  // 2. Build notification content
+  // 2. Send notification via Web3Forms
   const name    = `${lead.firstName || ''} ${lead.lastName || ''}`.trim() || 'Unknown'
-  const subject = lead.subject  || 'General'
-  const phone   = lead.phone    || 'not provided'
-  const email   = lead.email    || 'not provided'
-  const message = lead.message  || ''
+  const subject = lead.subject || 'General'
+  const phone   = lead.phone   || 'not provided'
+  const email   = lead.email   || 'not provided'
+  const message = lead.message || ''
 
-  const smsBody =
-    `🐴 New British Feed Lead!\n` +
-    `Name: ${name}\n` +
-    `Phone: ${phone}\n` +
-    `Email: ${email}\n` +
-    `Topic: ${subject}\n` +
-    `Msg: ${message.slice(0, 120)}${message.length > 120 ? '…' : ''}`
-
-  const emailHtml =
-    `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#f9f9f9;">` +
-    `<div style="background:#1B2A4A;padding:16px 24px;border-radius:8px 8px 0 0;">` +
-    `<h2 style="color:#C9A84C;margin:0;font-size:18px;">🐴 New Contact Form Lead</h2>` +
-    `<p style="color:#fff;margin:4px 0 0;font-size:13px;">British Feed &amp; Supplies Website</p></div>` +
-    `<div style="background:#fff;padding:24px;border-radius:0 0 8px 8px;border:1px solid #e5e7eb;">` +
-    `<table style="width:100%;border-collapse:collapse;font-size:14px;">` +
-    `<tr><td style="padding:8px 0;color:#6b7280;width:120px;vertical-align:top;">Name</td><td style="padding:8px 0;font-weight:600;color:#111;">${name}</td></tr>` +
-    `<tr style="background:#f9fafb;"><td style="padding:8px 4px;color:#6b7280;vertical-align:top;">Phone</td><td style="padding:8px 4px;color:#111;"><a href="tel:${phone}" style="color:#1B2A4A;">${phone}</a></td></tr>` +
-    `<tr><td style="padding:8px 0;color:#6b7280;vertical-align:top;">Email</td><td style="padding:8px 0;color:#111;"><a href="mailto:${email}" style="color:#1B2A4A;">${email}</a></td></tr>` +
-    `<tr style="background:#f9fafb;"><td style="padding:8px 4px;color:#6b7280;vertical-align:top;">Topic</td><td style="padding:8px 4px;color:#111;">${subject}</td></tr>` +
-    `<tr><td style="padding:8px 0;color:#6b7280;vertical-align:top;">Date</td><td style="padding:8px 0;color:#111;">${lead.date} at ${lead.time} ET</td></tr>` +
-    `<tr style="background:#f9fafb;"><td style="padding:8px 4px;color:#6b7280;vertical-align:top;">Message</td><td style="padding:8px 4px;color:#111;white-space:pre-wrap;">${message}</td></tr>` +
-    `</table>` +
-    `<div style="margin-top:20px;padding:12px 16px;background:#FEF3C7;border-radius:8px;font-size:13px;color:#92400e;">` +
-    `⚡ Reply directly to this email to respond to the customer.</div></div></div>`
-
-  // 3. Send email via Resend
-  const resendKey = (c.env as any)?.RESEND_API_KEY || ''
-  const toEmail   = (c.env as any)?.NOTIFY_EMAIL   || 'inquiries@britishfeed.com'
-  if (resendKey) {
-    try {
-      await fetch('https://api.resend.com/emails', {
-        method:  'POST',
-        headers: { 'Authorization': `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          from:     'British Feed Leads <onboarding@resend.dev>',
-          to:       [toEmail],
-          reply_to: email !== 'not provided' ? email : undefined,
-          subject:  `New Lead: ${name} — ${subject}`,
-          html:     emailHtml,
-        }),
-      })
-    } catch (_) {}
-  }
-
-  // 4. Send SMS via Twilio
-  const twilioSid   = (c.env as any)?.TWILIO_ACCOUNT_SID || ''
-  const twilioToken = (c.env as any)?.TWILIO_AUTH_TOKEN  || ''
-  const twilioFrom  = (c.env as any)?.TWILIO_FROM_NUMBER || ''
-  const toPhone     = (c.env as any)?.NOTIFY_PHONE       || '+15616336003'
-  if (twilioSid && twilioToken && twilioFrom) {
-    try {
-      await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`, {
-        method:  'POST',
-        headers: {
-          'Authorization': 'Basic ' + btoa(`${twilioSid}:${twilioToken}`),
-          'Content-Type':  'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({ To: toPhone, From: twilioFrom, Body: smsBody }).toString(),
-      })
-    } catch (_) {}
-  }
+  try {
+    await fetch('https://api.web3forms.com/submit', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        access_key: '5039ba39-d0f0-4d3e-8811-3e1c911eb198',
+        subject:    `🐴 New Lead: ${name} — ${subject}`,
+        from_name:  'British Feed Website',
+        to_email:   'inquiries@britishfeed.com',
+        replyto:    email !== 'not provided' ? email : 'inquiries@britishfeed.com',
+        name,
+        email,
+        phone,
+        topic:      subject,
+        message,
+        date:       `${lead.date} at ${lead.time} ET`,
+      }),
+    })
+  } catch (_) {}
 
   return c.json({ success: true, message: 'Thank you! We will contact you within 24 hours.' })
 })
