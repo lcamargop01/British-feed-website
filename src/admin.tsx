@@ -942,8 +942,8 @@ document.addEventListener('DOMContentLoaded', init);
 // ─── Image picker helpers (needed by fimg() in buildPanel) ───────────────────
 async function uploadHomepageImage(file, statusEl) {
   if (!file) return null;
-  if (file.size > 800 * 1024) {
-    if (statusEl) statusEl.textContent = 'File too large (max 800 KB)';
+  if (file.size > 4 * 1024 * 1024) {
+    if (statusEl) statusEl.textContent = 'File too large (max 4 MB)';
     return null;
   }
   const fd = new FormData();
@@ -953,8 +953,8 @@ async function uploadHomepageImage(file, statusEl) {
     const r = await fetch('/admin/api/catalog/upload-image', {method:'POST', body:fd});
     const d = await r.json();
     if (d.ok) {
-      if (statusEl) statusEl.textContent = 'Uploaded';
-      return d.imgUrl;
+      if (statusEl) statusEl.textContent = 'Uploaded ✓';
+      return d.url;
     }
     if (statusEl) statusEl.textContent = 'Upload failed: ' + (d.error||'unknown');
   } catch(e) {
@@ -1948,9 +1948,9 @@ admin.post('/api/catalog/upload-image', requireAuth, async (c) => {
 
   if (!file) return c.json({ ok: false, error: 'No file provided' }, 400)
 
-  // Check size: KV values max 25MB, but for performance keep images < 500KB
-  if (file.size > 800 * 1024) {
-    return c.json({ ok: false, error: 'Image must be under 800KB. Use a URL for larger images.' }, 400)
+  // Check size: KV values max 25MB, keep images reasonable for performance
+  if (file.size > 4 * 1024 * 1024) {
+    return c.json({ ok: false, error: 'Image must be under 4 MB.' }, 400)
   }
 
   const arrayBuf = await file.arrayBuffer()
@@ -3589,8 +3589,8 @@ function renderAll() {
 // Uploads a File and resolves with the public URL stored in KV.
 async function uploadHomepageImage(file, statusEl) {
   if (!file) return null;
-  if (file.size > 800 * 1024) {
-    if (statusEl) statusEl.textContent = 'File too large (max 800 KB)';
+  if (file.size > 4 * 1024 * 1024) {
+    if (statusEl) statusEl.textContent = 'File too large (max 4 MB)';
     return null;
   }
   const fd = new FormData();
@@ -3600,8 +3600,8 @@ async function uploadHomepageImage(file, statusEl) {
     const r = await fetch('/admin/api/catalog/upload-image', {method:'POST', body:fd});
     const d = await r.json();
     if (d.ok) {
-      if (statusEl) statusEl.textContent = 'Uploaded';
-      return d.imgUrl;
+      if (statusEl) statusEl.textContent = 'Uploaded ✓';
+      return d.url;
     }
     if (statusEl) statusEl.textContent = 'Upload failed: ' + (d.error||'unknown');
   } catch(e) {
