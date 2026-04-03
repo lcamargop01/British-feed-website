@@ -264,28 +264,22 @@ function getHTML(): string {
     }
     .hero-text-center { text-align:center; }
     @media(min-width:768px){ .hero-badge { backdrop-filter: blur(8px); } }
-    /* Delivery schedule popup */
-    .delivery-popup-wrap { position:relative; }
-    .delivery-popup {
-      display:none; position:absolute; bottom:calc(100% + 12px); left:50%;
-      transform:translateX(-50%); width:340px; max-width:92vw;
-      background:#1B2A4A; color:#fff; border-radius:14px;
-      padding:18px 20px; box-shadow:0 20px 60px rgba(0,0,0,0.35);
-      z-index:200; font-size:0.78rem; line-height:1.5;
-    }
-    .delivery-popup::after {
-      content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%);
-      border:8px solid transparent; border-top-color:#1B2A4A;
-    }
-    .delivery-popup-wrap:hover .delivery-popup,
-    .delivery-popup-wrap:focus-within .delivery-popup,
-    .delivery-popup.pinned { display:block; }
+    /* Delivery schedule modal */
     .delivery-day { display:flex; gap:8px; margin-bottom:8px; }
     .delivery-day:last-child { margin-bottom:0; }
     .delivery-day-name { color:#C9A84C; font-weight:700; min-width:72px; flex-shrink:0; }
-    @media(max-width:639px){
-      .delivery-popup { bottom:auto; top:calc(100% + 12px); }
-      .delivery-popup::after { top:auto; bottom:100%; border-top-color:transparent; border-bottom-color:#1B2A4A; }
+    #delivery-modal-overlay {
+      display:none; position:fixed; inset:0; z-index:9999;
+      background:rgba(0,0,0,0.6); backdrop-filter:blur(4px);
+      align-items:center; justify-content:center; padding:16px;
+    }
+    #delivery-modal-overlay.open { display:flex; }
+    #delivery-modal-box {
+      background:#1B2A4A; color:#fff; border-radius:18px;
+      padding:24px; width:100%; max-width:420px;
+      max-height:85vh; overflow-y:auto;
+      box-shadow:0 24px 80px rgba(0,0,0,0.5);
+      font-size:0.85rem; line-height:1.6;
     }
     .section-divider { border-top: 2px solid #C9A84C; width: 60px; margin: 0 auto; }
     .card-hover { transition: all 0.3s ease; }
@@ -729,21 +723,13 @@ function getHTML(): string {
             <i class="fas fa-gas-pump mt-0.5 flex-shrink-0"></i>
             <span><strong>Fuel Surcharge Notice:</strong> Due to rising fuel costs, we are implementing a temporary, minimal fuel surcharge. Thank you for your understanding.</span>
           </div>
-          <!-- Delivery Schedule popup trigger -->
-          <div class="delivery-popup-wrap mt-4">
-            <button onclick="this.closest('.delivery-popup-wrap').querySelector('.delivery-popup').classList.toggle('pinned')"
-              class="w-full flex items-center justify-center gap-2 bg-navy-700 hover:bg-navy-600 text-white text-xs font-semibold px-4 py-2.5 rounded-full transition-all">
+          <!-- Delivery Schedule button - opens full-screen modal -->
+          <div class="mt-4">
+            <button onclick="document.getElementById('delivery-modal-overlay').classList.add('open')"
+              class="w-full flex items-center justify-center gap-2 text-white text-xs font-semibold px-4 py-2.5 rounded-full transition-all"
+              style="background:#1B2A4A;">
               <i class="fas fa-calendar-week"></i> View Delivery Schedule
             </button>
-            <div class="delivery-popup" id="delivery-schedule-popup">
-              <div class="flex items-center justify-between mb-3">
-                <span class="font-bold text-gold-400 text-sm tracking-wide uppercase">Delivery Schedule</span>
-                <button onclick="document.getElementById('delivery-schedule-popup').classList.remove('pinned')" class="text-white/50 hover:text-white text-lg leading-none">&times;</button>
-              </div>
-              <div id="delivery-schedule-days">
-                <!-- Populated by JS from KV or default -->
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -1515,6 +1501,22 @@ document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
   vidObserver.observe(document.getElementById('story-media-wrap'));
 })();
 </script>
+
+<!-- ── Delivery Schedule Modal (full-screen, works on all devices) ── -->
+<div id="delivery-modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div id="delivery-modal-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <span style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;color:#C9A84C;letter-spacing:0.03em;">📅 Weekly Delivery Schedule</span>
+      <button onclick="document.getElementById('delivery-modal-overlay').classList.remove('open')"
+        style="background:rgba(255,255,255,0.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
+    </div>
+    <div id="delivery-schedule-days"><!-- populated by JS --></div>
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.15);font-size:0.75rem;color:rgba(255,255,255,0.55);text-align:center;">
+      Free delivery on orders $150+ · Minimal fuel surcharge applies
+    </div>
+  </div>
+</div>
+
 </body>
 </html>`
 }
