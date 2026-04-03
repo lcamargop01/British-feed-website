@@ -94,7 +94,7 @@ Keep answers ${botRules.length === 'short' ? 'very short (1-2 sentences)' : botR
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini',
+        model: 'gpt-5',
         messages: [
           { role: 'system', content: systemPrompt },
           ...messages
@@ -104,13 +104,22 @@ Keep answers ${botRules.length === 'short' ? 'very short (1-2 sentences)' : botR
       }),
     })
 
+    if (!response.ok) {
+      const errText = await response.text()
+      console.error('OpenAI API error:', response.status, errText)
+      return c.json({ reply: `Sorry, I'm having trouble connecting right now. Please call us at (561) 633-6003 for expert help!` })
+    }
     const data: any = await response.json()
+    const reply = data.choices?.[0]?.message?.content || ''
+    if (!reply) {
+      console.error('Empty reply from OpenAI, full response:', JSON.stringify(data))
+      return c.json({ reply: "I'm not sure about that one — please call us at (561) 633-6003 and our team will be happy to help!" })
+    }
     // Save conversation snippet to history
     if (kv && messages.length >= 1) {
       try {
         const histRaw = await kv.get('chat_history')
         const history: any[] = histRaw ? JSON.parse(histRaw) : []
-        const reply = data.choices?.[0]?.message?.content || ''
         history.push({
           date: new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }),
           messages: [...messages, { role:'assistant', content: reply }]
@@ -120,8 +129,9 @@ Keep answers ${botRules.length === 'short' ? 'very short (1-2 sentences)' : botR
         await kv.put('chat_history', JSON.stringify(history))
       } catch {}
     }
-    return c.json({ reply: data.choices?.[0]?.message?.content || 'Sorry, I could not process that. Please call us at (561) 633-6003!' })
-  } catch (e) {
+    return c.json({ reply })
+  } catch (e: any) {
+    console.error('Chat exception:', e?.message || e)
     return c.json({ reply: 'Sorry, something went wrong. Please call us at (561) 633-6003 for expert help!' })
   }
 })
