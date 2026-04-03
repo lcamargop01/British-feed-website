@@ -406,10 +406,10 @@ function getHTML(): string {
         </div>
       </div>
       <div class="scroll-reveal">
-        <div class="rounded-2xl overflow-hidden shadow-2xl">
-          <video class="w-full object-cover" style="max-height:480px;" controls playsinline poster="/admin/api/catalog/image/img_site_hero_bg" preload="metadata">
+        <div class="rounded-2xl overflow-hidden shadow-2xl bg-black">
+          <video class="w-full block" style="aspect-ratio:16/9;object-fit:contain;" controls playsinline poster="/admin/api/catalog/image/img_site_hero_bg" preload="metadata">
             <source src="/static/commercial.mp4" type="video/mp4" />
-            <img src="/admin/api/catalog/image/img_site_hero_bg" alt="British Feed commercial" class="w-full object-cover" />
+            <img src="/admin/api/catalog/image/img_site_hero_bg" alt="British Feed commercial" class="w-full block" />
           </video>
         </div>
         <!-- Find Us card below the video, not overlapping -->
