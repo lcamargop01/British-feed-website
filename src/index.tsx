@@ -182,6 +182,34 @@ app.get('/products', (c) => {
   return c.html(getProductsHTML())
 })
 
+// ── Printable magazine catalog ────────────────────────────────────────────────
+app.get('/catalog-print', async (c) => {
+  const kv = c.env?.BF_STORE
+  let products: any[] = []
+  // Try KV first (live admin edits), fall back to static JSON note
+  if (kv) {
+    try {
+      const raw = await kv.get('catalog_products', 'json') as any[] | null
+      if (raw && Array.isArray(raw) && raw.length > 0) products = raw
+    } catch (_) {}
+  }
+  return c.html(getCatalogPrintHTML(products))
+})
+
+// ── Public products API (no auth — used by catalog-print page) ────────────────
+app.get('/api/public/products', async (c) => {
+  const kv = c.env?.BF_STORE
+  if (kv) {
+    try {
+      const raw = await kv.get('catalog_products', 'json') as any[] | null
+      if (raw && Array.isArray(raw) && raw.length > 0) {
+        return c.json({ products: raw, source: 'kv' })
+      }
+    } catch (_) {}
+  }
+  return c.json({ products: [], source: 'none' })
+})
+
 // ── Favicon ────────────────────────────────────────────────────────────────────
 app.get('/favicon.ico', (c) => {
   return c.redirect('/static/favicon.ico', 301)
@@ -1682,6 +1710,878 @@ function brandModals(): string {
 export default app
 
 // ═══════════════════════════════════════════════════════════════════════════
+//  MAGAZINE-STYLE PRINTABLE CATALOG
+// ═══════════════════════════════════════════════════════════════════════════
+function getCatalogPrintHTML(liveProducts: any[]): string {
+  const year = new Date().getFullYear()
+  const monthYear = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+
+  // ── Vendor brand metadata (icons, descriptions) ──────────────────────────
+  const brandMeta: Record<string, { icon: string; desc: string; highlight: string }> = {
+    'Nutrena':                  { icon: '🌾', desc: 'Science-backed nutrition trusted by competitive riders and backyard horse owners alike.', highlight: 'SafeChoice · ProForce · Empower' },
+    'Red Mills':                { icon: '🏆', desc: 'Irish-made performance feeds formulated for equine athletes at the highest levels of sport.', highlight: 'Competition · Racehorse · Stud' },
+    'Triple Crown':             { icon: '⭐', desc: 'Premium nutrient-dense feeds with organic minerals and quality forage ingredients.', highlight: 'Senior · Growth · 30% Supplement' },
+    'Cavalor':                  { icon: '🐎', desc: 'Belgian sports nutrition — the choice of Olympic and FEI-level competitors worldwide.', highlight: 'Opti Force · FiberForce · Endurix' },
+    'Buckeye':                  { icon: '🌿', desc: 'Ohio-crafted feeds focused on digestive health and natural ingredients for all life stages.', highlight: 'Gro-N-Win · Safe N Easy · Cadence Ultra' },
+    'Havens':                   { icon: '🇩🇪', desc: 'Premium German forage feeds — high fibre, low sugar, ideal for metabolic horses.', highlight: 'Healty · Coarse Muesli · Good Performance' },
+    'Foran':                    { icon: '🧪', desc: 'Irish veterinary-developed supplements for performance, recovery, and metabolism.', highlight: 'Chevinal · Buccloze · Phosphogen' },
+    'Absorbine':                { icon: '💪', desc: 'America\'s most trusted equine grooming and topical care brand since 1892.', highlight: 'Veterinary Liniment · ShowSheen · UltraShield' },
+    'Farnam':                   { icon: '🛡️', desc: 'Comprehensive fly control, health, and management products for every horse owner.', highlight: 'Fly Sprays · Electrolytes · Psyllium' },
+    'Finish Line':              { icon: '🏁', desc: 'Targeted supplements for gut health, hydration, and peak performance recovery.', highlight: 'U-7 · Apple-A-Day · Iron Power' },
+    'Cowboy Magic':             { icon: '✨', desc: 'Professional detangling and coat care products loved by show grooms worldwide.', highlight: 'Detangler · Rosewater · Greenspot' },
+    'Andis':                    { icon: '✂️', desc: 'Professional-grade clippers and grooming tools used by top show barns.', highlight: 'Clippers · Blades · Trimmers' },
+    'Standlee':                 { icon: '🌱', desc: 'Premium Timothy and alfalfa hay products — convenient, dust-free, consistent quality.', highlight: 'Timothy Grass · Alfalfa · Hay Cubes' },
+    'K.E.R':                    { icon: '🔬', desc: 'Kentucky Equine Research — science-first nutrition consulting and precision supplements.', highlight: 'Restore SR · EO-3 · RiteTrac' },
+    'SynNutra':                 { icon: '💊', desc: 'Targeted equine supplements for joints, gut, and overall wellness.', highlight: 'Joint · Probiotics · Omega' },
+    'Generic':                  { icon: '🏪', desc: 'House brand and multi-brand selection — essential everyday products at great value.', highlight: 'Shavings · Hay · Grooming essentials' },
+    'British Horse Feeds':      { icon: '🇬🇧', desc: 'UK-heritage fibre feeds bringing British horse keeping tradition to South Florida.', highlight: 'Speedi-Beet · Fibergy Plus' },
+    'Canter':                   { icon: '🐴', desc: 'Luxury coat and mane care formulated for show horses and sensitive skin.', highlight: 'Conditioning · Mane & Tail · Shine' },
+    'E3':                       { icon: '⚡', desc: 'High-performance electrolyte and conditioning products for hard-working horses.', highlight: 'Shampoo · Coat Care' },
+  }
+
+  // ── Category metadata ─────────────────────────────────────────────────────
+  const catMeta: Record<string, { icon: string; color: string }> = {
+    'Horse Feed':               { icon: '🌾', color: '#1B2A4A' },
+    'Supplements':              { icon: '💊', color: '#2E5339' },
+    'Hay':                      { icon: '🌿', color: '#5C7A3E' },
+    'Hay Cubes & Pellets':      { icon: '📦', color: '#5C7A3E' },
+    'Shavings & Bedding':       { icon: '🛏️', color: '#8B6914' },
+    'Fly Sprays':               { icon: '🪰', color: '#7B3F00' },
+    'Fly Control Supplements':  { icon: '🛡️', color: '#7B3F00' },
+    'Grooming':                 { icon: '✨', color: '#4A2B6B' },
+    'Shampoo & Coat Care':      { icon: '🫧', color: '#4A2B6B' },
+    'Clippers & Tools':         { icon: '✂️', color: '#2C4A6B' },
+    'Liniments & Topicals':     { icon: '💪', color: '#6B2C2C' },
+    'Electrolytes':             { icon: '⚡', color: '#1A5276' },
+    'Gut Health':               { icon: '🫀', color: '#884EA0' },
+    'Psyllium Supplements':     { icon: '🌱', color: '#1E8449' },
+    'Oils':                     { icon: '🫙', color: '#B7950B' },
+    'Leather Care':             { icon: '🟫', color: '#784212' },
+  }
+
+  // ── Load products: use live KV products if available, else embed static note ─
+  // Products are passed in from the route handler (KV-first)
+  // At print time we fetch from the API on the client side for always-fresh data
+  const hasLiveData = liveProducts.length > 0
+
+  // ── Build category → products map ─────────────────────────────────────────
+  const byCategory: Record<string, any[]> = {}
+  const byVendor: Record<string, any[]> = {}
+  liveProducts.forEach(p => {
+    const cat = p.category || 'Other'
+    const ven = p.vendor || p.brand || 'Other'
+    if (!byCategory[cat]) byCategory[cat] = []
+    if (!byVendor[ven]) byVendor[ven] = []
+    byCategory[cat].push(p)
+    byVendor[ven].push(p)
+  })
+
+  const categories = Object.keys(byCategory).sort()
+  const vendors    = Object.keys(byVendor).sort()
+
+  // ── TOC entries ───────────────────────────────────────────────────────────
+  const tocSections = [
+    { title: 'About British Feed & Supplies', page: 2 },
+    { title: 'Why Choose Us',                page: 3 },
+    { title: 'Our Services',                 page: 4 },
+    { title: 'Product Index by Category',    page: 5 },
+    ...categories.map((cat, i) => ({ title: cat, page: 6 + i })),
+  ]
+
+  // ── Per-product row HTML ──────────────────────────────────────────────────
+  function productRow(p: any): string {
+    const price = p.priceFormatted || (p.price ? `$${Number(p.price).toFixed(2)}` : 'Call for Price')
+    const stock = p.inStock !== false ? '<span class="in-stock">✓ In Stock</span>' : '<span class="oos">Call</span>'
+    const desc = (p.description || '').replace(/—\s*available at British Feed.*?to order\./gi, '').trim()
+    const shortDesc = desc.length > 120 ? desc.slice(0, 117) + '…' : desc
+    return `<tr>
+      <td class="prod-name">${escHtml(p.name)}</td>
+      <td class="prod-brand">${escHtml(p.brand || p.vendor || '')}</td>
+      <td class="prod-desc">${escHtml(shortDesc)}</td>
+      <td class="prod-price">${escHtml(price)}</td>
+      <td class="prod-stock">${stock}</td>
+    </tr>`
+  }
+
+  function escHtml(s: string): string {
+    return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+  }
+
+  // ── Category section pages ────────────────────────────────────────────────
+  function categoryPages(): string {
+    return categories.map(cat => {
+      const prods = byCategory[cat]
+      const meta = catMeta[cat] || { icon: '📋', color: '#1B2A4A' }
+      // Group within category by vendor/brand
+      const vendorGroups: Record<string, any[]> = {}
+      prods.forEach(p => {
+        const v = p.vendor || p.brand || 'Other'
+        if (!vendorGroups[v]) vendorGroups[v] = []
+        vendorGroups[v].push(p)
+      })
+      const vendorList = Object.entries(vendorGroups).sort(([a],[b]) => a.localeCompare(b))
+
+      return `
+<div class="page category-page">
+  <div class="cat-header" style="background:${meta.color}">
+    <div class="cat-header-icon">${meta.icon}</div>
+    <div>
+      <div class="cat-header-title">${cat}</div>
+      <div class="cat-header-sub">${prods.length} product${prods.length !== 1 ? 's' : ''} · ${vendorList.length} brand${vendorList.length !== 1 ? 's' : ''}</div>
+    </div>
+    <div class="cat-header-logo">British Feed<br/>&amp; Supplies</div>
+  </div>
+
+  ${vendorList.map(([vendor, vprods]) => `
+  <div class="vendor-block">
+    <div class="vendor-label">${escHtml(vendor)}</div>
+    <table class="prod-table">
+      <thead><tr>
+        <th class="th-name">Product</th>
+        <th class="th-brand">Brand</th>
+        <th class="th-desc">Description</th>
+        <th class="th-price">Price</th>
+        <th class="th-stock">Avail.</th>
+      </tr></thead>
+      <tbody>${vprods.map(productRow).join('')}</tbody>
+    </table>
+  </div>`).join('')}
+
+  <div class="page-footer">
+    <span>British Feed &amp; Supplies · 14589 Southern Blvd, Loxahatchee Groves, FL 33470 · (561) 633-6003 · britishfeed.com</span>
+    <span>${cat} · ${monthYear}</span>
+  </div>
+</div>`
+    }).join('\n')
+  }
+
+  // ── Vendor summary cards for marketing page ───────────────────────────────
+  function vendorCards(): string {
+    return vendors.map(v => {
+      const meta = brandMeta[v] || { icon: '🏪', desc: '', highlight: '' }
+      const count = byVendor[v].length
+      return `<div class="brand-card">
+        <div class="brand-card-icon">${meta.icon}</div>
+        <div class="brand-card-name">${escHtml(v)}</div>
+        <div class="brand-card-count">${count} product${count !== 1 ? 's' : ''}</div>
+        ${meta.highlight ? `<div class="brand-card-highlight">${escHtml(meta.highlight)}</div>` : ''}
+      </div>`
+    }).join('')
+  }
+
+  // ── Stats ─────────────────────────────────────────────────────────────────
+  const totalInStock = liveProducts.filter(p => p.inStock !== false).length
+  const avgPrice = liveProducts.length
+    ? (liveProducts.reduce((s,p) => s + (Number(p.price)||0), 0) / liveProducts.length).toFixed(2)
+    : '0.00'
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>British Feed & Supplies — Product Catalog ${year}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<style>
+/* ═══ RESET & BASE ═══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 10pt; }
+body { font-family: 'Nunito Sans', sans-serif; color: #1a1a2e; background: #fff; }
+
+/* ═══ PAGE SETUP ═════════════════════════════════════════════════ */
+@page { size: 8.5in 11in; margin: 0; }
+@media print {
+  .no-print { display: none !important; }
+  .page { page-break-after: always; page-break-inside: avoid; }
+  .page:last-child { page-break-after: auto; }
+  a { color: inherit; text-decoration: none; }
+  body { background: white; }
+}
+.page {
+  width: 8.5in;
+  min-height: 11in;
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ═══ SCREEN PREVIEW STYLES ══════════════════════════════════════ */
+@media screen {
+  body { background: #e8e8e8; padding: 20px; }
+  .page {
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+    margin: 0 auto 32px auto;
+  }
+  .print-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+    background: #1B2A4A; color: #fff; padding: 12px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: 'Nunito Sans', sans-serif; font-size: 13px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .print-bar .bar-left { display: flex; align-items: center; gap: 16px; }
+  .print-bar .bar-title { font-weight: 700; font-size: 15px; color: #C9A84C; }
+  .print-bar .bar-sub { opacity: 0.75; font-size: 12px; }
+  .print-btn {
+    background: #C9A84C; color: #1B2A4A; border: none; cursor: pointer;
+    padding: 9px 22px; border-radius: 8px; font-weight: 700; font-size: 13px;
+    font-family: 'Nunito Sans', sans-serif; transition: background 0.2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .print-btn:hover { background: #E0C87A; }
+  .back-btn {
+    background: transparent; color: #C9A84C; border: 1px solid rgba(201,168,76,0.4);
+    cursor: pointer; padding: 7px 16px; border-radius: 8px; font-size: 12px;
+    font-family: 'Nunito Sans', sans-serif; transition: all 0.2s; text-decoration: none;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .back-btn:hover { background: rgba(201,168,76,0.1); }
+  body { padding-top: 64px; }
+  .loading-overlay {
+    position: fixed; inset: 0; background: rgba(27,42,74,0.92); z-index: 1000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: #fff; font-family: 'Nunito Sans', sans-serif;
+  }
+  .loading-overlay h2 { font-size: 22px; margin-bottom: 10px; color: #C9A84C; }
+  .loading-overlay p { opacity: 0.75; font-size: 14px; }
+  .spinner {
+    width: 48px; height: 48px; border: 4px solid rgba(201,168,76,0.3);
+    border-top-color: #C9A84C; border-radius: 50%; animation: spin 0.9s linear infinite; margin-bottom: 20px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+}
+
+/* ═══ COVER PAGE ═════════════════════════════════════════════════ */
+.cover-page {
+  background: linear-gradient(160deg, #0d1b35 0%, #1B2A4A 45%, #0a2218 100%);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.cover-page::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url('/static/hero_horse.jpg') center 30% / cover no-repeat;
+  opacity: 0.22;
+}
+.cover-overlay {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; height: 11in;
+  padding: 0.6in 0.7in;
+}
+.cover-top-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid rgba(201,168,76,0.35); padding-bottom: 14px; margin-bottom: 0;
+}
+.cover-logo-area { display: flex; align-items: center; gap: 12px; }
+.cover-logo-img { height: 52px; filter: brightness(0) invert(1); }
+.cover-logo-text { font-family: 'Cormorant Garamond', serif; font-size: 15pt; font-weight: 700; line-height: 1.2; }
+.cover-logo-text span { display: block; font-size: 9pt; font-weight: 400; opacity: 0.7; letter-spacing: 0.08em; }
+.cover-year-badge {
+  background: #C9A84C; color: #0d1b35; font-weight: 800; font-size: 11pt;
+  padding: 6px 18px; border-radius: 20px; letter-spacing: 0.05em;
+  font-family: 'Nunito Sans', sans-serif;
+}
+.cover-main { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 0.4in 0; }
+.cover-eyebrow {
+  font-family: 'Nunito Sans', sans-serif; font-size: 8pt; letter-spacing: 0.25em;
+  text-transform: uppercase; color: #C9A84C; margin-bottom: 16px;
+}
+.cover-headline {
+  font-family: 'Cormorant Garamond', serif; font-size: 54pt; font-weight: 700;
+  line-height: 1.05; margin-bottom: 10px;
+  text-shadow: 0 2px 30px rgba(0,0,0,0.5);
+}
+.cover-headline em { font-style: italic; color: #C9A84C; }
+.cover-subline {
+  font-family: 'Cormorant Garamond', serif; font-size: 18pt; font-weight: 400;
+  font-style: italic; opacity: 0.85; margin-bottom: 32px;
+}
+.cover-divider { width: 80px; height: 2px; background: #C9A84C; margin-bottom: 28px; }
+.cover-stats {
+  display: flex; gap: 40px;
+}
+.cover-stat { text-align: left; }
+.cover-stat-num { font-family: 'Cormorant Garamond', serif; font-size: 28pt; font-weight: 700; color: #C9A84C; line-height: 1; }
+.cover-stat-label { font-size: 8pt; opacity: 0.7; letter-spacing: 0.06em; margin-top: 2px; text-transform: uppercase; }
+.cover-bottom {
+  border-top: 1px solid rgba(201,168,76,0.35); padding-top: 18px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 8pt; opacity: 0.65;
+}
+.cover-address { display: flex; flex-direction: column; gap: 2px; }
+.cover-tagline { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 10pt; opacity: 0.8; }
+
+/* ═══ INNER PAGE COMMON ══════════════════════════════════════════ */
+.page-header {
+  background: #1B2A4A; color: #fff;
+  padding: 14px 0.5in; display: flex; align-items: center; justify-content: space-between;
+}
+.page-header-title { font-family: 'Cormorant Garamond', serif; font-size: 16pt; font-weight: 700; }
+.page-header-sub { font-size: 8pt; opacity: 0.65; margin-top: 2px; }
+.page-header-logo { font-family: 'Cormorant Garamond', serif; font-size: 10pt; text-align: right; opacity: 0.75; line-height: 1.3; }
+.page-body { padding: 0.35in 0.5in; flex: 1; }
+.page-footer {
+  background: #f5f5f5; border-top: 1px solid #ddd;
+  padding: 7px 0.5in; font-size: 7pt; color: #888;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: auto;
+}
+
+/* ═══ ABOUT PAGE ═════════════════════════════════════════════════ */
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 18px; }
+.about-story h2 { font-family: 'Cormorant Garamond', serif; font-size: 22pt; font-weight: 700; color: #1B2A4A; line-height: 1.2; margin-bottom: 12px; }
+.about-story p { font-size: 9.5pt; line-height: 1.65; color: #333; margin-bottom: 10px; }
+.about-story .gold-line { width: 50px; height: 2px; background: #C9A84C; margin-bottom: 16px; }
+.team-box { background: #F8F5EF; border: 1px solid #e8dcc8; border-radius: 8px; padding: 20px; }
+.team-box h3 { font-family: 'Cormorant Garamond', serif; font-size: 13pt; color: #1B2A4A; margin-bottom: 14px; border-bottom: 1px solid #C9A84C; padding-bottom: 8px; }
+.team-member { margin-bottom: 14px; }
+.team-member-name { font-weight: 700; font-size: 10pt; color: #1B2A4A; }
+.team-member-role { font-size: 8pt; color: #C9A84C; font-weight: 600; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+.team-member-bio { font-size: 8.5pt; color: #555; line-height: 1.55; }
+.info-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
+.info-card { background: #1B2A4A; color: #fff; border-radius: 8px; padding: 16px; text-align: center; }
+.info-card-icon { font-size: 18pt; margin-bottom: 6px; }
+.info-card-title { font-family: 'Cormorant Garamond', serif; font-size: 11pt; font-weight: 700; color: #C9A84C; margin-bottom: 4px; }
+.info-card-text { font-size: 7.5pt; opacity: 0.8; line-height: 1.5; }
+
+/* ═══ SERVICES PAGE ══════════════════════════════════════════════ */
+.services-intro { font-size: 10pt; line-height: 1.65; color: #444; max-width: 5.5in; margin-bottom: 24px; }
+.service-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.service-card { border: 1px solid #e0d5c0; border-radius: 10px; overflow: hidden; }
+.service-card-header { background: #1B2A4A; color: #fff; padding: 14px; text-align: center; }
+.service-card-icon { font-size: 22pt; margin-bottom: 4px; }
+.service-card-title { font-family: 'Cormorant Garamond', serif; font-size: 12pt; font-weight: 700; color: #C9A84C; }
+.service-card-body { padding: 14px; }
+.service-card-body p { font-size: 8.5pt; line-height: 1.6; color: #444; }
+.service-card-body .badge { display: inline-block; background: #F0E9D8; color: #8B6914; font-size: 7.5pt; font-weight: 700; padding: 3px 9px; border-radius: 10px; margin-top: 8px; }
+.delivery-schedule { margin-top: 20px; border: 1px solid #C9A84C30; border-radius: 8px; overflow: hidden; }
+.delivery-schedule-header { background: #C9A84C; color: #1B2A4A; padding: 8px 16px; font-weight: 700; font-size: 9pt; font-family: 'Cormorant Garamond', serif; font-size: 12pt; }
+.delivery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+.delivery-day { padding: 10px 14px; border-right: 1px solid #eee; border-bottom: 1px solid #eee; }
+.delivery-day:nth-child(3n) { border-right: none; }
+.delivery-day-name { font-weight: 700; font-size: 8pt; color: #1B2A4A; margin-bottom: 3px; }
+.delivery-day-areas { font-size: 7pt; color: #666; line-height: 1.5; }
+
+/* ═══ BRANDS PAGE ════════════════════════════════════════════════ */
+.brands-intro { font-size: 9.5pt; color: #444; line-height: 1.6; margin-bottom: 20px; max-width: 6in; }
+.brand-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.brand-card { border: 1px solid #e8dcc8; border-radius: 8px; padding: 12px 10px; text-align: center; background: #fafaf8; }
+.brand-card-icon { font-size: 18pt; margin-bottom: 4px; }
+.brand-card-name { font-weight: 700; font-size: 9pt; color: #1B2A4A; margin-bottom: 2px; }
+.brand-card-count { font-size: 7.5pt; color: #C9A84C; font-weight: 600; margin-bottom: 4px; }
+.brand-card-highlight { font-size: 7pt; color: #888; line-height: 1.4; }
+
+/* ═══ TOC PAGE ═══════════════════════════════════════════════════ */
+.toc-title { font-family: 'Cormorant Garamond', serif; font-size: 28pt; font-weight: 700; color: #1B2A4A; margin-bottom: 6px; }
+.toc-sub { font-size: 9pt; color: #888; margin-bottom: 28px; }
+.toc-section-header { font-family: 'Cormorant Garamond', serif; font-size: 11pt; font-weight: 700; color: #C9A84C; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid #e8dcc8; padding-bottom: 4px; margin: 16px 0 8px 0; }
+.toc-row { display: flex; align-items: baseline; padding: 4px 0; border-bottom: 1px dotted #ddd; }
+.toc-row-title { font-size: 9pt; color: #1B2A4A; flex: 1; }
+.toc-row-dots { flex: 1; border-bottom: 1px dotted #bbb; margin: 0 8px; position: relative; top: -3px; }
+.toc-row-page { font-size: 9pt; font-weight: 700; color: #1B2A4A; min-width: 24px; text-align: right; }
+.toc-cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+
+/* ═══ CATEGORY PAGES ═════════════════════════════════════════════ */
+.category-page { }
+.cat-header {
+  color: #fff; padding: 18px 0.5in;
+  display: flex; align-items: center; gap: 16px;
+}
+.cat-header-icon { font-size: 28pt; flex-shrink: 0; }
+.cat-header-title { font-family: 'Cormorant Garamond', serif; font-size: 22pt; font-weight: 700; line-height: 1; }
+.cat-header-sub { font-size: 8.5pt; opacity: 0.8; margin-top: 4px; }
+.cat-header-logo { margin-left: auto; font-family: 'Cormorant Garamond', serif; font-size: 9pt; text-align: right; opacity: 0.6; line-height: 1.4; }
+.vendor-block { padding: 0 0.5in; margin-top: 10px; }
+.vendor-label { font-weight: 700; font-size: 8pt; text-transform: uppercase; letter-spacing: 0.08em; color: #1B2A4A; background: #F0E9D8; padding: 4px 10px; border-left: 3px solid #C9A84C; margin-bottom: 0; }
+.prod-table { width: 100%; border-collapse: collapse; font-size: 8pt; margin-bottom: 6px; }
+.prod-table thead tr { background: #1B2A4A; color: #fff; }
+.prod-table th { padding: 5px 7px; text-align: left; font-weight: 600; font-size: 7.5pt; letter-spacing: 0.03em; }
+.prod-table tbody tr:nth-child(even) { background: #f9f8f5; }
+.prod-table tbody tr:hover { background: #FBF7F0; }
+.prod-table td { padding: 4px 7px; border-bottom: 1px solid #eee; vertical-align: top; line-height: 1.4; }
+.th-name  { width: 22%; }
+.th-brand { width: 13%; }
+.th-desc  { width: 42%; }
+.th-price { width: 11%; text-align: right; }
+.th-stock { width: 9%; text-align: center; }
+.prod-name  { font-weight: 600; color: #1B2A4A; }
+.prod-brand { color: #888; }
+.prod-desc  { color: #555; font-size: 7.5pt; }
+.prod-price { text-align: right; font-weight: 700; color: #1B2A4A; font-variant-numeric: tabular-nums; }
+.prod-stock { text-align: center; }
+.in-stock   { color: #2E7D32; font-size: 7pt; font-weight: 700; }
+.oos        { color: #E65100; font-size: 7pt; font-weight: 700; }
+
+/* ═══ BACK COVER ═════════════════════════════════════════════════ */
+.back-cover {
+  background: linear-gradient(160deg, #0d1b35 0%, #1B2A4A 60%, #0a2218 100%);
+  color: #fff; position: relative; overflow: hidden;
+}
+.back-cover::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url('/static/story_closing.jpg') center center / cover no-repeat;
+  opacity: 0.15;
+}
+.back-cover-overlay {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 11in; padding: 0.6in;
+  text-align: center;
+}
+.back-cover-logo { height: 70px; filter: brightness(0) invert(1); margin-bottom: 28px; }
+.back-cover-headline { font-family: 'Cormorant Garamond', serif; font-size: 32pt; font-weight: 700; margin-bottom: 10px; }
+.back-cover-headline em { color: #C9A84C; font-style: italic; }
+.back-cover-sub { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 14pt; opacity: 0.8; margin-bottom: 40px; }
+.back-divider { width: 80px; height: 1px; background: #C9A84C; margin: 0 auto 36px; }
+.back-contact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; width: 100%; max-width: 5.5in; margin-bottom: 36px; }
+.back-contact-item { text-align: center; }
+.back-contact-icon { font-size: 18pt; margin-bottom: 6px; }
+.back-contact-label { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.6; margin-bottom: 4px; }
+.back-contact-value { font-size: 10pt; font-weight: 600; }
+.back-social { font-size: 8pt; opacity: 0.6; margin-top: 16px; }
+.back-footer { position: absolute; bottom: 0.4in; left: 0; right: 0; text-align: center; font-size: 7pt; opacity: 0.45; }
+</style>
+</head>
+<body>
+
+<!-- Loading overlay — shown while products load client-side -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <h2>Building Your Catalog…</h2>
+  <p>Fetching latest products from our inventory</p>
+</div>
+
+<!-- ── Print bar (screen only) ────────────────────────────────── -->
+<div class="print-bar no-print">
+  <div class="bar-left">
+    <a href="/products" class="back-btn">← Back to Catalog</a>
+    <div>
+      <div class="bar-title">British Feed &amp; Supplies — Product Catalog ${year}</div>
+      <div class="bar-sub">Magazine-style · 8.5 × 11 in · Always current</div>
+    </div>
+  </div>
+  <button class="print-btn" onclick="window.print()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+    Download / Print PDF
+  </button>
+</div>
+
+<!-- All pages rendered by JS below -->
+<div id="catalogPages"></div>
+
+<script>
+// ── Client-side: load live products then render all pages ─────────────────
+const YEAR = ${year};
+const MONTH_YEAR = '${monthYear}';
+
+const CAT_META = ${JSON.stringify(catMeta)};
+const BRAND_META = ${JSON.stringify(brandMeta)};
+
+const DELIVERY_SCHEDULE = [
+  { day: 'Monday',    areas: 'Northwest Loxahatchee · North Wellington · Palm Beach Point North · Southfields' },
+  { day: 'Tuesday',   areas: 'C, E, F, G Road · Collecting Canal · Deer Run · Fox Trail · Sycamore · Palm Beach Point South' },
+  { day: 'Wednesday', areas: 'D Road · Northwest Loxahatchee · White Fences · Lake Worth · Grand Prix · Flying Cow · North Wellington · Palm Beach Point North' },
+  { day: 'Thursday',  areas: 'B, E, F, G Road · Collecting Canal · Deer Run · Jupiter · Grand Prix · Little Ranches · South Fields' },
+  { day: 'Friday',    areas: 'East Loxahatchee · White Fences · Flying Cow · North Wellington · Palm Beach Point (North & South)' },
+  { day: 'Saturday',  areas: 'A, B, C Road · Collecting Canal · Homeland' },
+];
+
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function buildCatalog(products) {
+  // ── Organise data ────────────────────────────────────────────────
+  const byCategory = {};
+  const byVendor   = {};
+  products.forEach(p => {
+    const cat = p.category || 'Other';
+    const ven = p.vendor   || p.brand || 'Other';
+    if (!byCategory[cat]) byCategory[cat] = [];
+    if (!byVendor[ven])   byVendor[ven]   = [];
+    byCategory[cat].push(p);
+    byVendor[ven].push(p);
+  });
+  const categories = Object.keys(byCategory).sort();
+  const vendors    = Object.keys(byVendor).sort();
+  const totalInStock = products.filter(p => p.inStock !== false).length;
+
+  // ── Helpers ──────────────────────────────────────────────────────
+  function productRow(p) {
+    const price = p.priceFormatted || (p.price ? '$'+Number(p.price).toFixed(2) : 'Call');
+    const stock = p.inStock !== false
+      ? '<span class="in-stock">✓</span>'
+      : '<span class="oos">Call</span>';
+    const raw = (p.description||'').replace(/—\\s*available at British Feed.*?to order\\.?/gi,'').trim();
+    const desc = raw.length > 115 ? raw.slice(0,112)+'…' : raw;
+    return \`<tr>
+      <td class="prod-name">\${esc(p.name)}</td>
+      <td class="prod-brand">\${esc(p.brand||p.vendor||'')}</td>
+      <td class="prod-desc">\${esc(desc)}</td>
+      <td class="prod-price">\${esc(price)}</td>
+      <td class="prod-stock">\${stock}</td>
+    </tr>\`;
+  }
+
+  // ── Cover page ────────────────────────────────────────────────────
+  const cover = \`
+<div class="page cover-page">
+  <div class="cover-overlay">
+    <div class="cover-top-bar">
+      <div class="cover-logo-area">
+        <img src="/admin/api/catalog/image/img_img_site_logo_white" alt="British Feed" class="cover-logo-img" onerror="this.style.display='none'"/>
+        <div class="cover-logo-text">British Feed &amp; Supplies<span>Wellington · Loxahatchee · Palm Beach County</span></div>
+      </div>
+      <div class="cover-year-badge">\${YEAR} CATALOG</div>
+    </div>
+
+    <div class="cover-main">
+      <div class="cover-eyebrow">Premium Equine Nutrition &amp; Supplies</div>
+      <div class="cover-headline">For Proper<br/><em>Care &amp; Nutrition</em></div>
+      <div class="cover-subline">Your complete guide to our full product range</div>
+      <div class="cover-divider"></div>
+      <div class="cover-stats">
+        <div class="cover-stat">
+          <div class="cover-stat-num">\${products.length}</div>
+          <div class="cover-stat-label">Products</div>
+        </div>
+        <div class="cover-stat">
+          <div class="cover-stat-num">\${vendors.length}+</div>
+          <div class="cover-stat-label">Premium Brands</div>
+        </div>
+        <div class="cover-stat">
+          <div class="cover-stat-num">\${categories.length}</div>
+          <div class="cover-stat-label">Categories</div>
+        </div>
+        <div class="cover-stat">
+          <div class="cover-stat-num">13+</div>
+          <div class="cover-stat-label">Years Serving WPB</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cover-bottom">
+      <div class="cover-address">
+        <span>14589 Southern Blvd, Palm West Plaza · Loxahatchee Groves, FL 33470</span>
+        <span>(561) 633-6003 · britishfeed.com</span>
+      </div>
+      <div class="cover-tagline">"Champions deserve champions' feed."</div>
+    </div>
+  </div>
+</div>\`;
+
+  // ── About page ────────────────────────────────────────────────────
+  const about = \`
+<div class="page">
+  <div class="page-header">
+    <div><div class="page-header-title">About British Feed &amp; Supplies</div><div class="page-header-sub">Our story · Our team · Our commitment</div></div>
+    <div class="page-header-logo">British Feed<br/>&amp; Supplies</div>
+  </div>
+  <div class="page-body">
+    <div class="about-grid">
+      <div class="about-story">
+        <div class="gold-line"></div>
+        <h2>Wellington's Most<br/>Trusted Feed Store</h2>
+        <p>Founded in 2012 by Vieri Bracco, British Feed &amp; Supplies was built on a simple promise: to bring the highest-quality equine nutrition products to the competitive riders and horse owners of Palm Beach County.</p>
+        <p>After a full renovation in 2016, our store became a one-stop destination for premium feeds, supplements, grooming products, hay, bedding, and more — serving everyone from Olympic-level competitors to backyard horse enthusiasts.</p>
+        <p>Located in the heart of Wellington's equestrian community, we have spent over a decade earning the trust of the most discerning horse owners in South Florida. Our certified equine nutritionists are always available for barn visits, ensuring your animals receive personalized care at every level.</p>
+        <p>We carry brands trusted at the world's most prestigious competitions, and we deliver them right to your barn door across Palm Beach County and surrounding areas.</p>
+      </div>
+      <div>
+        <div class="team-box">
+          <h3>Our Leadership Team</h3>
+          <div class="team-member">
+            <div class="team-member-name">Vieri Bracco</div>
+            <div class="team-member-role">Owner &amp; Founder</div>
+            <div class="team-member-bio">A lifelong equestrian with deep roots in the Wellington community, Vieri founded British Feed with a vision to provide competition-grade nutrition and supplies to South Florida's horse owners. His passion for equine welfare drives every product decision we make.</div>
+          </div>
+          <div class="team-member">
+            <div class="team-member-name">Carmine Garrett</div>
+            <div class="team-member-role">General Manager</div>
+            <div class="team-member-bio">Carmine brings years of hands-on equestrian experience and operational excellence to British Feed. As General Manager, she ensures every customer — from first-time horse owners to elite competitors — receives expert guidance and exceptional service.</div>
+          </div>
+        </div>
+        <div class="info-cards">
+          <div class="info-card">
+            <div class="info-card-icon">🏆</div>
+            <div class="info-card-title">Since 2012</div>
+            <div class="info-card-text">Over 13 years serving the WPB equestrian community</div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-icon">⭐</div>
+            <div class="info-card-title">4.8★ Rating</div>
+            <div class="info-card-text">Google-verified reviews from our loyal customers</div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-icon">🌎</div>
+            <div class="info-card-title">All Animals</div>
+            <div class="info-card-text">Horses, livestock, pets &amp; more</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer">
+    <span>British Feed &amp; Supplies · 14589 Southern Blvd, Loxahatchee Groves, FL 33470 · (561) 633-6003 · britishfeed.com</span>
+    <span>About Us · \${MONTH_YEAR}</span>
+  </div>
+</div>\`;
+
+  // ── Services page ─────────────────────────────────────────────────
+  const services = \`
+<div class="page">
+  <div class="page-header">
+    <div><div class="page-header-title">Our Services</div><div class="page-header-sub">Delivery · Nutrition · Farm Programs</div></div>
+    <div class="page-header-logo">British Feed<br/>&amp; Supplies</div>
+  </div>
+  <div class="page-body">
+    <p class="services-intro">At British Feed &amp; Supplies, we go beyond the store shelf. Our team is committed to supporting the health and performance of your animals with expert services designed for Palm Beach County's equestrian lifestyle.</p>
+    <div class="service-cards">
+      <div class="service-card">
+        <div class="service-card-header">
+          <div class="service-card-icon">🚚</div>
+          <div class="service-card-title">Free Local Delivery</div>
+        </div>
+        <div class="service-card-body">
+          <p>We deliver directly to your barn across Wellington, Loxahatchee, Royal Palm Beach, Lake Worth, Jupiter Farms, and surrounding communities.</p>
+          <p style="margin-top:8px">Free delivery on orders $150+. A $50 delivery fee applies to orders under $150. A temporary, minimal fuel surcharge is currently in effect.</p>
+          <span class="badge">Free on orders $150+</span>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="service-card-header">
+          <div class="service-card-icon">🔬</div>
+          <div class="service-card-title">Nutritional Barn Visit</div>
+        </div>
+        <div class="service-card-body">
+          <p>Our certified equine nutritionists come to you. We assess your horses' condition, workload, and dietary needs to build a customized feeding plan.</p>
+          <p style="margin-top:8px">From performance horses to senior care and metabolic management, we tailor every recommendation to your unique situation.</p>
+          <span class="badge">Call (561) 633-6003</span>
+        </div>
+      </div>
+      <div class="service-card">
+        <div class="service-card-header">
+          <div class="service-card-icon">💰</div>
+          <div class="service-card-title">Nutrena Farm Program</div>
+        </div>
+        <div class="service-card-body">
+          <p>Enroll in the Nutrena Farm Program to earn cash-back rewards on every bag of qualifying Nutrena feed you purchase.</p>
+          <p style="margin-top:8px">The more you buy, the more you earn — designed for barn managers and multi-horse operations who rely on Nutrena's science-backed nutrition.</p>
+          <span class="badge">Earn cash back rewards</span>
+        </div>
+      </div>
+    </div>
+    <div class="delivery-schedule">
+      <div class="delivery-schedule-header">📅 Weekly Delivery Schedule</div>
+      <div class="delivery-grid">
+        \${DELIVERY_SCHEDULE.map(d => \`<div class="delivery-day">
+          <div class="delivery-day-name">\${d.day}</div>
+          <div class="delivery-day-areas">\${d.areas}</div>
+        </div>\`).join('')}
+      </div>
+    </div>
+  </div>
+  <div class="page-footer">
+    <span>British Feed &amp; Supplies · 14589 Southern Blvd, Loxahatchee Groves, FL 33470 · (561) 633-6003 · britishfeed.com</span>
+    <span>Services · \${MONTH_YEAR}</span>
+  </div>
+</div>\`;
+
+  // ── Brands page ───────────────────────────────────────────────────
+  const brandsPage = \`
+<div class="page">
+  <div class="page-header">
+    <div><div class="page-header-title">Our Premium Brands</div><div class="page-header-sub">\${vendors.length} world-class brands curated for South Florida's equestrians</div></div>
+    <div class="page-header-logo">British Feed<br/>&amp; Supplies</div>
+  </div>
+  <div class="page-body">
+    <p class="brands-intro">Every brand we carry is hand-selected for quality, efficacy, and suitability for South Florida's climate and competitive environment. From Olympic-level performance feeds to trusted everyday grooming essentials, our lineup represents the very best available.</p>
+    <div class="brand-grid">
+      \${vendors.map(v => {
+        const meta = BRAND_META[v] || { icon: '🏪', desc:'', highlight:'' };
+        const count = byVendor[v].length;
+        return \`<div class="brand-card">
+          <div class="brand-card-icon">\${meta.icon}</div>
+          <div class="brand-card-name">\${esc(v)}</div>
+          <div class="brand-card-count">\${count} product\${count!==1?'s':''}</div>
+          \${meta.highlight ? \`<div class="brand-card-highlight">\${esc(meta.highlight)}</div>\` : ''}
+        </div>\`;
+      }).join('')}
+    </div>
+  </div>
+  <div class="page-footer">
+    <span>British Feed &amp; Supplies · 14589 Southern Blvd, Loxahatchee Groves, FL 33470 · (561) 633-6003 · britishfeed.com</span>
+    <span>Our Brands · \${MONTH_YEAR}</span>
+  </div>
+</div>\`;
+
+  // ── Table of contents ─────────────────────────────────────────────
+  let pageNum = 2; // cover is p1
+  const tocEntries = [
+    { title: 'About British Feed & Supplies', page: pageNum++ },
+    { title: 'Our Services & Delivery Schedule', page: pageNum++ },
+    { title: 'Our Premium Brands', page: pageNum++ },
+    { title: 'Table of Contents', page: pageNum++ },
+  ];
+  categories.forEach(cat => tocEntries.push({ title: cat, page: pageNum++ }));
+  tocEntries.push({ title: 'Contact & Hours', page: pageNum });
+
+  const frontEntries = tocEntries.slice(0,4);
+  const catEntries   = tocEntries.slice(4);
+
+  const toc = \`
+<div class="page">
+  <div class="page-header">
+    <div><div class="page-header-title">Table of Contents</div><div class="page-header-sub">\${products.length} products across \${categories.length} categories &amp; \${vendors.length} brands</div></div>
+    <div class="page-header-logo">British Feed<br/>&amp; Supplies</div>
+  </div>
+  <div class="page-body">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 32px;">
+      <div>
+        <div class="toc-section-header">Front Matter</div>
+        \${frontEntries.map(e=>\`<div class="toc-row"><span class="toc-row-title">\${esc(e.title)}</span><span class="toc-row-dots"></span><span class="toc-row-page">\${e.page}</span></div>\`).join('')}
+        <div class="toc-section-header" style="margin-top:24px">Product Categories A–H</div>
+        \${catEntries.filter((_,i)=>i<Math.ceil(catEntries.length/2)).map(e=>\`<div class="toc-row"><span class="toc-row-title">\${esc(e.title)}</span><span class="toc-row-dots"></span><span class="toc-row-page">\${e.page}</span></div>\`).join('')}
+      </div>
+      <div>
+        <div class="toc-section-header">Product Categories I–Z</div>
+        \${catEntries.filter((_,i)=>i>=Math.ceil(catEntries.length/2)).map(e=>\`<div class="toc-row"><span class="toc-row-title">\${esc(e.title)}</span><span class="toc-row-dots"></span><span class="toc-row-page">\${e.page}</span></div>\`).join('')}
+        <div class="toc-section-header" style="margin-top:24px">Store Information</div>
+        <div class="toc-row"><span class="toc-row-title">Contact &amp; Hours</span><span class="toc-row-dots"></span><span class="toc-row-page">\${pageNum}</span></div>
+        <div style="margin-top:24px;padding:16px;background:#F8F5EF;border:1px solid #e8dcc8;border-radius:8px;">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:13pt;font-weight:700;color:#1B2A4A;margin-bottom:6px;">Quick Reference</div>
+          <div style="font-size:8pt;color:#555;line-height:1.8;">
+            <div>📞 <strong>(561) 633-6003</strong></div>
+            <div>📍 14589 Southern Blvd, Loxahatchee Groves, FL</div>
+            <div>🕐 Store: Mon–Fri 9am–6pm · Sat 9am–4pm</div>
+            <div>🕐 Distribution: Mon–Fri 8am–5pm · Sat 9am–4pm</div>
+            <div>🌐 britishfeed.com</div>
+            <div>📦 Free delivery on orders $150+</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer">
+    <span>British Feed &amp; Supplies · 14589 Southern Blvd, Loxahatchee Groves, FL 33470 · (561) 633-6003 · britishfeed.com</span>
+    <span>Table of Contents · \${MONTH_YEAR}</span>
+  </div>
+</div>\`;
+
+  // ── Category product pages ────────────────────────────────────────
+  const catPages = categories.map(cat => {
+    const prods = byCategory[cat];
+    const meta  = CAT_META[cat] || { icon:'📋', color:'#1B2A4A' };
+    // Group by vendor within category
+    const vGroups = {};
+    prods.forEach(p => {
+      const v = p.vendor || p.brand || 'Other';
+      if (!vGroups[v]) vGroups[v] = [];
+      vGroups[v].push(p);
+    });
+    const vList = Object.entries(vGroups).sort(([a],[b]) => a.localeCompare(b));
+
+    return \`
+<div class="page category-page">
+  <div class="cat-header" style="background:\${meta.color}">
+    <div class="cat-header-icon">\${meta.icon}</div>
+    <div>
+      <div class="cat-header-title">\${esc(cat)}</div>
+      <div class="cat-header-sub">\${prods.length} product\${prods.length!==1?'s':''} · \${vList.length} brand\${vList.length!==1?'s':''}</div>
+    </div>
+    <div class="cat-header-logo">British Feed<br/>&amp; Supplies</div>
+  </div>
+  \${vList.map(([vendor, vprods]) => \`
+  <div class="vendor-block">
+    <div class="vendor-label">\${esc(vendor)}</div>
+    <table class="prod-table">
+      <thead><tr>
+        <th class="th-name">Product</th>
+        <th class="th-brand">Brand</th>
+        <th class="th-desc">Description</th>
+        <th class="th-price">Price</th>
+        <th class="th-stock">In Stock</th>
+      </tr></thead>
+      <tbody>\${vprods.map(productRow).join('')}</tbody>
+    </table>
+  </div>\`).join('')}
+  <div class="page-footer">
+    <span>British Feed &amp; Supplies · 14589 Southern Blvd, Loxahatchee Groves, FL 33470 · (561) 633-6003 · britishfeed.com</span>
+    <span>\${esc(cat)} · \${MONTH_YEAR}</span>
+  </div>
+</div>\`;
+  }).join('\\n');
+
+  // ── Back cover ────────────────────────────────────────────────────
+  const backCover = \`
+<div class="page back-cover">
+  <div class="back-cover-overlay">
+    <img src="/admin/api/catalog/image/img_img_site_logo_white" alt="British Feed" class="back-cover-logo" onerror="this.style.display='none'"/>
+    <div class="back-cover-headline">The Best Care<br/>for <em>Champions</em></div>
+    <div class="back-cover-sub">Premium Feed &amp; Supplies for South Florida's Finest Horses</div>
+    <div class="back-divider"></div>
+    <div class="back-contact-grid">
+      <div class="back-contact-item">
+        <div class="back-contact-icon">📞</div>
+        <div class="back-contact-label">Call Us</div>
+        <div class="back-contact-value">(561) 633-6003</div>
+      </div>
+      <div class="back-contact-item">
+        <div class="back-contact-icon">📍</div>
+        <div class="back-contact-label">Visit Us</div>
+        <div class="back-contact-value" style="font-size:9pt">14589 Southern Blvd<br/>Loxahatchee Groves, FL 33470</div>
+      </div>
+      <div class="back-contact-item">
+        <div class="back-contact-icon">🕐</div>
+        <div class="back-contact-label">Store Hours</div>
+        <div class="back-contact-value" style="font-size:9pt">Mon–Fri 9am–6pm<br/>Sat 9am–4pm</div>
+      </div>
+    </div>
+    <div class="back-social">@britishfeed · britishfeed.com · Since 2012</div>
+    <div class="back-footer">Pricing and availability subject to change without notice. Call (561) 633-6003 to confirm. © \${YEAR} British Feed &amp; Supplies. All rights reserved.</div>
+  </div>
+</div>\`;
+
+  return cover + about + services + brandsPage + toc + catPages + backCover;
+}
+
+// ── Boot: load products from API then build catalog ───────────────────────
+async function boot() {
+  try {
+    // Try public KV-backed API first (reflects admin edits instantly, no auth needed)
+    let products = [];
+    try {
+      const r = await fetch('/api/public/products');
+      if (r.ok) {
+        const d = await r.json();
+        if (d.products && d.products.length > 0) products = d.products;
+      }
+    } catch (_) {}
+
+    // Fallback to static JSON (always has data)
+    if (products.length === 0) {
+      const r = await fetch('/static/products-data.json');
+      if (r.ok) products = await r.json();
+    }
+
+    document.getElementById('catalogPages').innerHTML = buildCatalog(products);
+  } catch (err) {
+    document.getElementById('catalogPages').innerHTML =
+      '<div style="padding:40px;text-align:center;font-family:sans-serif;color:#c00">Error loading products: '+err.message+'. <a href="/products">Return to catalog</a></div>';
+  } finally {
+    document.getElementById('loadingOverlay').style.display = 'none';
+  }
+}
+
+boot();
+</script>
+</body>
+</html>`
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 //  FULL PRODUCT CATALOG PAGE
 // ═══════════════════════════════════════════════════════════════════════════
 function getProductsHTML(): string {
@@ -1999,6 +2899,11 @@ function getProductsHTML(): string {
         <i class="fas fa-phone-alt"></i>
         Call <strong>(561) 633-6003</strong> to confirm availability
       </div>
+      <a href="/catalog-print" target="_blank"
+         class="inline-flex items-center gap-2 bg-gold-400 hover:bg-gold-300 text-navy-700 font-bold text-sm px-5 py-2.5 rounded-lg transition-all shadow-lg hover:shadow-xl">
+        <i class="fas fa-file-pdf"></i>
+        Download Full Catalog (PDF)
+      </a>
       <span id="productCountBadge" class="text-xs text-slate-400 hidden sm:block text-right"></span>
     </div>
   </div>
