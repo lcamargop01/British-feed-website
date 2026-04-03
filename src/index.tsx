@@ -1973,21 +1973,10 @@ function getProductsHTML(): string {
 
 <!-- ── Navigation ─────────────────────────────────────────────────────────── -->
 <nav class="nav-sticky">
-  <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-    <a href="/" class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-full bg-gold-400 flex items-center justify-center text-navy-700 font-bold text-sm">BF</div>
-      <span class="text-white font-serif text-lg font-semibold hidden sm:block">British Feed <span class="text-gold-400">&amp; Supplies</span></span>
+  <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 py-2 flex items-center justify-center">
+    <a href="/" class="flex items-center justify-center">
+      <img src="/admin/api/catalog/image/img_img_site_logo_white" alt="British Feed & Supplies" class="h-12" style="filter:brightness(0) invert(1);" onerror="this.style.display='none'" />
     </a>
-    <div class="flex items-center gap-3">
-      <a href="/" class="text-gray-300 hover:text-white text-sm transition-colors flex items-center gap-1.5">
-        <i class="fas fa-home text-gold-400"></i>
-        <span class="hidden sm:inline">Home</span>
-      </a>
-      <a href="/#chat" class="bg-gold-400 hover:bg-gold-500 text-navy-700 font-semibold text-sm px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5">
-        <i class="fas fa-comment-dots"></i>
-        <span>Ask Our AI</span>
-      </a>
-    </div>
   </div>
 </nav>
 
@@ -2008,6 +1997,12 @@ function getProductsHTML(): string {
       <span id="productCountBadge" class="text-xs text-slate-400 hidden sm:block text-right"></span>
     </div>
   </div>
+</div>
+
+<!-- ── Fuel Surcharge Notice ──────────────────────────────────────────────── -->
+<div class="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center text-amber-800 text-xs flex items-center justify-center gap-2">
+  <i class="fas fa-gas-pump text-amber-600"></i>
+  <span><strong>Notice:</strong> Due to rising fuel costs, we are implementing a temporary, minimal fuel surcharge on deliveries. Thank you for your understanding.</span>
 </div>
 
 <!-- ── Store Layout ─────────────────────────────────────────────────────────── -->
@@ -2122,12 +2117,14 @@ function getProductsHTML(): string {
           <i class="fas fa-phone text-gold-400 text-xl mb-2"></i>
           <div class="font-semibold text-navy-700 text-sm">Call Us</div>
           <a href="tel:+15616336003" class="text-gold-500 font-semibold text-sm mt-1 block hover:text-gold-600">(561) 633-6003</a>
-          <div class="text-slate-500 text-xs">Mon–Sat 8am–6pm, Sun 9am–4pm</div>
+          <div class="text-slate-500 text-xs">Store: Mon–Fri 9am–6pm &middot; Sat 9am–4pm</div>
+          <div class="text-slate-400 text-xs">Distribution: Mon–Fri 8am–5pm &middot; Sat 9am–4pm</div>
         </div>
         <div class="bg-white rounded-2xl p-4 border border-slate-100">
           <i class="fas fa-truck text-gold-400 text-xl mb-2"></i>
           <div class="font-semibold text-navy-700 text-sm">Free Delivery</div>
           <div class="text-slate-500 text-xs mt-1">On orders over $150<br/>Wellington &amp; surrounding areas</div>
+          <div class="text-amber-600 text-xs mt-1 font-medium"><i class="fas fa-gas-pump mr-1"></i>Temporary minimal fuel surcharge applies</div>
         </div>
       </div>
 
