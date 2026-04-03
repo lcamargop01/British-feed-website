@@ -1956,8 +1956,8 @@ body { font-family: 'Nunito Sans', sans-serif; color: #1a1a2e; background: #d0d0
 }
 .cover-right-img {
   position: absolute; inset: 0;
-  background: url('/static/hero_horse.jpg') center 20% / cover no-repeat;
-  opacity: 0.9;
+  background: url('/static/catalog_cover.jpg') center 30% / cover no-repeat;
+  opacity: 0.95;
 }
 .cover-right-overlay {
   position: absolute; inset: 0;
@@ -2068,17 +2068,13 @@ table.ptable th {
 }
 table.ptable tbody tr:nth-child(even) { background: #fafaf8; }
 table.ptable td {
-  padding: 3.5px 6px; border-bottom: 1px solid #eee;
+  padding: 4px 6px; border-bottom: 1px solid #eee;
   vertical-align: top; line-height: 1.35;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  overflow: hidden;
 }
-.col-name  { width: 24%; font-weight: 700; color: #1B2A4A; white-space: normal; }
-.col-brand { width: 12%; color: #777; }
-.col-desc  { width: 42%; color: #555; font-size: 7pt; white-space: normal; line-height: 1.3; }
-.col-price { width: 12%; text-align: right; font-weight: 700; color: #1B2A4A; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.col-avail { width: 10%; text-align: center; }
-.badge-in  { color: #2E7D32; font-size: 6.5pt; font-weight: 700; }
-.badge-out { color: #B71C1C; font-size: 6.5pt; font-weight: 700; }
+.col-name  { width: 28%; font-weight: 700; color: #1B2A4A; white-space: normal; }
+.col-desc  { width: 58%; color: #555; font-size: 7pt; white-space: normal; line-height: 1.35; }
+.col-price { width: 14%; text-align: right; font-weight: 700; color: #1B2A4A; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 /* ═══ BACK COVER ═════════════════════════════════════════════════════ */
 .back-page {
@@ -2173,17 +2169,12 @@ function buildCatalog(products) {
   // ── Product row ───────────────────────────────────────────────────
   function prodRow(p) {
     const price = p.priceFormatted || (p.price ? '$'+Number(p.price).toFixed(2) : 'Call');
-    const avail = p.inStock !== false
-      ? '<span class="badge-in">&#10003; In Stock</span>'
-      : '<span class="badge-out">Call</span>';
     const raw  = (p.description||'').replace(/[—–]\s*available at British Feed.*?to order\.?/gi,'').trim();
-    const desc = raw.length > 110 ? raw.slice(0,107)+'…' : raw;
+    const desc = raw.length > 175 ? raw.slice(0,172)+'…' : raw;
     return \`<tr>
       <td class="col-name">\${esc(p.name)}</td>
-      <td class="col-brand">\${esc(p.brand||p.vendor||'')}</td>
       <td class="col-desc">\${esc(desc)}</td>
       <td class="col-price">\${esc(price)}</td>
-      <td class="col-avail">\${avail}</td>
     </tr>\`;
   }
 
@@ -2336,10 +2327,8 @@ function buildCatalog(products) {
         <table class="ptable">
           <thead><tr>
             <th class="col-name">Product</th>
-            <th class="col-brand">Brand</th>
-            <th class="col-desc">Description</th>
+            <th class="col-desc">Description &amp; Benefits</th>
             <th class="col-price">Price</th>
-            <th class="col-avail">Avail.</th>
           </tr></thead>
           <tbody>\${vprods.map(prodRow).join('')}</tbody>
         </table>
@@ -2351,7 +2340,7 @@ function buildCatalog(products) {
     <div class="cat-header-left">
       <div>
         <div class="cat-header-title">\${esc(cat)}</div>
-        <div class="cat-header-sub">\${prods.length} product\${prods.length!==1?'s':''} · \${vList.length} brand\${vList.length!==1?'s':''}</div>
+        <div class="cat-header-sub">\${prods.length} product\${prods.length!==1?'s':''} available</div>
       </div>
     </div>
     <div class="cat-header-right">British Feed<br/>&amp; Supplies</div>
