@@ -224,8 +224,8 @@ function getHTML(): string {
   <style>
     html { scroll-behavior: smooth; }
     .hero-bg {
-      background: linear-gradient(135deg, rgba(27,42,74,0.75) 0%, rgba(27,42,74,0.40) 55%, rgba(0,0,0,0.20) 100%),
-                  url('/admin/api/catalog/image/img_site_hero_bg') center/cover no-repeat;
+      background: linear-gradient(135deg, rgba(27,42,74,0.72) 0%, rgba(27,42,74,0.38) 55%, rgba(0,0,0,0.15) 100%),
+                  url('https://sspark.genspark.ai/cfimages?u1=5JrGkxXguoxsFg4FfUCeFWzD%2F6OU2V4Nd7PCUlAgk16M2vA5jUlLdE01YhtF0JvcA7Xksxqa%2Bo2yxrmffuqFcZc5u9do1eTDqR9Yuch26r2qLO2rfMh3bIvsKpHbTqgR1pcn&u2=OUTntpi6GMHAaQBY&width=2560') center/cover no-repeat;
     }
     .section-divider { border-top: 2px solid #C9A84C; width: 60px; margin: 0 auto; }
     .card-hover { transition: all 0.3s ease; }
@@ -262,7 +262,7 @@ function getHTML(): string {
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
       <a href="#home" class="flex items-center gap-3 group">
-        <img src="https://www.genspark.ai/api/files/s/xouaae2I" alt="British Feed Logo" class="h-12" onerror="this.style.display='none'" style="filter: brightness(0) invert(1);" />
+        <img src="/admin/api/catalog/image/img_img_site_logo_white" alt="British Feed Logo" class="h-10" onerror="this.style.display='none'" style="filter: brightness(0) invert(1);" />
         <span class="text-white font-serif text-lg font-semibold hidden sm:block">British Feed & Supplies</span>
       </a>
       <div class="hidden md:flex items-center gap-6 text-sm font-medium text-white/90">
@@ -395,7 +395,10 @@ function getHTML(): string {
       </div>
       <div class="scroll-reveal relative">
         <div class="rounded-2xl overflow-hidden shadow-2xl">
-          <img src="https://sspark.genspark.ai/cfimages?u1=K2zg5KNpQPqHX6KgPMOu%2BqTtOAdJN%2Fkacb%2B3o1K%2FCWoh8CE4T1yaOqa6a4eTfwczJSJKqVVvn9gLgipg%2F4Vhkxd6dxSHlTaSe4v2P%2Fxqvz2GYw%3D%3D&u2=eFbKamVjWpBxOevY&width=2560" alt="Dressage horse in arena" class="w-full h-96 object-cover" />
+          <video class="w-full h-96 object-cover" autoplay muted loop playsinline poster="/admin/api/catalog/image/img_site_hero_bg">
+            <source src="/static/commercial.mp4" type="video/mp4" />
+            <img src="/admin/api/catalog/image/img_site_hero_bg" alt="British Feed commercial" class="w-full h-96 object-cover" />
+          </video>
         </div>
         <div class="absolute -bottom-6 -left-6 bg-white rounded-2xl p-5 shadow-xl border border-gray-100 max-w-xs hidden lg:block">
           <div class="flex items-center gap-3">
@@ -475,7 +478,7 @@ function getHTML(): string {
         Grain Brands
         <span class="text-sm font-sans font-normal text-gray-400 ml-2">— click a brand to see all products</span>
       </h3>
-      <div id="grainBrandsGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div id="grainBrandsGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
         ${brandCards()}
       </div>
     </div>
@@ -636,7 +639,7 @@ function getHTML(): string {
     </div>
     <div class="grid md:grid-cols-3 gap-8">
       <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 card-hover scroll-reveal">
-        <div class="h-48 bg-cover bg-center" style="background-image:url('https://sspark.genspark.ai/cfimages?u1=APQFxRzBJu5iRG%2Be6%2BZSpV1FnL4sqrLBF61a2yu9f2v8MWczCNQSIgESkQQbf8iA%2FzJ5bD%2B4dbPiHRXn15DqqHv%2B714IxEzsafrHOXaCIR6eRXI4IYLxCq93T4CTomVNN%2FntdtJmtTsf&u2=FBjs72IGitspXxu9&width=2560')"></div>
+        <div class="h-48 bg-cover bg-center" style="background-image:url('/admin/api/catalog/image/img_img_site_truck')"></div>
         <div class="p-6">
           <div class="w-12 h-12 bg-navy-50 rounded-full flex items-center justify-center mb-4">
             <i class="fas fa-truck text-navy-700 text-xl"></i>
@@ -663,7 +666,7 @@ function getHTML(): string {
         </div>
       </div>
       <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 card-hover scroll-reveal">
-        <div class="h-48 bg-cover bg-center" style="background-image:url('https://sspark.genspark.ai/cfimages?u1=RSCeq2T%2FVGKFcvxpBbz9PZ4g21WB3CxOr%2B4PODR%2FSirFw%2Bq3FzkaoOwmZbMy%2BLEclsYUzaQtBOMk%2FEtgqFXt7CQ0wymSDb3cvuMDtDlU9qDD34U13PtQiC0Gfu4eOuuWU7nNr1GEyUrPc4eqT1nlVobQrs6F33lAh0NMrF2pJxrrDuw%3D&u2=mo%2FTEXhG78XbzS%2BM&width=2560')"></div>
+        <div class="h-48 bg-cover bg-center bg-white flex items-center justify-center" style="background-image:url('https://sspark.genspark.ai/cfimages?u1=v0dkTfLlLXgoeZLiiQP35sHCbdK2Lf4A3U5pvV683Qf516I0p3WIx0QGNwG1kRPWEZmm4f3KSCqO7m9PifeBRyQcOQBNcHI%2FMR1UI2dg&u2=JcOEp9U6PwOOsj0N&width=600');background-size:contain;background-repeat:no-repeat;"></div>
         <div class="p-6">
           <div class="w-12 h-12 bg-navy-50 rounded-full flex items-center justify-center mb-4">
             <i class="fas fa-certificate text-navy-700 text-xl"></i>
@@ -691,41 +694,35 @@ function getHTML(): string {
       </div>
       <h2 class="font-serif text-4xl lg:text-5xl font-bold text-navy-700">Meet Our Team</h2>
     </div>
+    <!-- Shared team photo -->
+    <div class="mb-10 scroll-reveal">
+      <img src="/admin/api/catalog/image/img_site_team_owners" alt="Vieri Bracco & Carmine Garrett" class="w-full max-h-80 object-cover object-top rounded-2xl shadow-xl" onerror="this.style.display='none'" />
+    </div>
     <div class="grid md:grid-cols-2 gap-10">
       <!-- Vieri Bracco -->
-      <div class="bg-cream rounded-2xl p-8 border border-gray-100 shadow-sm card-hover scroll-reveal flex gap-6">
-        <div class="flex-shrink-0">
-          <img src="/admin/api/catalog/image/img_site_team_owners" alt="Vieri Bracco & Carmine Garrett" class="w-24 h-24 rounded-full object-cover shadow-md" onerror="this.style.display='none'" />
-        </div>
-        <div>
-          <h3 class="font-serif text-2xl font-bold text-navy-700">Vieri Bracco</h3>
-          <p class="text-gold-500 font-semibold text-sm mb-3">Owner & Founder</p>
-          <p class="text-gray-600 text-sm leading-relaxed mb-4">
-            Vieri founded British Feed & Supplies in 2012 with a vision to bring top-quality European and American horse nutrition brands to the Wellington equestrian community. His passion for horses and deep knowledge of equine nutrition have made British Feed a cornerstone of Palm Beach County's horse world.
-          </p>
-          <div class="flex flex-wrap gap-2">
-            <span class="tag tag-perf">Founder</span>
-            <span class="tag tag-senior">Equine Nutrition</span>
-            <span class="tag tag-special">Community Leader</span>
-          </div>
+      <div class="bg-cream rounded-2xl p-8 border border-gray-100 shadow-sm card-hover scroll-reveal">
+        <h3 class="font-serif text-2xl font-bold text-navy-700">Vieri Bracco</h3>
+        <p class="text-gold-500 font-semibold text-sm mb-3">Owner & Founder</p>
+        <p class="text-gray-600 text-sm leading-relaxed mb-4">
+          Vieri founded British Feed & Supplies in 2012 with a vision to bring top-quality European and American horse nutrition brands to the Wellington equestrian community. His passion for horses and deep knowledge of equine nutrition have made British Feed a cornerstone of Palm Beach County's horse world.
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <span class="tag tag-perf">Founder</span>
+          <span class="tag tag-senior">Equine Nutrition</span>
+          <span class="tag tag-special">Community Leader</span>
         </div>
       </div>
       <!-- Carmine Garrett -->
-      <div class="bg-cream rounded-2xl p-8 border border-gray-100 shadow-sm card-hover scroll-reveal flex gap-6">
-        <div class="flex-shrink-0">
-          <img src="/admin/api/catalog/image/img_site_team_group" alt="British Feed Team" class="w-24 h-24 rounded-full object-cover shadow-md" onerror="this.style.display='none'" />
-        </div>
-        <div>
-          <h3 class="font-serif text-2xl font-bold text-navy-700">Carmine Garrett</h3>
-          <p class="text-gold-500 font-semibold text-sm mb-3">General Manager</p>
-          <p class="text-gray-600 text-sm leading-relaxed mb-4">
-            Carmine brings hands-on equestrian expertise and operational excellence to British Feed's daily operations. With deep roots in the Wellington horse community, Carmine ensures every customer receives personalized, knowledgeable service — from first-time horse owners to seasoned professionals.
-          </p>
-          <div class="flex flex-wrap gap-2">
-            <span class="tag tag-perf">General Manager</span>
-            <span class="tag tag-all">Customer Service</span>
-            <span class="tag tag-special">Wellington Community</span>
-          </div>
+      <div class="bg-cream rounded-2xl p-8 border border-gray-100 shadow-sm card-hover scroll-reveal">
+        <h3 class="font-serif text-2xl font-bold text-navy-700">Carmine Garrett</h3>
+        <p class="text-gold-500 font-semibold text-sm mb-3">General Manager</p>
+        <p class="text-gray-600 text-sm leading-relaxed mb-4">
+          Carmine brings hands-on equestrian expertise and operational excellence to British Feed's daily operations. With deep roots in the Wellington horse community, Carmine ensures every customer receives personalized, knowledgeable service — from first-time horse owners to seasoned professionals.
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <span class="tag tag-perf">General Manager</span>
+          <span class="tag tag-all">Customer Service</span>
+          <span class="tag tag-special">Wellington Community</span>
         </div>
       </div>
     </div>
@@ -902,7 +899,7 @@ function getHTML(): string {
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="grid md:grid-cols-3 gap-8 mb-8">
       <div>
-        <img src="https://www.genspark.ai/api/files/s/xouaae2I" alt="British Feed Logo" class="h-12 mb-4" style="filter: brightness(0) invert(1);" onerror="this.style.display='none'" />
+        <img src="/admin/api/catalog/image/img_img_site_logo_white" alt="British Feed Logo" class="h-10 mb-4" style="filter: brightness(0) invert(1);" onerror="this.style.display='none'" />
         <p class="text-white/50 text-sm leading-relaxed">Premium horse feed, hay, shavings & supplies for Wellington's equestrian community since 2016.</p>
         <a href="https://www.instagram.com/british_feed_and_supplies/" target="_blank" rel="noopener" class="inline-flex items-center gap-2 mt-4 text-white/50 hover:text-gold-400 transition-colors text-sm">
           <i class="fab fa-instagram text-lg"></i> @british_feed_and_supplies
@@ -1345,15 +1342,16 @@ document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
 
 // ── Brand card grid ────────────────────────────────────────────────────────────
 function brandCards(): string {
+  // Top 8 vendors by product count in catalog (from live catalog data)
   const brands = [
-    { id:'nutrena',   name:'Nutrena',       logo:'https://nutrenaworld.com/wp-content/themes/nutrena/img/logo.svg',         color:'#e8f0fe', tag:'SafeChoice · ProForce · Triumph',       img:'https://sspark.genspark.ai/cfimages?u1=Inli4Vrc%2Bq7q%2Bhejp2YDAGwFAIaUPxW7K%2FwGYXRV7M%2FosuAUR1Dg%2F0CYc7d60OG48eic0M3S7QLmL7rjvtV13G6oK3uyoFxL%2F6mCxQ%2BPP0S%2BoyvO&u2=KfyuzNFlfV1IBWO5&width=600' },
-    { id:'proelite',  name:'Pro Elite',      logo:'https://proelitehorsefeed.com/wp-content/uploads/2021/10/ProElite_Logo_Reversed.png', color:'#fef9e8', tag:'Performance · Senior · Growth',       img:'https://sspark.genspark.ai/cfimages?u1=UxSf44ASGNVschWMwLtxVTJm3%2BRiUSyER74fAAsvVIMvRn1hKeSeK4y%2BjKNE8jwMaOERwhJljHYQcYwWUmC1zwynUJr1ADAMOeXYd7zaFrqolHnB&u2=5%2BTutAkigKGikiTN&width=600' },
+    { id:'farnam',    name:'Farnam',         logo:'',                                                                          color:'#fff7ed', tag:'Horse Health · Fly Control · Hoof',     img:'https://sspark.genspark.ai/cfimages?u1=APQFxRzBJu5iRG%2Be6%2BZSpV1FnL4sqrLBF61a2yu9f2v8MWczCNQSIgESkQQbf8iA%2FzJ5bD%2B4dbPiHRXn15DqqHv%2B714IxEzsafrHOXaCIR6eRXI4IYLxCq93T4CTomVNN%2FntdtJmtTsf&u2=FBjs72IGitspXxu9&width=600' },
+    { id:'nutrena',   name:'Nutrena',        logo:'https://nutrenaworld.com/wp-content/themes/nutrena/img/logo.svg',           color:'#e8f0fe', tag:'SafeChoice · ProForce · Triumph',       img:'https://sspark.genspark.ai/cfimages?u1=Inli4Vrc%2Bq7q%2Bhejp2YDAGwFAIaUPxW7K%2FwGYXRV7M%2FosuAUR1Dg%2F0CYc7d60OG48eic0M3S7QLmL7rjvtV13G6oK3uyoFxL%2F6mCxQ%2BPP0S%2BoyvO&u2=KfyuzNFlfV1IBWO5&width=600' },
+    { id:'foran',     name:'Foran',          logo:'',                                                                          color:'#f0fff4', tag:'Equine Supplements · Performance',      img:'https://sspark.genspark.ai/cfimages?u1=CqkH4kIYABdVpnuxtR4bJqyehkIDpq3%2BdUQr%2FcbR38crltam%2BSVdBNtylFtOjAIbQiLcBWuAmcW42P%2F3dPIBpRuDsEF8u9g2sBQuyCtXS5dMZ3gwEWb6n0c%2BANfOj1jFDmw%3D&u2=erPuew9pmVC%2BvkXw&width=600' },
+    { id:'absorbine', name:'Absorbine',      logo:'',                                                                          color:'#fef9e8', tag:'Liniment · ShowSheen · Joint Support',  img:'https://sspark.genspark.ai/cfimages?u1=hzEbAV4lPpykIa5X9lcQ4jr%2Fm9mpHj9nzVfssr4frp4kAfrI%2BXGE%2BRdSmGkNbIxpnhntyl9t3x6ivKuK9ssLhnalkfNY3MPhQuv3a11VUri%2F6A%3D%3D&u2=Y3f3oehzecr27oyj&width=600' },
     { id:'cavalor',   name:'Cavalor',        logo:'https://cavalor.com/wp-content/uploads/2022/09/cavalor-logo.svg',          color:'#f0f7ff', tag:'Performix · FiberGastro · Strucomix',  img:'https://sspark.genspark.ai/cfimages?u1=onNaXY4%2FhbZvy5YUkL6RJRe7GDYh%2FXQ%2F9jUCePwxorXO0SXh9sJ4V5ZlP8bfJnaEM4xvG77mMoaKrx2Kh4NABnoukeaffKYGZCZbO8v6anEF9nDmP8mcozZwUEkzk0ZJI0S3JYPVUJekW5Q%2FTQ7Wo1Ym%2F384PTiYCw%3D%3D&u2=HvaCFz89bIhAFLwE&width=600' },
     { id:'redmills',  name:'Red Mills',      logo:'https://www.redmillshorse.com/wp-content/uploads/2019/01/logo.png',        color:'#fff0f0', tag:'Competition · Horse Care · Comfort',   img:'https://sspark.genspark.ai/cfimages?u1=7osbNYU1ox8HmUk%2Ff45sEFuifDuvcNmaipEgpuBsDXSH2IHPavx1l1F8XyLl6hGDuY9d7%2BNMCEuIiPfiM%2BXq2K%2BeZndZ3qLBoOkpr7yNJg%3D%3D&u2=2MbM4LT9HP0TC4eI&width=600' },
     { id:'havens',    name:'Havens',         logo:'',                                                                          color:'#f0fff4', tag:'Endurance · Gastro · Cool Mix',        img:'https://sspark.genspark.ai/cfimages?u1=dhrtoOORdnVmpeg5tu7Vf6iZPYmcuNy2bGs4%2F7HVf9X7%2FqSEKc8h4k8BEc2V5IGz%2BZu3%2FCtD5Qu55n%2F526YoYwwmmVccVgPnmttMjJxE%2FQk%3D&u2=7nQSyV4Lh9alc6Az&width=600' },
-    { id:'buckeye',   name:'Buckeye',        logo:'',                                                                          color:'#fff8f0', tag:'EQ8 · Cadence Ultra · Safe N Easy',    img:'https://sspark.genspark.ai/cfimages?u1=9XhtqN4rYmnFIf9UGMrzL7a9c7Ql2XBXrI6%2BK3o57loRQp60kAcf3xQdI%2BlJC9wcQvXchR9jZmirwQJGcDU%2B5FrgA86yTp6np7%2FN%2BLwuscUFAo2fjOxUxzIVKU4cPngVqwZepEz%2FUKNZINWBMvefKj9PnA%3D%3D&u2=ruqOATUPxWic6yRH&width=600' },
-    { id:'cryptoaero',name:'Crypto Aero',   logo:'',                                                                          color:'#f4fff0', tag:'Wholefood · All Natural',              img:'https://sspark.genspark.ai/cfimages?u1=UUsiXOiA0Ei8p%2FfKKGgbk1xAySyI%2FiMwtVhDYyrYBbgpnGA1ZJtkrAhHHwCYX1JzMYoWCDxVgQn44pKRN%2Bml1gVbJzt6nT4%2F%2B%2BDhAQJwPC%2BdZw%3D%3D&u2=QDzJUpsrG0A2lDdk&width=600' },
-    { id:'kent',      name:'Kent Sentinel', logo:'',                                                                          color:'#f5f0ff', tag:'Quality Grain Feeds',                  img:'https://sspark.genspark.ai/cfimages?u1=Vxz9lWjwxf2ZDBQw4sfUrkXEXV%2FJcZJZ%2FlYvsjswpMWnkrFwvhy8fUCTlInJHfSAcgbZhxIOUmLFM3lX4GvrTZqxqRl7aGNdVnzq9B9g7wZDh59ixKMAQk8Gp6G6Q1qmrlP2hg1jjhE%3D&u2=rkES%2F33%2By4pHTknJ&width=600' },
+    { id:'keyflow',   name:'KeyFlow',        logo:'',                                                                          color:'#f5f0ff', tag:'Low Starch · Performance · Senior',     img:'https://sspark.genspark.ai/cfimages?u1=Vxz9lWjwxf2ZDBQw4sfUrkXEXV%2FJcZJZ%2FlYvsjswpMWnkrFwvhy8fUCTlInJHfSAcgbZhxIOUmLFM3lX4GvrTZqxqRl7aGNdVnzq9B9g7wZDh59ixKMAQk8Gp6G6Q1qmrlP2hg1jjhE%3D&u2=rkES%2F33%2By4pHTknJ&width=600' },
   ]
   return brands.map(b => `
     <div class="product-brand-card bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100"
