@@ -725,7 +725,7 @@ function getHTML(): string {
           </div>
           <!-- Delivery Schedule button - opens full-screen modal -->
           <div class="mt-4">
-            <button onclick="document.getElementById('delivery-modal-overlay').classList.add('open')"
+            <button onclick="openDeliveryModal()"
               class="w-full flex items-center justify-center gap-2 text-white text-xs font-semibold px-4 py-2.5 rounded-full transition-all"
               style="background:#1B2A4A;">
               <i class="fas fa-calendar-week"></i> View Delivery Schedule
@@ -1426,28 +1426,37 @@ const DEFAULT_DELIVERY_SCHEDULE = [
   { day: 'Saturday',  areas: 'A, B, C Road; Collecting Canal; Homeland' },
 ];
 
+// Holds the active schedule (default or from KV)
+let ACTIVE_DELIVERY_SCHEDULE = DEFAULT_DELIVERY_SCHEDULE;
+
 function renderDeliverySchedule(raw) {
-  const el = document.getElementById('delivery-schedule-days');
-  if (!el) return;
   let days = DEFAULT_DELIVERY_SCHEDULE;
-  // raw can be JSON string or pre-parsed array
   if (raw) {
     try {
       const parsed = (typeof raw === 'string') ? JSON.parse(raw) : raw;
       if (Array.isArray(parsed) && parsed.length) days = parsed;
-    } catch(_) {
-      // fallback to default
-    }
+    } catch(_) {}
   }
-  el.innerHTML = days.map(d => \`
+  ACTIVE_DELIVERY_SCHEDULE = days;
+  // Also populate modal if it's already open
+  const el = document.getElementById('delivery-schedule-days');
+  if (el) el.innerHTML = buildScheduleHTML(days);
+}
+
+function buildScheduleHTML(days) {
+  return days.map(d => \`
     <div class="delivery-day">
       <span class="delivery-day-name">\${d.day}</span>
-      <span class="text-white/80">\${d.areas}</span>
+      <span style="color:rgba(255,255,255,0.8);">\${d.areas}</span>
     </div>
   \`).join('');
 }
-// Render default schedule on page load
-renderDeliverySchedule(null);
+
+function openDeliveryModal() {
+  const el = document.getElementById('delivery-schedule-days');
+  if (el) el.innerHTML = buildScheduleHTML(ACTIVE_DELIVERY_SCHEDULE);
+  document.getElementById('delivery-modal-overlay').classList.add('open');
+}
 
 // ─── Scroll reveal ────────────────────────────────────────────────────────────
 const observer = new IntersectionObserver(entries => {
