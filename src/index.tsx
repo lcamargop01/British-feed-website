@@ -641,9 +641,16 @@ function getHTML(): string {
           <div class="font-bold text-navy-700 text-base">Looking for something specific?</div>
           <div class="text-gray-500 text-sm mt-0.5">Browse our complete product catalog with search & filters.</div>
         </div>
-        <a href="/products" class="flex-shrink-0 bg-navy-700 hover:bg-navy-800 text-white font-bold px-6 py-3 rounded-xl transition-all hover:scale-105 flex items-center gap-2 whitespace-nowrap" style="background:#1B2A4A">
-          <i class="fas fa-list"></i> Browse Full Catalog
-        </a>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <a href="/products" class="flex-shrink-0 bg-navy-700 hover:bg-navy-800 text-white font-bold px-6 py-3 rounded-xl transition-all hover:scale-105 flex items-center gap-2 whitespace-nowrap" style="background:#1B2A4A">
+            <i class="fas fa-list"></i> Browse Full Catalog
+          </a>
+          <a href="/catalog-print" target="_blank"
+             style="display:inline-flex;align-items:center;gap:8px;background:#C9A84C;color:#1B2A4A;font-weight:700;padding:12px 20px;border-radius:12px;text-decoration:none;white-space:nowrap;flex-shrink:0;"
+             onmouseover="this.style.background='#E0C87A'" onmouseout="this.style.background='#C9A84C'">
+            <i class="fas fa-file-pdf"></i> Download PDF Catalog
+          </a>
+        </div>
       </div>
     </div>
 
@@ -2900,7 +2907,8 @@ function getProductsHTML(): string {
         Call <strong>(561) 633-6003</strong> to confirm availability
       </div>
       <a href="/catalog-print" target="_blank"
-         class="inline-flex items-center gap-2 bg-gold-400 hover:bg-gold-300 text-navy-700 font-bold text-sm px-5 py-2.5 rounded-lg transition-all shadow-lg hover:shadow-xl">
+         style="display:inline-flex;align-items:center;gap:8px;background:#C9A84C;color:#1B2A4A;font-weight:700;font-size:14px;padding:10px 20px;border-radius:8px;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,0.25);transition:all 0.2s;"
+         onmouseover="this.style.background='#E0C87A'" onmouseout="this.style.background='#C9A84C'">
         <i class="fas fa-file-pdf"></i>
         Download Full Catalog (PDF)
       </a>
