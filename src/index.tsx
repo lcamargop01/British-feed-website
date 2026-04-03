@@ -677,6 +677,7 @@ function getHTML(): string {
       <a href="/products" class="block py-2 hover:text-gold-400 flex items-center gap-2">
         <i class="fas fa-list text-xs" style="color:#C9A84C"></i>Product Catalog
       </a>
+      <a href="#guidelines" onclick="closeMobileMenu()" class="block py-2 hover:text-gold-400">Feeding Guide</a>
       <a href="#services" onclick="closeMobileMenu()" class="block py-2 hover:text-gold-400">Services</a>
       <a href="#team"     onclick="closeMobileMenu()" class="block py-2 hover:text-gold-400">Our Team</a>
       <a href="#reviews"  onclick="closeMobileMenu()" class="block py-2 hover:text-gold-400">Reviews</a>
@@ -1026,6 +1027,209 @@ function getHTML(): string {
   </div>
 </section>
 
+<!-- ═══════════════════════ FEEDING GUIDELINES ══════════════════════ -->
+<section id="guidelines" class="py-20 bg-white">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- Header -->
+    <div class="text-center mb-12 scroll-reveal">
+      <div class="flex items-center justify-center gap-2 mb-3">
+        <div class="h-px w-10 bg-gold-400"></div>
+        <span class="text-gold-500 font-semibold text-xs tracking-widest uppercase">Equine Nutrition</span>
+        <div class="h-px w-10 bg-gold-400"></div>
+      </div>
+      <h2 class="font-serif text-4xl font-bold text-navy-700 mb-3">Horse Feeding Guidelines</h2>
+      <p class="text-gray-500 text-lg max-w-2xl mx-auto">A practical South Florida reference from our team — because proper care starts long before the ride.</p>
+    </div>
+
+    <!-- Rule #1 banner -->
+    <div class="bg-navy-700 rounded-2xl p-6 mb-8 flex flex-col sm:flex-row items-center gap-5 scroll-reveal">
+      <div class="flex-shrink-0 w-14 h-14 rounded-full bg-gold-400 flex items-center justify-center text-navy-700 text-2xl font-serif font-bold">1</div>
+      <div>
+        <div class="text-gold-400 text-xs font-bold uppercase tracking-widest mb-1">Rule #1 — Always</div>
+        <div class="text-white font-serif text-xl font-bold mb-1">Forage First</div>
+        <p class="text-gray-300 text-sm leading-relaxed">Horses are hindgut fermenters built to eat small amounts continuously. <strong class="text-white">Feed 1.5–2% of body weight in quality hay per day</strong> (15–20 lbs for a 1,000 lb horse). Good forage buffers stomach acid, fuels hindgut bacteria, reduces ulcer risk, and prevents sand impaction. Grain supplements forage — it never replaces it.</p>
+      </div>
+    </div>
+
+    <!-- Two-column main content -->
+    <div class="grid lg:grid-cols-2 gap-8 mb-8">
+
+      <!-- Feeding reference table -->
+      <div class="bg-cream rounded-2xl p-6 scroll-reveal">
+        <div class="flex items-center gap-2 mb-4">
+          <i class="fas fa-table text-gold-400"></i>
+          <h3 class="font-bold text-navy-700 text-lg">Daily Feeding Reference</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-navy-700 text-white">
+                <th class="text-left py-2 px-3 rounded-tl-lg text-xs uppercase tracking-wider">Horse Type</th>
+                <th class="text-left py-2 px-3 text-xs uppercase tracking-wider">Hay / Day</th>
+                <th class="text-left py-2 px-3 text-xs uppercase tracking-wider">Grain</th>
+                <th class="text-left py-2 px-3 rounded-tr-lg text-xs uppercase tracking-wider">Key Focus</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              ${[
+                ['Idle / Easy Keeper','1.5% BW','Balancer only','Weight & minerals'],
+                ['Light / Pleasure','1.8% BW','2–4 lbs','Steady energy'],
+                ['Moderate Work','2.0% BW','4–6 lbs','Stamina, topline'],
+                ['Heavy / Competition','2.0% BW','6–10 lbs','Peak performance'],
+                ['Senior Horse','2.0–2.5% BW','4–8 lbs senior','Digestion, joints'],
+                ['Pregnant / Lactating','2.0–2.5% BW','4–8 lbs','Protein & calcium'],
+                ['Growing Youngster','2.0% BW','0.5–1% BW','Balanced growth'],
+                ['Metabolic / IR / EMS','1.5% BW low-NSC','Low-starch only','Blood sugar control'],
+              ].map(([type,hay,grain,focus],i) => `
+              <tr class="${i%2===1?'bg-cream-dark':'bg-white'}">
+                <td class="py-2 px-3 font-semibold text-navy-700 text-xs">${type}</td>
+                <td class="py-2 px-3 text-xs text-gray-600">${hay}</td>
+                <td class="py-2 px-3 text-xs text-gray-600">${grain}</td>
+                <td class="py-2 px-3 text-xs text-gray-500">${focus}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+        <p class="text-xs text-gray-400 mt-3">BW = Body Weight. Split grain into 2–3 meals. Never exceed 5 lbs in a single feeding.</p>
+      </div>
+
+      <!-- Hay selection table -->
+      <div class="bg-cream rounded-2xl p-6 scroll-reveal">
+        <div class="flex items-center gap-2 mb-4">
+          <i class="fas fa-leaf text-gold-400"></i>
+          <h3 class="font-bold text-navy-700 text-lg">Hay Selection Guide</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-navy-700 text-white">
+                <th class="text-left py-2 px-3 rounded-tl-lg text-xs uppercase tracking-wider">Hay Type</th>
+                <th class="text-left py-2 px-3 text-xs uppercase tracking-wider">Protein</th>
+                <th class="text-left py-2 px-3 rounded-tr-lg text-xs uppercase tracking-wider">Best Suited For</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              ${[
+                ['Premium Alfalfa','15–22%','Hard keepers, lactating mares, young horses'],
+                ['Timothy 1st Cut','8–10%','All-around; lower sugar, excellent fiber'],
+                ['Timothy 2nd Cut','10–12%','Performance horses; softer, more palatable'],
+                ['Orchard Grass','10–12%','Horses that refuse timothy; highly palatable'],
+                ['T/A Blend','12–16%','Performance; balances fiber + protein'],
+                ['Peanut Hay','14–18%','Underweight horses & growing youngsters'],
+                ['Teff Grass','8–10%','Metabolic/IR/Cushings horses — ultra-low NSC'],
+              ].map(([type,prot,use],i) => `
+              <tr class="${i%2===1?'bg-cream-dark':'bg-white'}">
+                <td class="py-2 px-3 font-semibold text-navy-700 text-xs">${type}</td>
+                <td class="py-2 px-3 text-xs text-gold-600 font-semibold">${prot}</td>
+                <td class="py-2 px-3 text-xs text-gray-600">${use}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+        <p class="text-xs text-gray-400 mt-3 italic">"We're very picky about our hay — if a shipment isn't up to our standards, we send it back." — Vieri Bracco</p>
+      </div>
+    </div>
+
+    <!-- South Florida + Pro Tips + Feed Selector row -->
+    <div class="grid lg:grid-cols-3 gap-6 mb-8">
+
+      <!-- South Florida specifics -->
+      <div class="bg-navy-700 rounded-2xl p-6 scroll-reveal">
+        <div class="flex items-center gap-2 mb-4">
+          <i class="fas fa-sun text-gold-400"></i>
+          <h3 class="font-bold text-white text-base">South Florida Specifics</h3>
+        </div>
+        <div class="space-y-3 text-sm">
+          <div class="flex gap-3">
+            <span class="text-gold-400 mt-0.5 flex-shrink-0">⚡</span>
+            <div><strong class="text-white">Electrolytes year-round</strong><p class="text-gray-300 text-xs mt-0.5">Florida heat causes 2–4x more sweat loss than cool climates. Supplement sodium, potassium & chloride daily in summer.</p></div>
+          </div>
+          <div class="flex gap-3">
+            <span class="text-gold-400 mt-0.5 flex-shrink-0">🏜️</span>
+            <div><strong class="text-white">Sand colic prevention</strong><p class="text-gray-300 text-xs mt-0.5">Sandy Loxahatchee soil is ingested with every bite off the ground. Feed hay in racks. Use psyllium (SandClear/SandPurge) one week per month.</p></div>
+          </div>
+          <div class="flex gap-3">
+            <span class="text-gold-400 mt-0.5 flex-shrink-0">🦟</span>
+            <div><strong class="text-white">Flies never stop</strong><p class="text-gray-300 text-xs mt-0.5">Fly season is year-round here. Combine topical sprays with a feed-through IGR supplement for full-season protection.</p></div>
+          </div>
+          <div class="flex gap-3">
+            <span class="text-gold-400 mt-0.5 flex-shrink-0">🏆</span>
+            <div><strong class="text-white">WEF & show stress</strong><p class="text-gray-300 text-xs mt-0.5">Hauling and stabling changes spike ulcer risk. Use gastric buffering supplements before and during show weeks.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pro tips -->
+      <div class="bg-gold-50 border border-gold-200 rounded-2xl p-6 scroll-reveal" style="background:rgba(201,168,76,0.07)">
+        <div class="flex items-center gap-2 mb-4">
+          <i class="fas fa-lightbulb text-gold-500"></i>
+          <h3 class="font-bold text-navy-700 text-base">Pro Tips from Our Team</h3>
+        </div>
+        <ul class="space-y-2.5 text-sm">
+          ${[
+            ['Transition any new feed gradually over 10–14 days to avoid digestive upset.'],
+            ['<strong>Weigh, don\'t scoop.</strong> The same scoop of pellets vs. textured feed can differ by 2–3 lbs.'],
+            ['Fresh, clean water at all times — horses drink 5–10 gallons daily, more in summer.'],
+            ['If hay quality is unknown, add a ration balancer to fill vitamin and mineral gaps.'],
+            ['Have your hay tested — NSC levels matter greatly for metabolic horses and visual appearance doesn\'t tell the full story.'],
+            ['Not sure what to feed? Call us — we offer free nutritional consultations and barn visits.'],
+          ].map(([tip]) => `
+          <li class="flex gap-2.5">
+            <span class="text-gold-500 font-bold flex-shrink-0 mt-0.5">✓</span>
+            <span class="text-gray-700 text-xs leading-relaxed">${tip}</span>
+          </li>`).join('')}
+        </ul>
+      </div>
+
+      <!-- When to call -->
+      <div class="bg-orange-50 border-l-4 border-orange-400 rounded-r-2xl p-6 scroll-reveal">
+        <div class="flex items-center gap-2 mb-4">
+          <i class="fas fa-exclamation-triangle text-orange-500"></i>
+          <h3 class="font-bold text-navy-700 text-base">Signs to Watch For</h3>
+        </div>
+        <p class="text-xs text-gray-600 mb-3">Call your vet or schedule a nutrition consult if you notice:</p>
+        <ul class="space-y-1.5 text-xs text-gray-600">
+          ${['Sudden weight loss or gain','Poor topline despite adequate feeding','Recurring colic episodes','Loose or dark manure lasting 48+ hours','Coat dullness or excessive shedding','Hoof rings or laminitis signs','Changes in energy, attitude or focus','Difficulty chewing or dropping feed'].map(s=>`<li class="flex gap-2"><span class="text-orange-400 flex-shrink-0">•</span>${s}</li>`).join('')}
+        </ul>
+        <div class="mt-4 p-3 bg-navy-700 rounded-xl text-white text-xs">
+          <i class="fas fa-phone text-gold-400 mr-1"></i>
+          <strong>Free barn visits available</strong> — call <strong class="text-gold-400">(561) 633-6003</strong> to schedule a nutritional consultation.
+        </div>
+      </div>
+    </div>
+
+    <!-- Feed quick-match grid -->
+    <div class="bg-cream rounded-2xl p-6 scroll-reveal">
+      <div class="text-center mb-5">
+        <h3 class="font-bold text-navy-700 text-lg">Quick-Match: Find the Right Feed</h3>
+        <p class="text-gray-500 text-sm mt-1">Products we stock in-store — ask us for a sample or feeding recommendation</p>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        ${[
+          ['fa-trophy','Competition / Show','Pro Elite Performance · Cavalor Performix · Red Mills Competition 14 · Havens Performance 14'],
+          ['fa-heart','Senior Horse','SafeChoice Senior · Pro Elite Senior · Buckeye EQ8 Senior · Cavalor Strucomix Senior'],
+          ['fa-weight','Easy Keeper / IR / EMS','SafeChoice Special Care · Pro Elite Starch Wise · Cavalor Pianissimo · Havens Cool Mix'],
+          ['fa-dumbbell','Hard Keeper','Pro Elite Omega Advantage · Cavalor WholyGain · Havens Power Plus · Buckeye Cadence Ultra'],
+          ['fa-stethoscope','Gut Health / Ulcers','Cavalor FiberGastro · Cavalor FiberForce · Havens Gastro Plus · Red Mills Comfort Mash'],
+          ['fa-seedling','Young / Growing','Pro Elite Growth · Buckeye Gro-N-Win · SafeChoice Mare & Foal · Red Mills Horse Care 14'],
+          ['fa-route','Endurance','Havens Endurance · Cavalor Endurix · CocoSoya Oil · Havens Equi-Force Oil'],
+          ['fa-brain','Topline & Muscle','Pro Elite Topline Advantage · Cavalor Muscle Force · Topline Xtreme · Vita-E & Selenium'],
+          ['fa-leaf','Natural / Whole Food','Crypto Aero Wholefood · Red Mills Horse Care 10 Mix · Cavalor Strucomix Original'],
+        ].map(([icon,need,products]) => `
+        <div class="bg-white rounded-xl p-4 border border-gray-100 hover:border-gold-300 hover:shadow-sm transition-all">
+          <div class="flex items-center gap-2 mb-2">
+            <i class="fas ${icon} text-gold-400 w-4 text-center text-sm"></i>
+            <span class="font-bold text-navy-700 text-xs uppercase tracking-wide">${need}</span>
+          </div>
+          <p class="text-xs text-gray-500 leading-relaxed">${products}</p>
+        </div>`).join('')}
+      </div>
+    </div>
+
+  </div>
+</section>
+
 <!-- ═══════════════════════════ SERVICES ═══════════════════════════ -->
 <section id="services" class="py-20 bg-cream-dark">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1324,6 +1528,7 @@ function getHTML(): string {
         <ul class="space-y-2 text-sm text-white/50">
           <li><a href="#about"    class="hover:text-gold-400 transition-colors">About Us</a></li>
           <li><a href="#products" class="hover:text-gold-400 transition-colors">Products</a></li>
+          <li><a href="#guidelines" class="hover:text-gold-400 transition-colors">Feeding Guide</a></li>
           <li><a href="#services" class="hover:text-gold-400 transition-colors">Services</a></li>
           <li><a href="#team"     class="hover:text-gold-400 transition-colors">Our Team</a></li>
           <li><a href="#reviews"  class="hover:text-gold-400 transition-colors">Reviews</a></li>
@@ -2498,14 +2703,14 @@ table.ptable td {
 }
 .story-left-col {
   background: #FBF7F0;
-  padding: 0.3in 0.3in 0.3in 0.55in;
+  padding: 0.18in 0.25in 0.18in 0.45in;
   border-right: 1px solid #e8dcc8;
-  display: flex; flex-direction: column; gap: 18px;
+  display: flex; flex-direction: column; gap: 10px;
 }
 .story-right-col {
   background: #fff;
-  padding: 0.3in 0.55in 0.3in 0.3in;
-  display: flex; flex-direction: column; gap: 18px;
+  padding: 0.18in 0.45in 0.18in 0.25in;
+  display: flex; flex-direction: column; gap: 10px;
 }
 
 .story-section-label {
@@ -2515,21 +2720,21 @@ table.ptable td {
 }
 .story-section-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 14pt; font-weight: 700; color: #1B2A4A; line-height: 1.2; margin-bottom: 7px;
+  font-size: 12pt; font-weight: 700; color: #1B2A4A; line-height: 1.2; margin-bottom: 5px;
 }
 .story-text {
-  font-size: 8pt; color: #444; line-height: 1.65;
+  font-size: 7.5pt; color: #444; line-height: 1.55;
 }
 .story-text strong { color: #1B2A4A; }
 .story-quote {
   border-left: 3px solid #C9A84C;
-  padding: 8px 12px;
+  padding: 6px 10px;
   background: rgba(201,168,76,0.07);
   border-radius: 0 6px 6px 0;
 }
 .story-quote-text {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 10.5pt; font-style: italic; color: #1B2A4A; line-height: 1.45;
+  font-size: 9.5pt; font-style: italic; color: #1B2A4A; line-height: 1.4;
 }
 .story-quote-attr {
   font-size: 6.5pt; color: #888; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.1em;
@@ -2539,13 +2744,13 @@ table.ptable td {
 }
 .story-pillar {
   background: #fff; border: 1px solid #e8dcc8;
-  border-radius: 6px; padding: 9px 10px;
+  border-radius: 6px; padding: 6px 8px;
 }
-.story-pillar-icon { font-size: 12pt; margin-bottom: 4px; }
+.story-pillar-icon { font-size: 10pt; margin-bottom: 2px; }
 .story-pillar-title { font-size: 7.5pt; font-weight: 700; color: #1B2A4A; margin-bottom: 2px; }
 .story-pillar-text  { font-size: 6.5pt; color: #666; line-height: 1.5; }
 .story-timeline {
-  display: flex; flex-direction: column; gap: 8px;
+  display: flex; flex-direction: column; gap: 5px;
 }
 .story-timeline-item {
   display: flex; gap: 10px; align-items: flex-start;
@@ -2560,7 +2765,7 @@ table.ptable td {
 .story-timeline-text { font-size: 7.5pt; color: #444; line-height: 1.5; }
 .story-timeline-text strong { color: #1B2A4A; }
 .story-services {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 7px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 5px;
 }
 .story-service {
   display: flex; align-items: flex-start; gap: 7px;
@@ -2591,64 +2796,64 @@ table.ptable td {
 .guide-header-logo { height: 28px; filter: brightness(0) invert(1); }
 
 .guide-body {
-  flex: 1; padding: 0.2in 0.55in 0.15in;
-  display: grid; grid-template-columns: 1fr 1fr; gap: 0.2in;
-  overflow: visible;
+  flex: 1; padding: 0.14in 0.45in 0.1in;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.15in;
+  overflow: hidden;
 }
-.guide-col { display: flex; flex-direction: column; gap: 10px; }
+.guide-col { display: flex; flex-direction: column; gap: 7px; }
 .guide-section { }
 .guide-section-head {
-  font-size: 6pt; font-weight: 800; text-transform: uppercase;
-  letter-spacing: 0.16em; color: #C9A84C;
-  border-bottom: 1.5px solid #C9A84C; padding-bottom: 3px; margin-bottom: 6px;
+  font-size: 5.5pt; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.14em; color: #C9A84C;
+  border-bottom: 1.5px solid #C9A84C; padding-bottom: 2px; margin-bottom: 4px;
 }
 .guide-section-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 11.5pt; font-weight: 700; color: #1B2A4A; margin-bottom: 5px;
+  font-size: 10pt; font-weight: 700; color: #1B2A4A; margin-bottom: 4px;
 }
-.guide-text { font-size: 7pt; color: #444; line-height: 1.6; }
+.guide-text { font-size: 6.5pt; color: #444; line-height: 1.55; }
 .guide-text strong { color: #1B2A4A; }
 
 .guide-table {
-  width: 100%; border-collapse: collapse; font-size: 6.5pt; margin-top: 4px;
+  width: 100%; border-collapse: collapse; font-size: 6pt; margin-top: 3px;
 }
 .guide-table th {
   background: #1B2A4A; color: #C9A84C;
-  padding: 4px 7px; text-align: left; font-size: 6pt;
-  text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 3px 5px; text-align: left; font-size: 5.5pt;
+  text-transform: uppercase; letter-spacing: 0.06em;
 }
 .guide-table td {
-  padding: 4px 7px; border-bottom: 1px solid #eee;
-  vertical-align: top; line-height: 1.45; color: #444;
+  padding: 3px 5px; border-bottom: 1px solid #eee;
+  vertical-align: top; line-height: 1.4; color: #444;
 }
 .guide-table tr:nth-child(even) td { background: #fafaf8; }
 .guide-table td:first-child { font-weight: 700; color: #1B2A4A; }
 
 .guide-tip-box {
   background: rgba(201,168,76,0.1); border: 1px solid #C9A84C;
-  border-radius: 6px; padding: 8px 10px;
+  border-radius: 6px; padding: 6px 8px;
 }
-.guide-tip-head { font-size: 6.5pt; font-weight: 800; color: #a07830; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px; }
+.guide-tip-head { font-size: 6pt; font-weight: 800; color: #a07830; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px; }
 .guide-tip-list { list-style: none; padding: 0; margin: 0; }
-.guide-tip-list li { font-size: 7pt; color: #444; line-height: 1.65; padding-left: 12px; position: relative; }
+.guide-tip-list li { font-size: 6.5pt; color: #444; line-height: 1.55; padding-left: 11px; position: relative; }
 .guide-tip-list li::before { content: "✓"; position: absolute; left: 0; color: #C9A84C; font-weight: 700; }
 
 .guide-alert-box {
   background: #FFF8F0; border-left: 3px solid #E8956A;
-  border-radius: 0 6px 6px 0; padding: 7px 10px;
+  border-radius: 0 6px 6px 0; padding: 5px 8px;
 }
-.guide-alert-head { font-size: 6.5pt; font-weight: 800; color: #b05020; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px; }
-.guide-alert-text { font-size: 7pt; color: #555; line-height: 1.55; }
+.guide-alert-head { font-size: 6pt; font-weight: 800; color: #b05020; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; }
+.guide-alert-text { font-size: 6.5pt; color: #555; line-height: 1.5; }
 
 .guide-brand-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 4px;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 3px;
 }
 .guide-brand-cell {
   background: #F8FAFC; border: 1px solid #E2E8F0;
-  border-radius: 5px; padding: 5px 7px;
+  border-radius: 4px; padding: 4px 5px;
 }
-.guide-brand-need { font-size: 6pt; color: #888; text-transform: uppercase; letter-spacing: 0.08em; }
-.guide-brand-name { font-size: 7pt; font-weight: 700; color: #1B2A4A; line-height: 1.3; margin-top: 1px; }
+.guide-brand-need { font-size: 5.5pt; color: #888; text-transform: uppercase; letter-spacing: 0.06em; }
+.guide-brand-name { font-size: 6pt; font-weight: 700; color: #1B2A4A; line-height: 1.3; margin-top: 1px; }
 
 .guide-footer {
   background: #0d1b35; color: rgba(255,255,255,0.7);
@@ -2798,11 +3003,13 @@ function buildCatalog(products) {
 </div>\`;
 
   // ── TABLE OF CONTENTS ─────────────────────────────────────────────
-  let pageNum = 2;
-  const frontPages = [
-    { title: 'Table of Contents',              page: pageNum++ },
-  ];
-  const catPageNums = {};
+  // Page 1 = Cover, 2 = TOC, 3 = Our Story, 4 = Feeding Guide, 5+ = categories
+  let pageNum = 2; // TOC is page 2
+  pageNum++;       // Our Story = 3
+  pageNum++;       // Feeding Guide = 4
+  const storyPageNum = 3;
+  const guidePageNum = 4;
+  const catPageNums: Record<string,number> = {};
   categories.forEach(cat => {
     catPageNums[cat] = pageNum++;
   });
@@ -2819,15 +3026,27 @@ function buildCatalog(products) {
   </div>
   <div class="page-body">
     <div class="toc-grid">
+
+      <!-- LEFT COLUMN: front matter + first half of categories -->
       <div>
-        <div class="toc-section-label">Store Information</div>
+        <div class="toc-section-label">In This Catalog</div>
+        <div class="toc-row">
+          <span class="toc-row-title">Our Story &amp; Mission</span>
+          <span class="toc-dots"></span>
+          <span class="toc-row-page">3</span>
+        </div>
+        <div class="toc-row">
+          <span class="toc-row-title">Horse Feeding Guidelines</span>
+          <span class="toc-dots"></span>
+          <span class="toc-row-page">4</span>
+        </div>
         <div class="toc-row">
           <span class="toc-row-title">About Us &amp; Contact</span>
           <span class="toc-dots"></span>
           <span class="toc-row-page">Back</span>
         </div>
 
-        <div class="toc-section-label" style="margin-top:18px">Product Categories</div>
+        <div class="toc-section-label" style="margin-top:14px">Product Categories</div>
         \${categories.slice(0, Math.ceil(categories.length / 2)).map(cat => \`
           <div class="toc-row">
             <span class="toc-row-title">\${esc(cat)}</span>
@@ -2836,8 +3055,10 @@ function buildCatalog(products) {
             <span class="toc-row-page">\${catPageNums[cat]}</span>
           </div>\`).join('')}
       </div>
+
+      <!-- RIGHT COLUMN: second half of categories + quick reference -->
       <div>
-        <div class="toc-section-label">Categories (continued)</div>
+        <div class="toc-section-label">Product Categories (continued)</div>
         \${categories.slice(Math.ceil(categories.length / 2)).map(cat => \`
           <div class="toc-row">
             <span class="toc-row-title">\${esc(cat)}</span>
@@ -2853,10 +3074,11 @@ function buildCatalog(products) {
           <div class="toc-info-line">&#128336; Store: Mon–Fri 9am–6pm · Sat 9am–4pm</div>
           <div class="toc-info-line">&#128336; Distribution: Mon–Fri 8am–5pm · Sat 9am–4pm</div>
           <div class="toc-info-line">&#127758; britishfeed.com</div>
-          <div class="toc-info-line">&#128666; Free delivery on orders $150+</div>
+          <div class="toc-info-line">&#128666; Free delivery on orders \$150+</div>
           <div class="toc-info-line" style="opacity:0.6;font-size:7pt;margin-top:4px">Temporary minimal fuel surcharge currently in effect</div>
         </div>
       </div>
+
     </div>
   </div>
   <div class="page-footer">
