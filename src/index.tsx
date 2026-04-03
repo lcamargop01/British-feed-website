@@ -2027,16 +2027,44 @@ async function submitContact(e){
   btn.disabled = true;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sending...';
   const form = e.target;
-  const data = {
-    firstName: form.firstName.value, lastName: form.lastName.value,
-    email: form.email.value, phone: form.phone.value,
-    subject: form.subject.value, message: form.message.value
-  };
+  const firstName = form.firstName.value;
+  const lastName  = form.lastName.value;
+  const email     = form.email.value;
+  const phone     = form.phone.value;
+  const subject   = form.subject.value;
+  const message   = form.message.value;
+
   try {
-    await fetch('/api/contact', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) });
+    // 1. Save to KV via backend (keeps admin lead log)
+    fetch('/api/contact', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ firstName, lastName, email, phone, subject, message })
+    }).catch(()=>{});
+
+    // 2. Send email via Web3Forms (client-side — works from browser)
+    const formData = new FormData();
+    formData.append('access_key',  '70c128a5-b266-4e4f-ae13-99dc1f2ac7cd');
+    formData.append('name',        \`\${firstName} \${lastName}\`.trim());
+    formData.append('email',       email);
+    formData.append('phone',       phone || 'not provided');
+    formData.append('subject',     \`🐴 New Contact: \${firstName} \${lastName} — \${subject}\`);
+    formData.append('message',     \`Subject: \${subject}\\nPhone: \${phone || 'not provided'}\\n\\n\${message}\`);
+    formData.append('to_email',    'sales@britishfeed.com,laura@britishfeed.com');
+    formData.append('replyto',     email);
+    formData.append('from_name',   'British Feed Website');
+
+    const w3res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      body: formData
+    });
+    const w3data = await w3res.json();
+    if (!w3data.success) console.warn('Web3Forms warning:', w3data.message);
+
     form.style.display = 'none';
     document.getElementById('contact-success').classList.remove('hidden');
-  } catch {
+  } catch(err) {
+    console.error('Contact form error:', err);
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Send Message';
   }
