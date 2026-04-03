@@ -406,8 +406,20 @@ function getHTML(): string {
         </div>
       </div>
       <div class="scroll-reveal">
-        <div class="rounded-2xl overflow-hidden shadow-2xl">
-          <img src="/static/story_closing.jpg" alt="British Feed — For Proper Care & Nutrition" class="w-full block object-cover" />
+        <div class="rounded-2xl overflow-hidden shadow-2xl relative" id="story-media-wrap">
+          <!-- Closing slide shown until video is ready to play -->
+          <img id="story-poster" src="/static/story_closing.jpg" alt="British Feed — For Proper Care & Nutrition" class="w-full block object-cover" />
+          <!-- Video hidden initially, swaps in when autoplay succeeds -->
+          <video id="story-video" class="w-full block object-cover hidden" style="aspect-ratio:16/9;"
+            playsinline preload="auto" loop>
+            <source src="/static/commercial.mp4" type="video/mp4" />
+          </video>
+          <!-- Tap-to-unmute overlay shown if browser blocks audio -->
+          <div id="story-unmute" class="hidden absolute inset-0 flex items-end justify-center pb-6 pointer-events-none">
+            <button onclick="storyUnmute()" class="pointer-events-auto bg-black/60 hover:bg-black/80 text-white text-sm font-semibold px-5 py-2.5 rounded-full flex items-center gap-2 transition-all">
+              <i class="fas fa-volume-xmark"></i> Tap to unmute
+            </button>
+          </div>
         </div>
         <!-- Find Us card below the video, not overlapping -->
         <div class="mt-5 bg-white rounded-2xl p-5 shadow-md border border-gray-100">
@@ -1351,6 +1363,52 @@ const observer = new IntersectionObserver(entries => {
   entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
 }, { threshold: 0.1 });
 document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+
+// ─── Our Story video: autoplay with audio when scrolled into view ─────────────
+(function() {
+  const video   = document.getElementById('story-video');
+  const poster  = document.getElementById('story-poster');
+  const unmute  = document.getElementById('story-unmute');
+  if (!video) return;
+
+  function startVideo() {
+    video.muted = false;
+    const p = video.play();
+    if (p && p.then) {
+      p.then(() => {
+        // Autoplay with audio succeeded
+        poster.classList.add('hidden');
+        video.classList.remove('hidden');
+        unmute.classList.add('hidden');
+      }).catch(() => {
+        // Audio blocked — try muted then show unmute button
+        video.muted = true;
+        video.play().then(() => {
+          poster.classList.add('hidden');
+          video.classList.remove('hidden');
+          unmute.classList.remove('hidden');
+        }).catch(() => {});
+      });
+    }
+  }
+
+  // Unmute when user taps the overlay button
+  window.storyUnmute = function() {
+    video.muted = false;
+    unmute.classList.add('hidden');
+  };
+
+  // Trigger when video scrolls into view
+  const vidObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        startVideo();
+        vidObserver.disconnect();
+      }
+    });
+  }, { threshold: 0.4 });
+  vidObserver.observe(document.getElementById('story-media-wrap'));
+})();
 </script>
 </body>
 </html>`
