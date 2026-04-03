@@ -2899,7 +2899,13 @@ function getProductsHTML(): string {
     <a href="/" class="flex items-center justify-center">
       <img src="/admin/api/catalog/image/img_img_site_logo_white" alt="British Feed & Supplies" class="h-12" style="filter:brightness(0) invert(1);" onerror="this.style.display='none'" />
     </a>
-    <div class="w-24"></div>
+    <a href="/catalog-print" target="_blank"
+       style="display:inline-flex;align-items:center;gap:6px;background:#C9A84C;color:#1B2A4A;font-weight:700;font-size:12px;padding:7px 14px;border-radius:7px;text-decoration:none;white-space:nowrap;"
+       onmouseover="this.style.background='#E0C87A'" onmouseout="this.style.background='#C9A84C'">
+      <i class="fas fa-file-pdf"></i>
+      <span class="hidden sm:inline">Download Catalog</span>
+      <span class="sm:hidden">PDF</span>
+    </a>
   </div>
 </nav>
 
