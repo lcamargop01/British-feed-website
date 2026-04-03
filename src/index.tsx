@@ -2121,22 +2121,14 @@ html { font-size: 10pt; }
 body { font-family: 'Nunito Sans', sans-serif; color: #1a1a2e; background: #d0d0d0; }
 
 /* ═══ PAGE SETUP ═════════════════════════════════════════════════════ */
-/* Single @page rule — size + zero margins (no duplicate rules) */
+/* Single @page rule — size + zero margins */
 @page { size: 8.5in 11in; margin: 0; }
 @media print {
   html, body { background: white !important; }
   .no-print { display: none !important; }
-  /* Fixed pages (cover, toc, back) break after themselves */
-  .page { page-break-after: always; break-after: page; }
+  /* Every .page div = exactly one sheet */
+  .page { page-break-after: always; break-after: page; page-break-inside: avoid; break-inside: avoid; }
   .page:last-child { page-break-after: auto; break-after: auto; }
-  /* Cat pages flow freely and are NOT clamped to 11in */
-  .cat-page { height: auto !important; overflow: visible !important; page-break-after: always; break-after: page; }
-  .cat-page:last-child { page-break-after: auto; break-after: auto; }
-  .cat-body { overflow: visible !important; }
-  /* Table rows should not be orphaned */
-  table.ptable { break-inside: auto; }
-  table.ptable thead { display: table-header-group; }
-  table.ptable tbody tr { break-inside: avoid; break-after: auto; }
   a { color: inherit !important; text-decoration: none !important; }
   .print-bar { display: none !important; }
   .loading-overlay { display: none !important; }
@@ -2153,12 +2145,7 @@ body { font-family: 'Nunito Sans', sans-serif; color: #1a1a2e; background: #d0d0
   display: flex;
   flex-direction: column;
 }
-/* Category pages are NOT height-clamped — they flow to next print page */
-.cat-page {
-  height: auto;
-  min-height: 11in;
-  overflow: visible;
-}
+/* cat-page inherits .page (height:11in, overflow:hidden) — JS splits content into pages */
 @media screen {
   .page {
     margin: 0 auto 32px auto;
@@ -2303,8 +2290,11 @@ body { font-family: 'Nunito Sans', sans-serif; color: #1a1a2e; background: #d0d0
 }
 .cover-right-img {
   position: absolute; inset: 0;
-  background: url('/static/catalog_cover.jpg') 20% 25% / cover no-repeat;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center top;
   opacity: 0.95;
+  display: block;
 }
 .cover-right-overlay {
   position: absolute; inset: 0;
@@ -2375,6 +2365,7 @@ body { font-family: 'Nunito Sans', sans-serif; color: #1a1a2e; background: #d0d0
 .toc-info-line strong { color: #C9A84C; }
 
 /* ═══ CATEGORY PAGES ═════════════════════════════════════════════════ */
+/* cat-page layout — body flex-fills remaining space */
 .cat-page { }
 .cat-header {
   padding: 14px 0.5in;
@@ -2391,9 +2382,25 @@ body { font-family: 'Nunito Sans', sans-serif; color: #1a1a2e; background: #d0d0
   font-family: 'Cormorant Garamond', serif;
   font-size: 8.5pt; text-align: right; opacity: 0.6; line-height: 1.5; color: #fff;
 }
+/* Continuation page mini-header */
+.cat-cont-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 0.5in; flex-shrink: 0;
+}
+.cat-cont-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13pt; font-weight: 700; color: #fff;
+}
+.cat-cont-label {
+  font-size: 7pt; color: rgba(255,255,255,0.55); font-style: italic; margin-left: 8px; flex: 1;
+}
+.cat-cont-right {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 8pt; opacity: 0.55; color: #fff; text-align: right;
+}
 
 /* product table */
-.cat-body { padding: 0 0.4in 0.18in; flex: 1; overflow: visible; }
+.cat-body { padding: 0.04in 0.4in 0.18in; flex: 1; overflow: hidden; }
 .vgroup { margin-top: 8px; }
 .vgroup-label {
   font-size: 6.5pt; font-weight: 800; text-transform: uppercase;
@@ -2571,7 +2578,7 @@ function buildCatalog(products) {
       </div>
     </div>
     <div class="cover-right">
-      <div class="cover-right-img"></div>
+      <img class="cover-right-img" src="/static/catalog_cover.jpg" alt="" />
       <div class="cover-right-overlay"></div>
       <div class="cover-right-badge">
         Wellington's Most<br/>Trusted Feed Store
@@ -2658,11 +2665,36 @@ function buildCatalog(products) {
 </div>\`;
 
   // ── CATEGORY PAGES ────────────────────────────────────────────────
-  const catPages = categories.map(cat => {
-    const prods = byCategory[cat];
-    const meta  = CAT_META[cat] || { color:'#1B2A4A', accent:'#C9A84C' };
+  // Page height budget (points at 72pt/in):
+  //   Page = 11in = 792pt
+  //   cat-header ≈ 52pt  (first page only)
+  //   cont-header ≈ 28pt (continuation pages)
+  //   thead row   ≈ 18pt
+  //   page-footer ≈ 26pt
+  //   cat-body padding top+bottom ≈ 29pt (0.3in top + 0.18in bottom)
+  //   vendor-row  ≈ 22pt
+  //   product row base ≈ 18pt  +  2pt per 55 chars of description (7pt font ~10ch/pt, col 58% of 7in = 4.06in ≈ 293pt wide / 7pt ≈ ~42ch per line)
+  const PT = 72; // pt per inch
+  const PAGE_H       = 11 * PT;          // 792
+  const FOOTER_H     = 26;
+  const BODY_PAD     = Math.round(0.48 * PT); // top+bottom padding of cat-body
+  const CAT_HDR_H    = 52;               // first-page colored header
+  const CONT_HDR_H   = 28;               // continuation mini-header
+  const THEAD_H      = 18;
+  const VENDOR_ROW_H = 22;
+  const ROW_BASE_H   = 20;               // min row height at 7px top+bottom padding
+  const DESC_CHARS_PER_LINE = 90;        // ~90 chars per line in col-desc at 7pt
+  const LINE_H_PT    = 9;                // 7pt font × 1.45 leading ≈ 9pt per line
 
-    // Group by vendor/brand
+  function estimateRowH(p) {
+    const desc = (p.description||'').replace(/[—–]\s*available at British Feed.*?to order\.?/gi,'').trim();
+    const lines = Math.max(1, Math.ceil(desc.length / DESC_CHARS_PER_LINE));
+    return ROW_BASE_H + Math.max(0, lines - 1) * LINE_H_PT;
+  }
+
+  // Build flat list of "items" for a category: each item is {type, data, height}
+  function buildItems(cat) {
+    const prods = byCategory[cat];
     const vg = {};
     prods.forEach(p => {
       const v = p.vendor || p.brand || 'General';
@@ -2670,43 +2702,88 @@ function buildCatalog(products) {
       vg[v].push(p);
     });
     const vList = Object.entries(vg).sort(([a],[b]) => a.localeCompare(b));
+    const items = [];
+    vList.forEach(([vendor, vprods]) => {
+      items.push({ type: 'vendor', vendor, height: VENDOR_ROW_H });
+      vprods.forEach(p => items.push({ type: 'row', p, height: estimateRowH(p) }));
+    });
+    return items;
+  }
 
-    // Build a single unified table — thead repeats on every print page
-    // Vendor rows act as section dividers within the body
-    const tbodyRows = vList.map(([vendor, vprods]) => \`
-      <tr class="vendor-row">
-        <td colspan="3"><div class="vgroup-label" style="background:\${meta.color}">\${esc(vendor)}</div></td>
-      </tr>
-      \${vprods.map(prodRow).join('')}\`).join('');
-
+  // Emit one fixed-height page div
+  function catPageDiv(cat, meta, isFirst, rows_html) {
+    const hdr = isFirst
+      ? \`<div class="cat-header" style="background:\${meta.color}">
+          <div class="cat-header-left"><div>
+            <div class="cat-header-title">\${esc(cat)}</div>
+            <div class="cat-header-sub">\${byCategory[cat].length} product\${byCategory[cat].length!==1?'s':''} available</div>
+          </div></div>
+          <div class="cat-header-right">British Feed<br/>&amp; Supplies</div>
+        </div>\`
+      : \`<div class="cat-cont-header" style="background:\${meta.color}">
+          <span class="cat-cont-title">\${esc(cat)}</span>
+          <span class="cat-cont-label">continued</span>
+          <span class="cat-cont-right">British Feed &amp; Supplies</span>
+        </div>\`;
     return \`
 <div class="page cat-page">
-  <div class="cat-header" style="background:\${meta.color}">
-    <div class="cat-header-left">
-      <div>
-        <div class="cat-header-title">\${esc(cat)}</div>
-        <div class="cat-header-sub">\${prods.length} product\${prods.length!==1?'s':''} available</div>
-      </div>
-    </div>
-    <div class="cat-header-right">British Feed<br/>&amp; Supplies</div>
-  </div>
+  \${hdr}
   <div class="cat-body">
     <table class="ptable">
-      <thead>
-        <tr>
-          <th class="col-name">Product</th>
-          <th class="col-desc">Description &amp; Benefits</th>
-          <th class="col-price">Price</th>
-        </tr>
-      </thead>
-      <tbody>\${tbodyRows}</tbody>
+      <thead><tr>
+        <th class="col-name">Product</th>
+        <th class="col-desc">Description &amp; Benefits</th>
+        <th class="col-price">Price</th>
+      </tr></thead>
+      <tbody>\${rows_html}</tbody>
     </table>
   </div>
-  <div class="page-footer cat-page-footer">
+  <div class="page-footer">
     <span>British Feed &amp; Supplies · 14589 Southern Blvd · (561) 633-6003 · britishfeed.com</span>
     <span>\${esc(cat)} · \${MONTH_YEAR}</span>
   </div>
 </div>\`;
+  }
+
+  function rowHtml(item, meta) {
+    if (item.type === 'vendor') {
+      return \`<tr class="vendor-row"><td colspan="3"><div class="vgroup-label" style="background:\${meta.color}">\${esc(item.vendor)}</div></td></tr>\`;
+    }
+    return prodRow(item.p);
+  }
+
+  const catPages = categories.flatMap(cat => {
+    const meta  = CAT_META[cat] || { color:'#1B2A4A', accent:'#C9A84C' };
+    const items = buildItems(cat);
+    const pages = [];
+    let isFirst  = true;
+    let usedH    = 0;
+    let rowsHtml = '';
+
+    // Calculate available body height for this page
+    function bodyBudget() {
+      const hdrH = isFirst ? CAT_HDR_H : CONT_HDR_H;
+      return PAGE_H - hdrH - THEAD_H - FOOTER_H - BODY_PAD;
+    }
+
+    let budget = bodyBudget();
+
+    items.forEach(item => {
+      // If vendor label + at least one row won't fit, flush to next page
+      if (usedH + item.height > budget && rowsHtml !== '') {
+        pages.push(catPageDiv(cat, meta, isFirst, rowsHtml));
+        isFirst  = false;
+        rowsHtml = '';
+        usedH    = 0;
+        budget   = bodyBudget();
+      }
+      rowsHtml += rowHtml(item, meta);
+      usedH    += item.height;
+    });
+
+    // Flush remaining rows
+    if (rowsHtml) pages.push(catPageDiv(cat, meta, isFirst, rowsHtml));
+    return pages;
   }).join('\\n');
 
   // ── BACK COVER ────────────────────────────────────────────────────
