@@ -656,6 +656,7 @@ function getHTML(): string {
         <a href="/products" class="nav-link hover:text-gold-400 transition-colors flex items-center gap-1" title="Browse our product catalog">
           <i class="fas fa-list text-gold-400 text-xs"></i>Full Catalog
         </a>
+        <a href="#guidelines" class="nav-link hover:text-gold-400 transition-colors">Feeding Guide</a>
         <a href="#services" class="nav-link hover:text-gold-400 transition-colors">Services</a>
         <a href="#team"     class="nav-link hover:text-gold-400 transition-colors">Our Team</a>
         <a href="#reviews"  class="nav-link hover:text-gold-400 transition-colors">Reviews</a>
@@ -982,52 +983,7 @@ function getHTML(): string {
 
   </div>
 </section>
-<section id="finder" class="py-20 bg-white">
-  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="text-center mb-12 scroll-reveal">
-      <div class="flex items-center justify-center gap-2 mb-3">
-        <div class="h-px w-10 bg-gold-400"></div>
-        <span class="text-gold-500 font-semibold text-xs tracking-widest uppercase">Find the Right Feed</span>
-        <div class="h-px w-10 bg-gold-400"></div>
-      </div>
-      <h2 class="font-serif text-4xl font-bold text-navy-700 mb-3">Not Sure What to Feed?</h2>
-      <p class="text-gray-500 text-lg">Answer 3 quick questions and we'll recommend the best options for your horse.</p>
-    </div>
-    <div class="bg-cream rounded-2xl p-8 shadow-sm border border-gray-100 scroll-reveal">
-      <div id="finder-step-1">
-        <h3 class="font-bold text-navy-700 text-lg mb-4"><span class="text-gold-400 font-serif text-2xl mr-2">1.</span> What best describes your horse?</h3>
-        <div class="grid sm:grid-cols-2 gap-3">
-          ${[
-            {val:'competition',label:'Competition / Show Horse',icon:'fa-trophy'},
-            {val:'senior',label:'Senior Horse (15+ years)',icon:'fa-heart'},
-            {val:'easy',label:'Easy Keeper / Metabolic',icon:'fa-weight'},
-            {val:'hard',label:'Hard Keeper / Needs Weight',icon:'fa-dumbbell'},
-            {val:'young',label:'Young / Growing Horse',icon:'fa-seedling'},
-            {val:'broodmare',label:'Broodmare / Breeding',icon:'fa-baby'},
-            {val:'endurance',label:'Endurance / Trail Horse',icon:'fa-route'},
-            {val:'digestive',label:'Digestive Issues / Sensitive',icon:'fa-stethoscope'},
-          ].map(o=>`
-            <button onclick="selectHorse('${o.val}')" class="finder-option flex items-center gap-3 p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-navy-700 hover:bg-navy-50 transition-all text-left font-medium text-navy-700">
-              <i class="fas ${o.icon} text-gold-400 w-5 text-center"></i>${o.label}
-            </button>`).join('')}
-        </div>
-      </div>
-      <div id="finder-results" class="hidden">
-        <div class="flex items-center gap-3 mb-6">
-          <button onclick="resetFinder()" class="text-sm text-gray-400 hover:text-navy-700 flex items-center gap-1"><i class="fas fa-arrow-left"></i> Start over</button>
-          <h3 class="font-bold text-navy-700 text-lg">Recommended for Your Horse</h3>
-        </div>
-        <div id="finder-recs" class="space-y-4"></div>
-        <div class="mt-6 p-4 bg-navy-700 rounded-xl text-white text-sm">
-          <i class="fas fa-comments text-gold-400 mr-2"></i>
-          Want personalized advice? <strong>Chat with Bri</strong> below or call <strong>(561) 633-6003</strong> to speak with our team.
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ═══════════════════════ FEEDING GUIDELINES ══════════════════════ -->
+<!-- ═══════════════════════ EQUINE NUTRITION ══════════════════════ -->
 <section id="guidelines" class="py-20 bg-white">
   <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -1199,31 +1155,91 @@ function getHTML(): string {
       </div>
     </div>
 
-    <!-- Feed quick-match grid -->
-    <div class="bg-cream rounded-2xl p-6 scroll-reveal">
-      <div class="text-center mb-5">
-        <h3 class="font-bold text-navy-700 text-lg">Quick-Match: Find the Right Feed</h3>
-        <p class="text-gray-500 text-sm mt-1">Products we stock in-store — ask us for a sample or feeding recommendation</p>
+    <!-- ── Feed Finder Questionnaire ── -->
+    <div id="feed-finder" class="bg-cream rounded-2xl p-8 shadow-sm border border-gray-100 scroll-reveal">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center gap-2 mb-3">
+          <div class="h-px w-8 bg-gold-400"></div>
+          <span class="text-gold-500 font-semibold text-xs tracking-widest uppercase">Feed Finder</span>
+          <div class="h-px w-8 bg-gold-400"></div>
+        </div>
+        <h3 class="font-serif text-3xl font-bold text-navy-700 mb-2">Not Sure What to Feed?</h3>
+        <p class="text-gray-500 text-base">Answer 3 quick questions and we'll recommend the best options for your horse.</p>
+        <!-- Progress indicator -->
+        <div id="finder-progress" class="flex items-center justify-center gap-2 mt-5">
+          <div class="finder-dot active w-8 h-8 rounded-full bg-navy-700 text-white text-xs font-bold flex items-center justify-center transition-all">1</div>
+          <div class="h-px w-8 bg-gray-300"></div>
+          <div class="finder-dot w-8 h-8 rounded-full bg-gray-200 text-gray-400 text-xs font-bold flex items-center justify-center transition-all">2</div>
+          <div class="h-px w-8 bg-gray-300"></div>
+          <div class="finder-dot w-8 h-8 rounded-full bg-gray-200 text-gray-400 text-xs font-bold flex items-center justify-center transition-all">3</div>
+        </div>
       </div>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        ${[
-          ['fa-trophy','Competition / Show','Pro Elite Performance · Cavalor Performix · Red Mills Competition 14 · Havens Performance 14'],
-          ['fa-heart','Senior Horse','SafeChoice Senior · Pro Elite Senior · Buckeye EQ8 Senior · Cavalor Strucomix Senior'],
-          ['fa-weight','Easy Keeper / IR / EMS','SafeChoice Special Care · Pro Elite Starch Wise · Cavalor Pianissimo · Havens Cool Mix'],
-          ['fa-dumbbell','Hard Keeper','Pro Elite Omega Advantage · Cavalor WholyGain · Havens Power Plus · Buckeye Cadence Ultra'],
-          ['fa-stethoscope','Gut Health / Ulcers','Cavalor FiberGastro · Cavalor FiberForce · Havens Gastro Plus · Red Mills Comfort Mash'],
-          ['fa-seedling','Young / Growing','Pro Elite Growth · Buckeye Gro-N-Win · SafeChoice Mare & Foal · Red Mills Horse Care 14'],
-          ['fa-route','Endurance','Havens Endurance · Cavalor Endurix · CocoSoya Oil · Havens Equi-Force Oil'],
-          ['fa-brain','Topline & Muscle','Pro Elite Topline Advantage · Cavalor Muscle Force · Topline Xtreme · Vita-E & Selenium'],
-          ['fa-leaf','Natural / Whole Food','Crypto Aero Wholefood · Red Mills Horse Care 10 Mix · Cavalor Strucomix Original'],
-        ].map(([icon,need,products]) => `
-        <div class="bg-white rounded-xl p-4 border border-gray-100 hover:border-gold-300 hover:shadow-sm transition-all">
-          <div class="flex items-center gap-2 mb-2">
-            <i class="fas ${icon} text-gold-400 w-4 text-center text-sm"></i>
-            <span class="font-bold text-navy-700 text-xs uppercase tracking-wide">${need}</span>
-          </div>
-          <p class="text-xs text-gray-500 leading-relaxed">${products}</p>
-        </div>`).join('')}
+
+      <!-- Step 1: Horse Type -->
+      <div id="finder-q1">
+        <h4 class="font-bold text-navy-700 text-base mb-4 text-center">
+          <span class="text-gold-400 font-serif text-xl mr-1">1.</span> What best describes your horse?
+        </h4>
+        <div class="grid sm:grid-cols-2 gap-3">
+          ${[
+            {val:'competition',label:'Competition / Show Horse',icon:'fa-trophy'},
+            {val:'senior',label:'Senior Horse (15+ years)',icon:'fa-heart'},
+            {val:'easy',label:'Easy Keeper / Metabolic',icon:'fa-weight'},
+            {val:'hard',label:'Hard Keeper / Needs Weight',icon:'fa-dumbbell'},
+            {val:'young',label:'Young / Growing Horse',icon:'fa-seedling'},
+            {val:'broodmare',label:'Broodmare / Breeding',icon:'fa-baby'},
+            {val:'endurance',label:'Endurance / Trail Horse',icon:'fa-route'},
+            {val:'digestive',label:'Digestive Issues / Sensitive',icon:'fa-stethoscope'},
+          ].map(o=>`
+            <button onclick="finderQ1('${o.val}')" class="finder-option flex items-center gap-3 p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-navy-700 hover:bg-navy-50 transition-all text-left font-medium text-navy-700">
+              <i class="fas ${o.icon} text-gold-400 w-5 text-center"></i>${o.label}
+            </button>`).join('')}
+        </div>
+      </div>
+
+      <!-- Step 2: Primary Goal -->
+      <div id="finder-q2" class="hidden">
+        <div class="flex items-center gap-2 mb-5">
+          <button onclick="finderBack(1)" class="text-sm text-gray-400 hover:text-navy-700 flex items-center gap-1"><i class="fas fa-arrow-left"></i> Back</button>
+        </div>
+        <h4 class="font-bold text-navy-700 text-base mb-4 text-center">
+          <span class="text-gold-400 font-serif text-xl mr-1">2.</span> What is your <em>primary</em> goal or concern?
+        </h4>
+        <div id="finder-q2-options" class="grid sm:grid-cols-2 gap-3"></div>
+      </div>
+
+      <!-- Step 3: Activity Level -->
+      <div id="finder-q3" class="hidden">
+        <div class="flex items-center gap-2 mb-5">
+          <button onclick="finderBack(2)" class="text-sm text-gray-400 hover:text-navy-700 flex items-center gap-1"><i class="fas fa-arrow-left"></i> Back</button>
+        </div>
+        <h4 class="font-bold text-navy-700 text-base mb-4 text-center">
+          <span class="text-gold-400 font-serif text-xl mr-1">3.</span> What is your horse's current activity level?
+        </h4>
+        <div class="grid sm:grid-cols-2 gap-3">
+          ${[
+            {val:'light',label:'Light — trail rides, occasional arena work',icon:'fa-walking'},
+            {val:'moderate',label:'Moderate — regular training, local shows',icon:'fa-horse'},
+            {val:'intense',label:'Intense — competition, heavy daily work',icon:'fa-bolt'},
+            {val:'retired',label:'Retired / Pasture only',icon:'fa-tree'},
+          ].map(o=>`
+            <button onclick="finderQ3('${o.val}')" class="finder-option flex items-center gap-3 p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-navy-700 hover:bg-navy-50 transition-all text-left font-medium text-navy-700">
+              <i class="fas ${o.icon} text-gold-400 w-5 text-center"></i>${o.label}
+            </button>`).join('')}
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="finder-results" class="hidden">
+        <div class="flex items-center gap-3 mb-6">
+          <button onclick="resetFinder()" class="text-sm text-gray-400 hover:text-navy-700 flex items-center gap-1"><i class="fas fa-arrow-left"></i> Start over</button>
+          <h4 class="font-bold text-navy-700 text-lg">Recommended for Your Horse</h4>
+        </div>
+        <div id="finder-recs" class="space-y-4"></div>
+        <div class="mt-6 p-4 bg-navy-700 rounded-xl text-white text-sm">
+          <i class="fas fa-comments text-gold-400 mr-2"></i>
+          Want personalized advice? <strong>Chat with Bri</strong> below or call <strong>(561) 633-6003</strong> to speak with our team.
+        </div>
       </div>
     </div>
 
@@ -1634,71 +1650,335 @@ document.addEventListener('click', e => {
 });
 
 // ─── Feed Finder ─────────────────────────────────────────────────────────────
-const finderRecs = {
+// ─── Feed Finder (3-step questionnaire) ──────────────────────────────────────
+const finderState = { q1: null, q2: null };
+
+// Q2 options per horse type
+const finderQ2Options = {
   competition: [
-    {brand:'Pro Elite Performance',desc:'High-fat beet-pulp textured feed designed for mature show and performance horses. Supports stamina, muscle strength, and endurance with guaranteed amino acids.',tags:['Performance','Show Horse']},
-    {brand:'Cavalor Performix',desc:'Premium muesli for sport horses needing intense energy output. Level 5 formula with puffed & extruded cereals for optimal digestibility.',tags:['Performance','Level 5']},
-    {brand:'Red Mills Competition 14',desc:'14% protein competition mix with high digestibility and energy for horses in intense training and competition.',tags:['Competition','High Protein']},
-    {brand:'Havens Performance 14',desc:'Complete performance muesli with 14% protein. Ideal for horses competing in jumping, dressage, or eventing.',tags:['Performance','Muesli']},
+    {val:'energy',      label:'Sustained energy & stamina',      icon:'fa-bolt'},
+    {val:'muscle',      label:'Topline & muscle development',     icon:'fa-dumbbell'},
+    {val:'recovery',    label:'Faster recovery after work',       icon:'fa-redo'},
+    {val:'gut',         label:'Gut health / ulcer prevention',    icon:'fa-stethoscope'},
   ],
   senior: [
-    {brand:'Nutrena SafeChoice Senior',desc:'High-fat, controlled-starch formula with Digestive Shield™. Complete nutrition designed for older horses, hard keepers, and horses with dental challenges.',tags:['Senior','Complete Feed']},
-    {brand:'Pro Elite Senior',desc:'Textured feed addressing the special nutritional needs of older horses. Low starch and sugar to support metabolic health.',tags:['Senior','Low Starch']},
-    {brand:'Buckeye EQ8 Senior',desc:'Multi-textured senior feed with gut health support system. High fiber and controlled energy for aging horses.',tags:['Senior','Gut Health']},
-    {brand:'Cavalor Strucomix Senior',desc:'Fibre-rich muesli with puffed & extruded grains for easy digestion. Long alfalfa fibres stimulate chewing.',tags:['Senior','Fibre-Rich']},
+    {val:'digestion',   label:'Easier digestion & dental support',icon:'fa-tooth'},
+    {val:'weight',      label:'Maintain or gain weight',          icon:'fa-balance-scale'},
+    {val:'joints',      label:'Joint & mobility support',         icon:'fa-running'},
+    {val:'overall',     label:'All-round senior health',          icon:'fa-heart'},
   ],
   easy: [
-    {brand:'Nutrena SafeChoice Special Care',desc:'Only 10% NSC — lowest starch formula for easy keepers, metabolic horses, insulin-resistant ponies, and miniature horses with Digestive Shield™.',tags:['Easy Keeper','Low NSC','Metabolic']},
-    {brand:'Pro Elite Starch Wise',desc:'Low starch and sugar pelleted feed for mature performance horses with metabolic concerns. Corn-free formula.',tags:['Metabolic','Low Starch']},
-    {brand:'Cavalor Pianissimo',desc:'Special care muesli for sensitive, excitable, or metabolically challenged horses. Calming formula with low sugar content.',tags:['Low Sugar','Calming']},
-    {brand:'Pro Elite Grass Advantage',desc:'Ration balancer with low feeding rate. Balances grass and mixed forage diets without adding excess calories.',tags:['Balancer','Grass','Easy Keeper']},
+    {val:'lowstarch',   label:'Low NSC / insulin management',     icon:'fa-tint'},
+    {val:'minerals',    label:'Vitamins & minerals without calories',icon:'fa-capsules'},
+    {val:'calming',     label:'Calming & focus',                  icon:'fa-brain'},
+    {val:'coat',        label:'Coat & hoof quality',              icon:'fa-star'},
   ],
   hard: [
-    {brand:'Pro Elite Omega Advantage',desc:'Extruded pellet supplement with 24% fat and added vitamin E. Supports weight gain, coat shine, and performance appearance.',tags:['Weight Gain','High Fat']},
-    {brand:'Buckeye Cadence Ultra',desc:'Sweet pelleted feed for performance horses. High calorie dense formula for hard keepers needing extra energy.',tags:['High Calorie','Weight Gain']},
-    {brand:'Cavalor WholyGain',desc:'Concentrated weight gain supplement providing high-quality fats and proteins for underweight or hard-keeping horses.',tags:['Weight Gain','High Fat']},
-    {brand:'Havens Power Plus Mix',desc:'High-energy power muesli with extra fat and calories for horses struggling to maintain weight under heavy workload.',tags:['Hard Keeper','High Energy']},
+    {val:'weightgain',  label:'Safe weight gain',                 icon:'fa-arrow-up'},
+    {val:'highfat',     label:'High-fat / high-calorie feed',     icon:'fa-fire'},
+    {val:'topline',     label:'Build topline & muscle',           icon:'fa-dumbbell'},
+    {val:'gut',         label:'Gut health support during gain',   icon:'fa-stethoscope'},
   ],
   young: [
-    {brand:'Pro Elite Growth',desc:'Textured feed formulated specifically for foals, growing horses, and broodmares. Balanced amino acid profile supports healthy bone and muscle development.',tags:['Foals','Growing','Broodmares']},
-    {brand:'Buckeye Gro-N-Win',desc:'Ration balancer for growing horses. Fortifies pasture and hay rations with essential nutrients without excess calories.',tags:['Growing','Balancer']},
-    {brand:'Nutrena SafeChoice Mare & Foal',desc:'Controlled starch pelleted formula with Digestive Shield™ for pregnant and lactating mares, weanlings, and yearlings.',tags:['Mare & Foal','Growing']},
+    {val:'growth',      label:'Bone & muscle development',        icon:'fa-bone'},
+    {val:'balancer',    label:'Ration balancer (low calorie)',     icon:'fa-balance-scale'},
+    {val:'foal',        label:'Foal / weanling specific',         icon:'fa-baby'},
+    {val:'broodmare',   label:'Pregnant or lactating mare',       icon:'fa-female'},
   ],
   broodmare: [
-    {brand:'Pro Elite Grass Advantage',desc:'Pellet balancer for broodmares on pasture. Provides balanced nutrition without overfeeding energy to horses on good grass.',tags:['Broodmares','Balancer']},
-    {brand:'Nutrena SafeChoice Mare & Foal',desc:'16% protein controlled-starch formula for pregnant or lactating mares, weanlings, and yearlings with complete nutrition support.',tags:['Mares','Foals','16% Protein']},
-    {brand:'Red Mills Horse Care 14',desc:'14% protein complete diet mix for breeding stock. Supports reproductive performance and early foal development.',tags:['Broodmares','14% Protein']},
+    {val:'pregnant',    label:'Pregnant mare nutrition',          icon:'fa-baby'},
+    {val:'lactating',   label:'Lactating / nursing mare',         icon:'fa-heart'},
+    {val:'balancer',    label:'Pasture balancer',                 icon:'fa-leaf'},
+    {val:'protein',     label:'High protein & calcium',           icon:'fa-capsules'},
   ],
   endurance: [
-    {brand:'Havens Endurance',desc:'Designed specifically for endurance horses covering long distances. High fiber and sustained-release energy to keep horses going mile after mile.',tags:['Endurance','Long Distance']},
-    {brand:'Cavalor Endurix',desc:'Energy-dense muesli with L-carnitine for fat metabolism. Supports stamina and recovery for endurance and eventing horses.',tags:['Endurance','Stamina']},
-    {brand:'Havens Natural Balance',desc:'Complete balanced muesli providing steady, long-lasting energy for recreational and trail horses with lighter workloads.',tags:['Trail Horse','Balanced']},
+    {val:'stamina',     label:'Long-distance stamina',            icon:'fa-route'},
+    {val:'electrolytes',label:'Electrolyte & hydration support',  icon:'fa-tint'},
+    {val:'fatfuel',     label:'Fat-based slow energy',            icon:'fa-fire'},
+    {val:'recovery',    label:'Post-ride recovery',               icon:'fa-redo'},
   ],
   digestive: [
-    {brand:'Cavalor FiberGastro',desc:'Specifically formulated for horses with gastric sensitivity, ulcer risk, or digestive issues. High fiber, low starch, with natural stomach buffering.',tags:['Gastric','Ulcer Support']},
-    {brand:'Havens Gastro Plus',desc:'Gastro-supportive muesli with prebiotics and probiotics. Ideal for horses prone to colic, ulcers, or stress-related digestive upset.',tags:['Gastric','Probiotics']},
-    {brand:'Buckeye EQ8 Performance',desc:'Extruded feed with built-in gut health system. Combines prebiotics, probiotics, and postbiotics for a healthy microbiome.',tags:['Gut Health','Extruded']},
-    {brand:'Red Mills Comfort Mash',desc:'Easy-to-digest mash feed for horses recovering from illness, dental issues, or surgery. Gentle on the digestive system.',tags:['Recovery','Easy Digest']},
+    {val:'ulcer',       label:'Ulcer risk / gastric sensitivity', icon:'fa-fire-alt'},
+    {val:'colic',       label:'Colic prevention',                 icon:'fa-exclamation-triangle'},
+    {val:'microbiome',  label:'Gut microbiome support',           icon:'fa-bacteria'},
+    {val:'mash',        label:'Easy-digest / recovery mash',      icon:'fa-blender'},
   ],
 };
-function selectHorse(type){
-  const recs = finderRecs[type] || [];
-  const html = recs.map(r=>\`
+
+// Recommendation database keyed by [q1][q2][activity]
+const finderRecs = {
+  competition: {
+    energy: {
+      light:    [{brand:'Cavalor Performix',desc:'Premium muesli for sport horses — puffed & extruded cereals for optimal digestibility and sustained energy.',tags:['Performance']},{brand:'Red Mills Horse Care 14',desc:'14% protein mix suited for moderate training and local shows with good digestibility.',tags:['Performance']}],
+      moderate: [{brand:'Cavalor Performix',desc:'Level 5 formula with puffed & extruded cereals — ideal for horses in regular training.',tags:['Performance']},{brand:'Havens Performance 14',desc:'Complete 14% protein muesli for jumping, dressage, or eventing.',tags:['Performance','Muesli']}],
+      intense:  [{brand:'Pro Elite Performance',desc:'High-fat beet-pulp textured feed for peak stamina, muscle strength and endurance. Guaranteed amino acids.',tags:['Performance','Show Horse']},{brand:'Red Mills Competition 14',desc:'High-energy 14% protein mix for horses in intense competition training.',tags:['Competition','High Protein']},{brand:'Cavalor Performix',desc:'Level 5 puffed & extruded formula maximising energy output for hard-working sport horses.',tags:['Performance']}],
+      retired:  [{brand:'Havens Natural Balance',desc:'Balanced muesli providing steady energy — ideal for lightly worked ex-competition horses.',tags:['Balanced']}],
+    },
+    muscle: {
+      light:    [{brand:'Cavalor Muscle Force',desc:'Targeted amino acid supplement to build and maintain topline for horses in light work.',tags:['Muscle','Supplement']}],
+      moderate: [{brand:'Pro Elite Topline Advantage',desc:'Lysine, methionine & threonine blend specifically targeting topline and muscle building.',tags:['Topline','Muscle']}],
+      intense:  [{brand:'Pro Elite Performance',desc:'Complete performance feed with guaranteed amino acids for muscle synthesis and topline.',tags:['Performance','Topline']},{brand:'Pro Elite Topline Advantage',desc:'High-quality amino acid concentrate to accelerate muscle and topline development.',tags:['Topline']}],
+      retired:  [{brand:'Cavalor Muscle Force',desc:'Amino acid supplement to preserve muscle mass in retired horses.',tags:['Muscle']}],
+    },
+    recovery: {
+      light:    [{brand:'Cavalor Endurix',desc:'L-carnitine formula supporting fat metabolism and faster recovery between work sessions.',tags:['Recovery']}],
+      moderate: [{brand:'Cavalor Endurix',desc:'Energy-dense muesli with L-carnitine for improved recovery and stamina.',tags:['Recovery','Stamina']}],
+      intense:  [{brand:'Cavalor Endurix',desc:'Elite recovery support — L-carnitine, antioxidants, electrolytes for hard-working competition horses.',tags:['Recovery','Endurance']},{brand:'Pro Elite Performance',desc:'Rich in vitamin E and omega-3s for post-competition muscle recovery.',tags:['Recovery']}],
+      retired:  [{brand:'Cavalor Strucomix Original',desc:'Gentle fibre-rich muesli supporting overall wellbeing in retired horses.',tags:['Maintenance']}],
+    },
+    gut: {
+      light:    [{brand:'Cavalor FiberGastro',desc:'High-fiber, low-starch formula with natural gastric buffering — excellent for ulcer-prone horses.',tags:['Gastric','Ulcer']}],
+      moderate: [{brand:'Cavalor FiberGastro',desc:'Gastric buffering formula keeping gut health stable during regular training.',tags:['Gastric']}],
+      intense:  [{brand:'Cavalor FiberGastro',desc:'Intensive gastric support for show horses under travel and competition stress.',tags:['Gastric','Ulcer']},{brand:'Havens Gastro Plus',desc:'Prebiotics & probiotics to maintain gut balance during intense competition schedules.',tags:['Gut Health']}],
+      retired:  [{brand:'Cavalor FiberForce',desc:'High-fibre complete feed supporting digestive health in retired horses.',tags:['Fibre','Gut']}],
+    },
+  },
+  senior: {
+    digestion: {
+      light:    [{brand:'Nutrena SafeChoice Senior',desc:'High-fat, controlled-starch formula with Digestive Shield™ — ideal for older horses needing easy digestion.',tags:['Senior','Digestive Shield']}],
+      moderate: [{brand:'Nutrena SafeChoice Senior',desc:'Digestive Shield™ technology supports hindgut health for senior horses in light to moderate work.',tags:['Senior']}],
+      intense:  [{brand:'Buckeye EQ8 Senior',desc:'Gut health support system combined with high fiber and energy for active senior horses.',tags:['Senior','Gut Health']}],
+      retired:  [{brand:'Cavalor Strucomix Senior',desc:'Long alfalfa fibres stimulate chewing and digestion — perfect for retired seniors.',tags:['Senior','Fibre']}],
+    },
+    weight: {
+      light:    [{brand:'Nutrena SafeChoice Senior',desc:'Complete nutrition formula helping seniors maintain healthy body condition.',tags:['Senior','Complete Feed']}],
+      moderate: [{brand:'Pro Elite Senior',desc:'Low-starch textured feed for seniors needing to maintain weight during regular activity.',tags:['Senior']}],
+      intense:  [{brand:'Buckeye EQ8 Senior',desc:'Higher-calorie senior formula with gut support for active older horses.',tags:['Senior','High Fiber']}],
+      retired:  [{brand:'Cavalor Strucomix Senior',desc:'Easy-to-eat fibre muesli for retired seniors with lower calorie needs.',tags:['Senior']}],
+    },
+    joints: {
+      light:    [{brand:'Buckeye EQ8 Senior',desc:'Comprehensive joint and gut support in one senior-specific feed.',tags:['Senior','Joint']}],
+      moderate: [{brand:'Buckeye EQ8 Senior',desc:'Active senior support: joint health, gut balance and sustained energy.',tags:['Senior','Joint']}],
+      intense:  [{brand:'Buckeye EQ8 Senior',desc:'Full-spectrum senior nutrition — joints, gut, energy for competition-level older horses.',tags:['Senior']}],
+      retired:  [{brand:'Cavalor Strucomix Senior',desc:'Gentle muesli with long fibre and joint-friendly nutrients for retired seniors.',tags:['Senior']}],
+    },
+    overall: {
+      light:    [{brand:'Nutrena SafeChoice Senior',desc:'All-in-one senior formula — complete, balanced and easy to digest.',tags:['Senior','Complete']},{brand:'Pro Elite Senior',desc:'Textured senior feed addressing metabolic, dental and digestive needs.',tags:['Senior']}],
+      moderate: [{brand:'Buckeye EQ8 Senior',desc:'Multi-dimensional senior health: digestion, joints, energy.',tags:['Senior','Gut Health']}],
+      intense:  [{brand:'Buckeye EQ8 Senior',desc:'Full-spectrum active senior nutrition.',tags:['Senior']},{brand:'Cavalor Strucomix Senior',desc:'European-style fibre muesli for the hardworking senior horse.',tags:['Senior']}],
+      retired:  [{brand:'Cavalor Strucomix Senior',desc:'Retirement-focused fibre muesli: easy to eat, easy to digest.',tags:['Senior']},{brand:'Nutrena SafeChoice Senior',desc:'Complete senior maintenance at any activity level.',tags:['Senior']}],
+    },
+  },
+  easy: {
+    lowstarch: {
+      light:    [{brand:'Nutrena SafeChoice Special Care',desc:'Only 10% NSC — lowest starch formula for insulin-resistant horses and easy keepers. Digestive Shield™.',tags:['Low NSC','Metabolic']}],
+      moderate: [{brand:'Pro Elite Starch Wise',desc:'Low starch and sugar, corn-free pellet for metabolic horses in moderate work.',tags:['Metabolic','Low Starch']}],
+      intense:  [{brand:'Pro Elite Starch Wise',desc:'Performance-supporting yet low-starch formula — critical for IR horses in heavy work.',tags:['Low Starch','Metabolic']},{brand:'Nutrena SafeChoice Special Care',desc:'Ultra-low NSC with Digestive Shield™ even for horses in active competition.',tags:['Low NSC']}],
+      retired:  [{brand:'Nutrena SafeChoice Special Care',desc:'Pasture & retirement management for metabolic horses — ultra-low NSC.',tags:['Easy Keeper','Low NSC']}],
+    },
+    minerals: {
+      light:    [{brand:'Pro Elite Grass Advantage',desc:'Ration balancer providing vitamins and minerals without excess calories — ideal for easy keepers on good pasture.',tags:['Balancer','Easy Keeper']}],
+      moderate: [{brand:'Pro Elite Grass Advantage',desc:'Low-rate balancer ensuring micronutrient coverage for horses in moderate work.',tags:['Balancer']}],
+      intense:  [{brand:'Pro Elite Grass Advantage',desc:'Minerals and vitamins concentrated for performance without adding starch.',tags:['Balancer','Performance']}],
+      retired:  [{brand:'Pro Elite Grass Advantage',desc:'Pasture balancer perfect for retired easy keepers needing nutrients without calories.',tags:['Balancer','Easy Keeper']}],
+    },
+    calming: {
+      light:    [{brand:'Cavalor Pianissimo',desc:'Calming muesli with low sugar for sensitive or excitable horses.',tags:['Calming','Low Sugar']}],
+      moderate: [{brand:'Cavalor Pianissimo',desc:'Keeps energy steady and behaviour calm during regular training.',tags:['Calming']}],
+      intense:  [{brand:'Cavalor Pianissimo',desc:'Calming formula for metabolically sensitive horses in competition environments.',tags:['Calming','Show']}],
+      retired:  [{brand:'Cavalor Pianissimo',desc:'Gentle calming muesli for retired horses prone to excitability.',tags:['Calming']}],
+    },
+    coat: {
+      light:    [{brand:'Pro Elite Omega Advantage',desc:'24% fat supplement boosting coat shine and hoof quality.',tags:['Coat','Omega']}],
+      moderate: [{brand:'Pro Elite Omega Advantage',desc:'High-fat supplement for visible coat and hoof improvement in working horses.',tags:['Coat','Omega']}],
+      intense:  [{brand:'Pro Elite Omega Advantage',desc:'Omega-rich fat supplement — coat, hoof and anti-inflammatory support for active horses.',tags:['Coat','Omega','Anti-inflammatory']}],
+      retired:  [{brand:'Pro Elite Omega Advantage',desc:'Keep retired horses looking their best with omega-3 and vitamin E support.',tags:['Coat']}],
+    },
+  },
+  hard: {
+    weightgain: {
+      light:    [{brand:'Cavalor WholyGain',desc:'High-quality fats and proteins for safe weight gain in easy-going horses.',tags:['Weight Gain']}],
+      moderate: [{brand:'Buckeye Cadence Ultra',desc:'Calorie-dense sweet pelleted feed for moderate-work hard keepers.',tags:['Weight Gain','High Calorie']}],
+      intense:  [{brand:'Pro Elite Omega Advantage',desc:'24% fat extruded pellet for dramatic weight and condition gains in hard-working horses.',tags:['Weight Gain','High Fat']},{brand:'Havens Power Plus Mix',desc:'High-energy power muesli for horses struggling to maintain weight under heavy workload.',tags:['Hard Keeper','High Energy']}],
+      retired:  [{brand:'Cavalor WholyGain',desc:'Concentrated weight support for retired horses losing condition.',tags:['Weight Gain']}],
+    },
+    highfat: {
+      light:    [{brand:'Cavalor WholyGain',desc:'Concentrated fat and protein blend for safe calorie addition.',tags:['High Fat']}],
+      moderate: [{brand:'Havens Power Plus Mix',desc:'High-fat power muesli sustaining moderate-work hard keepers.',tags:['High Fat','Hard Keeper']}],
+      intense:  [{brand:'Pro Elite Omega Advantage',desc:'24% fat + vitamin E — maximum calorie density for competition hard keepers.',tags:['High Fat','Performance']},{brand:'Buckeye Cadence Ultra',desc:'Sweet pelleted high-calorie feed for intensely working hard keepers.',tags:['High Calorie']}],
+      retired:  [{brand:'Cavalor WholyGain',desc:'Gentle high-fat supplement for retired horses.',tags:['High Fat']}],
+    },
+    topline: {
+      light:    [{brand:'Pro Elite Topline Advantage',desc:'Targeted amino acids (lysine, methionine, threonine) to build topline in light-work horses.',tags:['Topline']}],
+      moderate: [{brand:'Pro Elite Topline Advantage',desc:'Topline building amino acid blend for horses in regular training.',tags:['Topline','Muscle']}],
+      intense:  [{brand:'Pro Elite Performance',desc:'Full performance feed with amino acids and energy to support topline in hard-working horses.',tags:['Topline','Performance']},{brand:'Pro Elite Topline Advantage',desc:'Stack with base feed for accelerated topline development.',tags:['Topline']}],
+      retired:  [{brand:'Cavalor Muscle Force',desc:'Maintain topline and muscle in retired horses with targeted amino acids.',tags:['Topline','Retired']}],
+    },
+    gut: {
+      light:    [{brand:'Cavalor FiberGastro',desc:'High-fiber, low-starch formula protecting gut health while adding safe nutrition.',tags:['Gastric','Gut']}],
+      moderate: [{brand:'Cavalor FiberForce',desc:'Fibre-rich complete feed supporting hindgut health in moderate-work hard keepers.',tags:['Fibre','Gut']}],
+      intense:  [{brand:'Cavalor FiberGastro',desc:'Gastric buffering with high fibre — critical during intensive weight-gain programmes.',tags:['Gastric','Fibre']},{brand:'Havens Gastro Plus',desc:'Probiotics and prebiotics maintaining microbiome balance in horses gaining weight.',tags:['Gut','Probiotics']}],
+      retired:  [{brand:'Cavalor FiberForce',desc:'Comprehensive fibre support for retired hard keepers.',tags:['Fibre','Gut']}],
+    },
+  },
+  young: {
+    growth: {
+      light:    [{brand:'Pro Elite Growth',desc:'Balanced amino acids for healthy bone and muscle development in young horses.',tags:['Growing','Foals']}],
+      moderate: [{brand:'Pro Elite Growth',desc:'Textured growing horse feed for young horses in light training.',tags:['Growing']}],
+      intense:  [{brand:'Pro Elite Growth',desc:'Complete growth formula supporting young competition horses in intense work.',tags:['Growing','Performance']}],
+      retired:  [{brand:'Buckeye Gro-N-Win',desc:'Ration balancer for young horses at pasture needing nutrients without excess calories.',tags:['Growing','Balancer']}],
+    },
+    balancer: {
+      light:    [{brand:'Buckeye Gro-N-Win',desc:'Low-rate ration balancer fortifying pasture and hay for easy-keeper youngsters.',tags:['Balancer','Growing']}],
+      moderate: [{brand:'Buckeye Gro-N-Win',desc:'Essential nutrients without excess energy for growing horses in moderate work.',tags:['Balancer']}],
+      intense:  [{brand:'Pro Elite Growth',desc:'Full-spectrum growth nutrition for young horses in active training.',tags:['Growing','Performance']}],
+      retired:  [{brand:'Buckeye Gro-N-Win',desc:'Pasture balancer ensuring growing horses get what hay alone cannot provide.',tags:['Balancer']}],
+    },
+    foal: {
+      light:    [{brand:'Nutrena SafeChoice Mare & Foal',desc:'Controlled starch pelleted formula for weanlings and yearlings with Digestive Shield™.',tags:['Foal','Growing']}],
+      moderate: [{brand:'Nutrena SafeChoice Mare & Foal',desc:'Supports foal development alongside early light groundwork.',tags:['Foal']}],
+      intense:  [{brand:'Pro Elite Growth',desc:'Performance-oriented growth formula for foals entering early training.',tags:['Foal','Performance']}],
+      retired:  [{brand:'Nutrena SafeChoice Mare & Foal',desc:'Complete nutrition for pasture foals.',tags:['Foal']}],
+    },
+    broodmare: {
+      light:    [{brand:'Nutrena SafeChoice Mare & Foal',desc:'16% protein controlled-starch formula for pregnant or lactating mares.',tags:['Mare','Broodmare']}],
+      moderate: [{brand:'Pro Elite Growth',desc:'Covers nutritional needs of both mare and foal in moderate-work scenarios.',tags:['Mare','Foal']}],
+      intense:  [{brand:'Red Mills Horse Care 14',desc:'14% protein complete diet supporting reproductive performance.',tags:['Broodmare','14% Protein']}],
+      retired:  [{brand:'Nutrena SafeChoice Mare & Foal',desc:'Pasture broodmare nutrition — complete and balanced.',tags:['Mare']}],
+    },
+  },
+  broodmare: {
+    pregnant: {
+      light:    [{brand:'Nutrena SafeChoice Mare & Foal',desc:'Complete controlled-starch formula supporting pregnant mares throughout gestation.',tags:['Pregnant','Mare']}],
+      moderate: [{brand:'Pro Elite Growth',desc:'Textured feed with balanced amino acids for pregnant mares in moderate work.',tags:['Pregnant']}],
+      intense:  [{brand:'Red Mills Horse Care 14',desc:'High-protein formula for intensely worked pregnant mares.',tags:['Pregnant','High Protein']}],
+      retired:  [{brand:'Nutrena SafeChoice Mare & Foal',desc:'Gentle complete nutrition for pasture pregnant mares.',tags:['Pregnant']}],
+    },
+    lactating: {
+      light:    [{brand:'Nutrena SafeChoice Mare & Foal',desc:'Supports milk production and mare recovery — high protein and calcium.',tags:['Lactating','Mare']}],
+      moderate: [{brand:'Pro Elite Growth',desc:'Fuels milk production and supports mare condition during nursing.',tags:['Lactating']}],
+      intense:  [{brand:'Red Mills Horse Care 14',desc:'14% protein for high-demand lactating mares in active use.',tags:['Lactating','High Protein']}],
+      retired:  [{brand:'Nutrena SafeChoice Mare & Foal',desc:'Pasture nutrition supporting milk production.',tags:['Lactating']}],
+    },
+    balancer: {
+      light:    [{brand:'Pro Elite Grass Advantage',desc:'Ration balancer for broodmares on good pasture — nutrients without excess calories.',tags:['Balancer','Broodmare']}],
+      moderate: [{brand:'Pro Elite Grass Advantage',desc:'Mineral and vitamin coverage for working broodmares on forage.',tags:['Balancer']}],
+      intense:  [{brand:'Nutrena SafeChoice Mare & Foal',desc:'Complete nutrition when pasture alone is not enough.',tags:['Broodmare','Complete']}],
+      retired:  [{brand:'Pro Elite Grass Advantage',desc:'Low-rate pasture balancer for retired broodmares.',tags:['Balancer']}],
+    },
+    protein: {
+      light:    [{brand:'Nutrena SafeChoice Mare & Foal',desc:'16% protein controlled-starch formula — balanced calcium for bone development.',tags:['High Protein','Calcium']}],
+      moderate: [{brand:'Red Mills Horse Care 14',desc:'14% protein breeding stock formula.',tags:['High Protein']}],
+      intense:  [{brand:'Red Mills Horse Care 14',desc:'High protein and energy for actively worked broodmares.',tags:['High Protein','Performance']}],
+      retired:  [{brand:'Pro Elite Growth',desc:'Amino acid-rich pasture supplement for broodmares.',tags:['Protein']}],
+    },
+  },
+  endurance: {
+    stamina: {
+      light:    [{brand:'Havens Natural Balance',desc:'Steady, long-lasting energy for trail horses in light recreational work.',tags:['Trail','Balanced']}],
+      moderate: [{brand:'Cavalor Endurix',desc:'L-carnitine formula supporting fat metabolism and sustained stamina.',tags:['Endurance','Stamina']}],
+      intense:  [{brand:'Havens Endurance',desc:'Purpose-built for long-distance endurance — high fibre and slow-release energy.',tags:['Endurance','Long Distance']},{brand:'Cavalor Endurix',desc:'Energy-dense with L-carnitine for elite endurance horses.',tags:['Endurance','Performance']}],
+      retired:  [{brand:'Havens Natural Balance',desc:'Balanced muesli for retired endurance horses maintaining light fitness.',tags:['Balanced']}],
+    },
+    electrolytes: {
+      light:    [{brand:'Havens Natural Balance',desc:'Balanced muesli — pair with an electrolyte supplement for Florida trail riding.',tags:['Trail','Balanced']}],
+      moderate: [{brand:'Cavalor Endurix',desc:'Includes electrolyte support — ideal for moderate-distance Florida riding.',tags:['Electrolytes','Endurance']}],
+      intense:  [{brand:'Havens Endurance',desc:'High-fibre endurance feed — pair with Cavalor Electroliq Sweat for intensive hydration management.',tags:['Endurance','Electrolytes']}],
+      retired:  [{brand:'Havens Natural Balance',desc:'Maintenance muesli with electrolyte supplement support.',tags:['Balanced']}],
+    },
+    fatfuel: {
+      light:    [{brand:'Havens Natural Balance',desc:'Fat-based steady energy for trail horses.',tags:['Fat Fuel']}],
+      moderate: [{brand:'Cavalor Endurix',desc:'L-carnitine enhances fat utilisation — ideal fat-fuel formula.',tags:['Fat Fuel','Endurance']}],
+      intense:  [{brand:'Havens Endurance',desc:'High-fibre, fat-fuelled formula designed for competition endurance horses.',tags:['Fat Fuel','Long Distance']}],
+      retired:  [{brand:'Cavalor Strucomix Original',desc:'Fibre muesli providing fat-based maintenance energy for retired horses.',tags:['Fat Fuel']}],
+    },
+    recovery: {
+      light:    [{brand:'Cavalor Endurix',desc:'L-carnitine and antioxidants to aid recovery after trail rides.',tags:['Recovery']}],
+      moderate: [{brand:'Cavalor Endurix',desc:'Post-ride recovery support with muscle-protecting antioxidants.',tags:['Recovery']}],
+      intense:  [{brand:'Havens Endurance',desc:'High fibre sustains hindgut bacteria critical for endurance recovery.',tags:['Recovery','Endurance']},{brand:'Cavalor Endurix',desc:'Elite recovery blend for competition endurance horses.',tags:['Recovery']}],
+      retired:  [{brand:'Cavalor Strucomix Original',desc:'Gentle maintenance and recovery support for retired endurance horses.',tags:['Recovery','Retired']}],
+    },
+  },
+  digestive: {
+    ulcer: {
+      light:    [{brand:'Cavalor FiberGastro',desc:'High-fibre, low-starch formula with natural gastric buffering — first choice for ulcer-prone horses.',tags:['Gastric','Ulcer']}],
+      moderate: [{brand:'Cavalor FiberGastro',desc:'Sustained gastric protection for horses in regular training.',tags:['Gastric','Ulcer']}],
+      intense:  [{brand:'Cavalor FiberGastro',desc:'Intensive gastric protection for show and competition horses under stress.',tags:['Gastric','Show']},{brand:'Havens Gastro Plus',desc:'Probiotics and prebiotics to maintain gut balance during intense schedules.',tags:['Gut','Probiotics']}],
+      retired:  [{brand:'Cavalor FiberForce',desc:'High-fibre complete maintenance feed for retired ulcer-history horses.',tags:['Fibre','Gut']}],
+    },
+    colic: {
+      light:    [{brand:'Cavalor FiberForce',desc:'Fibre-rich complete feed reducing colic risk in horses on limited turnout.',tags:['Fibre','Colic Prevention']}],
+      moderate: [{brand:'Cavalor FiberGastro',desc:'High fibre and low starch minimises colic risk during regular work.',tags:['Fibre','Colic']}],
+      intense:  [{brand:'Cavalor FiberGastro',desc:'Comprehensive fibre and gastric support reducing colic risk in competition horses.',tags:['Fibre','Gastric']}],
+      retired:  [{brand:'Cavalor FiberForce',desc:'High-fibre retirement diet — colic prevention through consistent forage support.',tags:['Fibre','Retired']}],
+    },
+    microbiome: {
+      light:    [{brand:'Havens Gastro Plus',desc:'Prebiotics and probiotics supporting a healthy gut microbiome.',tags:['Probiotics','Gut Health']}],
+      moderate: [{brand:'Buckeye EQ8 Performance',desc:'Pre-, pro- and postbiotics combined in an extruded feed for optimal microbiome balance.',tags:['Gut Health','Extruded']}],
+      intense:  [{brand:'Buckeye EQ8 Performance',desc:'Full-spectrum gut microbiome support for competition horses.',tags:['Gut Health','Performance']},{brand:'Havens Gastro Plus',desc:'Pre- and probiotic gastro support during high-stress schedules.',tags:['Probiotics']}],
+      retired:  [{brand:'Havens Gastro Plus',desc:'Gentle microbiome support for retired horses.',tags:['Probiotics','Retired']}],
+    },
+    mash: {
+      light:    [{brand:'Red Mills Comfort Mash',desc:'Easy-to-digest mash — ideal for horses recovering from illness, dental challenges or surgery.',tags:['Recovery','Mash']}],
+      moderate: [{brand:'Red Mills Comfort Mash',desc:'Gentle mash supporting gut health during moderate work.',tags:['Mash']}],
+      intense:  [{brand:'Red Mills Comfort Mash',desc:'Recovery mash providing calories and nutrients for hard-working sensitive horses.',tags:['Mash','Recovery']}],
+      retired:  [{brand:'Red Mills Comfort Mash',desc:'Soft easy-digest mash perfect for retired or dental-challenged horses.',tags:['Mash','Retired']}],
+    },
+  },
+};
+
+function finderSetStep(step) {
+  ['finder-q1','finder-q2','finder-q3','finder-results'].forEach(id => {
+    document.getElementById(id).classList.add('hidden');
+  });
+  if (step >= 1) document.getElementById('finder-q1').classList.remove('hidden');
+  if (step >= 2) { document.getElementById('finder-q1').classList.add('hidden'); document.getElementById('finder-q2').classList.remove('hidden'); }
+  if (step >= 3) { document.getElementById('finder-q2').classList.add('hidden'); document.getElementById('finder-q3').classList.remove('hidden'); }
+  if (step === 4) { document.getElementById('finder-q3').classList.add('hidden'); document.getElementById('finder-results').classList.remove('hidden'); }
+  // Update progress dots
+  document.querySelectorAll('.finder-dot').forEach((dot, i) => {
+    dot.classList.toggle('bg-navy-700', i < step && step <= 3);
+    dot.classList.toggle('text-white', i < step && step <= 3);
+    dot.classList.toggle('bg-gold-400', step === 4 && i < 3);
+    dot.classList.toggle('bg-gray-200', !(i < step && step <= 3) && !(step === 4 && i < 3));
+    dot.classList.toggle('text-gray-400', !(i < step && step <= 3));
+  });
+}
+
+function finderQ1(type) {
+  finderState.q1 = type;
+  finderState.q2 = null;
+  // Populate Q2 options
+  const opts = finderQ2Options[type] || [];
+  document.getElementById('finder-q2-options').innerHTML = opts.map(o => \`
+    <button onclick="finderQ2('\${o.val}')" class="finder-option flex items-center gap-3 p-4 bg-white rounded-xl border-2 border-gray-200 hover:border-navy-700 hover:bg-navy-50 transition-all text-left font-medium text-navy-700">
+      <i class="fas \${o.icon} text-gold-400 w-5 text-center"></i>\${o.label}
+    </button>\`).join('');
+  finderSetStep(2);
+}
+
+function finderQ2(goal) {
+  finderState.q2 = goal;
+  finderSetStep(3);
+}
+
+function finderQ3(activity) {
+  const q1 = finderState.q1, q2 = finderState.q2;
+  const recs = (finderRecs[q1] && finderRecs[q1][q2] && finderRecs[q1][q2][activity]) || [];
+  const html = recs.length
+    ? recs.map(r=>\`
     <div class="bg-cream rounded-xl p-5 border border-gray-200">
       <div class="flex items-start justify-between gap-2 mb-2">
         <div class="font-bold text-navy-700">\${r.brand}</div>
         <div class="flex flex-wrap gap-1 justify-end">\${r.tags.map(t=>\`<span class="tag tag-perf text-xs">\${t}</span>\`).join('')}</div>
       </div>
       <p class="text-sm text-gray-600">\${r.desc}</p>
-    </div>\`).join('');
+    </div>\`).join('')
+    : \`<div class="bg-cream rounded-xl p-5 border border-gray-200 text-gray-600 text-sm">We'd love to help you personally — call <strong>(561) 633-6003</strong> or chat with Bri below for a custom recommendation.</div>\`;
   document.getElementById('finder-recs').innerHTML = html;
-  document.getElementById('finder-step-1').classList.add('hidden');
-  document.getElementById('finder-results').classList.remove('hidden');
+  finderSetStep(4);
 }
+
+function finderBack(toStep) {
+  finderSetStep(toStep);
+}
+
 function resetFinder(){
-  document.getElementById('finder-step-1').classList.remove('hidden');
-  document.getElementById('finder-results').classList.add('hidden');
+  finderState.q1 = null; finderState.q2 = null;
+  finderSetStep(1);
 }
+// Legacy alias kept for any inline onclick references
+function selectHorse(type){ finderQ1(type); }
 
 // ─── Contact form ─────────────────────────────────────────────────────────────
 async function submitContact(e){
