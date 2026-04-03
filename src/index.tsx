@@ -2121,6 +2121,7 @@ html { font-size: 10pt; }
 body { font-family: 'Nunito Sans', sans-serif; color: #1a1a2e; background: #d0d0d0; }
 
 /* ═══ PAGE SETUP ═════════════════════════════════════════════════════ */
+/* Single @page rule — size + zero margins (no duplicate rules) */
 @page { size: 8.5in 11in; margin: 0; }
 @media print {
   html, body { background: white !important; }
@@ -2132,8 +2133,6 @@ body { font-family: 'Nunito Sans', sans-serif; color: #1a1a2e; background: #d0d0
   .cat-page { height: auto !important; overflow: visible !important; page-break-after: always; break-after: page; }
   .cat-page:last-child { page-break-after: auto; break-after: auto; }
   .cat-body { overflow: visible !important; }
-  /* Vendor groups: try to keep together, but allow breaking if needed */
-  .vgroup { break-inside: avoid; }
   /* Table rows should not be orphaned */
   table.ptable { break-inside: auto; }
   table.ptable thead { display: table-header-group; }
@@ -2142,9 +2141,6 @@ body { font-family: 'Nunito Sans', sans-serif; color: #1a1a2e; background: #d0d0
   .print-bar { display: none !important; }
   .loading-overlay { display: none !important; }
   body { padding-top: 0 !important; }
-  /* Footer stays at bottom of each print page via margin */
-  .cat-footer { position: running(catFooter); }
-  @page { margin-bottom: 0.35in; }
 }
 
 /* ═══ PAGE SHELL ═════════════════════════════════════════════════════ */
@@ -2307,7 +2303,7 @@ body { font-family: 'Nunito Sans', sans-serif; color: #1a1a2e; background: #d0d0
 }
 .cover-right-img {
   position: absolute; inset: 0;
-  background: url('/static/catalog_cover.jpg') 55% 25% / cover no-repeat;
+  background: url('/static/catalog_cover.jpg') 20% 25% / cover no-repeat;
   opacity: 0.95;
 }
 .cover-right-overlay {
