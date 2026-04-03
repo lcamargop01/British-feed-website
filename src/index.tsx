@@ -2045,20 +2045,23 @@ async function submitContact(e){
     // 2. Send email via Web3Forms (client-side — works from browser)
     const formData = new FormData();
     formData.append('access_key',  '70c128a5-b266-4e4f-ae13-99dc1f2ac7cd');
-    formData.append('name',        \`\${firstName} \${lastName}\`.trim());
+    formData.append('botcheck',    '');
+    formData.append('name',        (firstName + ' ' + lastName).trim());
     formData.append('email',       email);
     formData.append('phone',       phone || 'not provided');
-    formData.append('subject',     \`🐴 New Contact: \${firstName} \${lastName} — \${subject}\`);
-    formData.append('message',     \`Subject: \${subject}\\nPhone: \${phone || 'not provided'}\\n\\n\${message}\`);
-    formData.append('to_email',    'sales@britishfeed.com,laura@britishfeed.com');
+    formData.append('subject',     'New Contact: ' + firstName + ' ' + lastName + ' - ' + subject);
+    formData.append('message',     'Name: ' + firstName + ' ' + lastName + '\nEmail: ' + email + '\nPhone: ' + (phone || 'not provided') + '\nTopic: ' + subject + '\n\n' + message);
     formData.append('replyto',     email);
     formData.append('from_name',   'British Feed Website');
+    formData.append('redirect',    'false');
 
     const w3res = await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
+      headers: { 'Accept': 'application/json' },
       body: formData
     });
     const w3data = await w3res.json();
+    console.log('Web3Forms response:', JSON.stringify(w3data));
     if (!w3data.success) console.warn('Web3Forms warning:', w3data.message);
 
     form.style.display = 'none';
