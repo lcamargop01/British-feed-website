@@ -190,7 +190,7 @@ app.get('/catalog-print', async (c) => {
   if (kv) {
     try {
       const raw = await kv.get('catalog_products', 'json') as any[] | null
-      if (raw && Array.isArray(raw) && raw.length > 0) products = raw
+      if (raw && Array.isArray(raw) && raw.length > 0) products = applyExpertDescriptions(raw)
     } catch (_) {}
   }
   return c.html(getCatalogPrintHTML(products))
@@ -2287,7 +2287,7 @@ body { font-family: 'Nunito Sans', sans-serif; color: #1a1a2e; background: #d0d0
 }
 .cover-right-img {
   position: absolute; inset: 0;
-  background: url('/static/catalog_cover.jpg') center 30% / cover no-repeat;
+  background: url('/static/catalog_cover.jpg') 82% 25% / cover no-repeat;
   opacity: 0.95;
 }
 .cover-right-overlay {
@@ -2399,13 +2399,12 @@ table.ptable th {
 }
 table.ptable tbody tr:nth-child(even) { background: #fafaf8; }
 table.ptable td {
-  padding: 4px 6px; border-bottom: 1px solid #eee;
-  vertical-align: top; line-height: 1.35;
-  overflow: hidden;
+  padding: 7px 7px; border-bottom: 1px solid #eee;
+  vertical-align: top; line-height: 1.45; overflow: visible;
 }
-.col-name  { width: 28%; font-weight: 700; color: #1B2A4A; white-space: normal; }
-.col-desc  { width: 58%; color: #555; font-size: 7pt; white-space: normal; line-height: 1.35; }
-.col-price { width: 14%; text-align: right; font-weight: 700; color: #1B2A4A; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.col-name  { width: 26%; font-weight: 700; color: #1B2A4A; white-space: normal; font-size: 7.5pt; }
+.col-desc  { width: 60%; color: #444; font-size: 7pt; white-space: normal; line-height: 1.45; overflow: visible; }
+.col-price { width: 14%; text-align: right; font-weight: 700; color: #1B2A4A; font-size: 7.5pt; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 /* ═══ BACK COVER ═════════════════════════════════════════════════════ */
 .back-page {
@@ -2501,7 +2500,7 @@ function buildCatalog(products) {
   function prodRow(p) {
     const price = p.priceFormatted || (p.price ? '$'+Number(p.price).toFixed(2) : 'Call');
     const raw  = (p.description||'').replace(/[—–]\s*available at British Feed.*?to order\.?/gi,'').trim();
-    const desc = raw.length > 175 ? raw.slice(0,172)+'…' : raw;
+    const desc = raw; // show full description — row height auto-expands
     return \`<tr>
       <td class="col-name">\${esc(p.name)}</td>
       <td class="col-desc">\${esc(desc)}</td>
@@ -3519,7 +3518,8 @@ function resetAll() {
 async function loadData() {
   try {
     let products=null;
-    try { const r=await fetch('/admin/api/public/catalog'); if(r.ok){const d=await r.json(); if(d.products&&d.products.length)products=d.products;} } catch(e){}
+    // Use /api/public/products which applies expert descriptions over live KV data
+    try { const r=await fetch('/api/public/products'); if(r.ok){const d=await r.json(); if(d.products&&d.products.length)products=d.products;} } catch(e){}
     if(!products){const r=await fetch('/static/products-data.json'); if(!r.ok)throw new Error('Failed'); products=await r.json();}
     allProducts=products;
     const badge=document.getElementById('productCountBadge'); if(badge){badge.textContent=products.length+' products';badge.classList.remove('hidden');}
