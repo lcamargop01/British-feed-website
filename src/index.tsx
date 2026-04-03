@@ -1973,10 +1973,15 @@ function getProductsHTML(): string {
 
 <!-- ── Navigation ─────────────────────────────────────────────────────────── -->
 <nav class="nav-sticky">
-  <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 py-2 flex items-center justify-center">
+  <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 py-2 flex items-center justify-between">
+    <a href="/" class="text-gray-300 hover:text-white text-sm transition-colors flex items-center gap-1.5">
+      <i class="fas fa-arrow-left text-gold-400 text-xs"></i>
+      <span>Back to Site</span>
+    </a>
     <a href="/" class="flex items-center justify-center">
       <img src="/admin/api/catalog/image/img_img_site_logo_white" alt="British Feed & Supplies" class="h-12" style="filter:brightness(0) invert(1);" onerror="this.style.display='none'" />
     </a>
+    <div class="w-24"></div>
   </div>
 </nav>
 
@@ -1997,12 +2002,6 @@ function getProductsHTML(): string {
       <span id="productCountBadge" class="text-xs text-slate-400 hidden sm:block text-right"></span>
     </div>
   </div>
-</div>
-
-<!-- ── Fuel Surcharge Notice ──────────────────────────────────────────────── -->
-<div class="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center text-amber-800 text-xs flex items-center justify-center gap-2">
-  <i class="fas fa-gas-pump text-amber-600"></i>
-  <span><strong>Notice:</strong> Due to rising fuel costs, we are implementing a temporary, minimal fuel surcharge on deliveries. Thank you for your understanding.</span>
 </div>
 
 <!-- ── Store Layout ─────────────────────────────────────────────────────────── -->
