@@ -406,11 +406,8 @@ function getHTML(): string {
         </div>
       </div>
       <div class="scroll-reveal">
-        <div class="rounded-2xl overflow-hidden shadow-2xl bg-black">
-          <video class="w-full block" style="aspect-ratio:16/9;object-fit:contain;" controls playsinline poster="/admin/api/catalog/image/img_site_hero_bg" preload="metadata">
-            <source src="/static/commercial.mp4" type="video/mp4" />
-            <img src="/admin/api/catalog/image/img_site_hero_bg" alt="British Feed commercial" class="w-full block" />
-          </video>
+        <div class="rounded-2xl overflow-hidden shadow-2xl">
+          <img src="/static/story_closing.jpg" alt="British Feed — For Proper Care & Nutrition" class="w-full block object-cover" />
         </div>
         <!-- Find Us card below the video, not overlapping -->
         <div class="mt-5 bg-white rounded-2xl p-5 shadow-md border border-gray-100">
