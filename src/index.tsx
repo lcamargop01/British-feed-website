@@ -57,8 +57,9 @@ Palm Beach County, Florida. You help customers find the best feed, hay, and supp
 STORE INFO:
 - Address: 14589 Southern Blvd, Palm West Plaza, Loxahatchee Groves, FL 33470
 - Phone: (561) 633-6003
-- Email: admin@britishfeed.com
 - Owner: Vieri Bracco | General Manager: Carmine Garrett
+- Store Hours: Mon–Fri 9am–6pm, Sat 9am–4pm
+- Distribution Center Hours: Mon–Fri 8am–5pm, Sat 9am–4pm
 - Services: Free delivery ($150 min), Nutritional visits, Certified Nutrena Farm Program
 
 PRODUCT BRANDS WE CARRY:
@@ -223,8 +224,8 @@ function getHTML(): string {
   <style>
     html { scroll-behavior: smooth; }
     .hero-bg {
-      background: linear-gradient(135deg, rgba(27,42,74,0.85) 0%, rgba(27,42,74,0.50) 55%, rgba(0,0,0,0.25) 100%),
-                  url('https://sspark.genspark.ai/cfimages?u1=hzEbAV4lPpykIa5X9lcQ4jr%2Fm9mpHj9nzVfssr4frp4kAfrI%2BXGE%2BRdSmGkNbIxpnhntyl9t3x6ivKuK9ssLhnalkfNY3MPhQuv3a11VUri%2F6A%3D%3D&u2=Y3f3oehzecr27oyj&width=2560') center/cover no-repeat;
+      background: linear-gradient(135deg, rgba(27,42,74,0.75) 0%, rgba(27,42,74,0.40) 55%, rgba(0,0,0,0.20) 100%),
+                  url('/admin/api/catalog/image/img_site_hero_bg') center/cover no-repeat;
     }
     .section-divider { border-top: 2px solid #C9A84C; width: 60px; margin: 0 auto; }
     .card-hover { transition: all 0.3s ease; }
@@ -261,7 +262,7 @@ function getHTML(): string {
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
       <a href="#home" class="flex items-center gap-3 group">
-        <img src="https://www.genspark.ai/api/files/s/P7DEplwl" alt="British Feed Logo" class="h-10 brightness-0 invert" onerror="this.style.display='none'" />
+        <img src="https://www.genspark.ai/api/files/s/xouaae2I" alt="British Feed Logo" class="h-12" onerror="this.style.display='none'" style="filter: brightness(0) invert(1);" />
         <span class="text-white font-serif text-lg font-semibold hidden sm:block">British Feed & Supplies</span>
       </a>
       <div class="hidden md:flex items-center gap-6 text-sm font-medium text-white/90">
@@ -694,9 +695,7 @@ function getHTML(): string {
       <!-- Vieri Bracco -->
       <div class="bg-cream rounded-2xl p-8 border border-gray-100 shadow-sm card-hover scroll-reveal flex gap-6">
         <div class="flex-shrink-0">
-          <div class="w-24 h-24 rounded-full bg-navy-700 flex items-center justify-center shadow-md">
-            <span class="text-white font-serif text-3xl font-bold">V</span>
-          </div>
+          <img src="/admin/api/catalog/image/img_site_team_owners" alt="Vieri Bracco & Carmine Garrett" class="w-24 h-24 rounded-full object-cover shadow-md" onerror="this.style.display='none'" />
         </div>
         <div>
           <h3 class="font-serif text-2xl font-bold text-navy-700">Vieri Bracco</h3>
@@ -714,9 +713,7 @@ function getHTML(): string {
       <!-- Carmine Garrett -->
       <div class="bg-cream rounded-2xl p-8 border border-gray-100 shadow-sm card-hover scroll-reveal flex gap-6">
         <div class="flex-shrink-0">
-          <div class="w-24 h-24 rounded-full bg-gold-400 flex items-center justify-center shadow-md">
-            <span class="text-navy-700 font-serif text-3xl font-bold">C</span>
-          </div>
+          <img src="/admin/api/catalog/image/img_site_team_group" alt="British Feed Team" class="w-24 h-24 rounded-full object-cover shadow-md" onerror="this.style.display='none'" />
         </div>
         <div>
           <h3 class="font-serif text-2xl font-bold text-navy-700">Carmine Garrett</h3>
@@ -813,13 +810,15 @@ function getHTML(): string {
           <div>
             <div class="font-bold text-white text-lg mb-1">Store Location</div>
             <div class="text-white/70">14589 Southern Blvd, Palm West Plaza<br/>Loxahatchee Groves, FL 33470</div>
+            <div class="text-white/50 text-sm mt-1"><i class="fas fa-clock mr-1 text-gold-400/70"></i>Mon–Fri 9am–6pm &nbsp;·&nbsp; Sat 9am–4pm</div>
           </div>
         </div>
         <div class="flex gap-5">
           <div class="w-12 h-12 bg-gold-400/20 rounded-full flex items-center justify-center flex-shrink-0"><i class="fas fa-warehouse text-gold-400 text-lg"></i></div>
           <div>
             <div class="font-bold text-white text-lg mb-1">Distribution Center</div>
-            <div class="text-white/70">100 Aldi Way, Suite 400<br/>Royal Palm Beach, FL 33411<br/><span class="text-xs">(Visit by appointment only)</span></div>
+            <div class="text-white/70">100 Aldi Way, Suite 400<br/>Royal Palm Beach, FL 33411</div>
+            <div class="text-white/50 text-sm mt-1"><i class="fas fa-clock mr-1 text-gold-400/70"></i>Mon–Fri 8am–5pm &nbsp;·&nbsp; Sat 9am–4pm</div>
           </div>
         </div>
         <div class="flex gap-5">
@@ -827,13 +826,6 @@ function getHTML(): string {
           <div>
             <div class="font-bold text-white text-lg mb-1">Phone</div>
             <a href="tel:5616336003" class="text-gold-400 hover:text-gold-300 text-xl font-bold">(561) 633-6003</a>
-          </div>
-        </div>
-        <div class="flex gap-5">
-          <div class="w-12 h-12 bg-gold-400/20 rounded-full flex items-center justify-center flex-shrink-0"><i class="fas fa-envelope text-gold-400 text-lg"></i></div>
-          <div>
-            <div class="font-bold text-white text-lg mb-1">Email</div>
-            <a href="mailto:admin@britishfeed.com" class="text-gold-400 hover:text-gold-300">admin@britishfeed.com</a>
           </div>
         </div>
         <div class="flex gap-5">
@@ -910,7 +902,7 @@ function getHTML(): string {
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="grid md:grid-cols-3 gap-8 mb-8">
       <div>
-        <img src="https://www.genspark.ai/api/files/s/P7DEplwl" alt="British Feed Logo" class="h-10 brightness-0 invert mb-4" onerror="this.style.display='none'" />
+        <img src="https://www.genspark.ai/api/files/s/xouaae2I" alt="British Feed Logo" class="h-12 mb-4" style="filter: brightness(0) invert(1);" onerror="this.style.display='none'" />
         <p class="text-white/50 text-sm leading-relaxed">Premium horse feed, hay, shavings & supplies for Wellington's equestrian community since 2016.</p>
         <a href="https://www.instagram.com/british_feed_and_supplies/" target="_blank" rel="noopener" class="inline-flex items-center gap-2 mt-4 text-white/50 hover:text-gold-400 transition-colors text-sm">
           <i class="fab fa-instagram text-lg"></i> @british_feed_and_supplies
@@ -932,7 +924,7 @@ function getHTML(): string {
         <div class="space-y-2 text-sm text-white/50">
           <div><i class="fas fa-map-marker-alt text-gold-400 mr-2 w-4"></i>14589 Southern Blvd, Loxahatchee Groves, FL</div>
           <div><a href="tel:5616336003" class="hover:text-gold-400"><i class="fas fa-phone text-gold-400 mr-2 w-4"></i>(561) 633-6003</a></div>
-          <div><a href="mailto:admin@britishfeed.com" class="hover:text-gold-400"><i class="fas fa-envelope text-gold-400 mr-2 w-4"></i>admin@britishfeed.com</a></div>
+          <div><i class="fas fa-clock text-gold-400 mr-2 w-4"></i>Mon–Fri 9am–6pm · Sat 9am–4pm</div>
         </div>
       </div>
     </div>
@@ -1973,7 +1965,7 @@ function getProductsHTML(): string {
         <i class="fas fa-info-circle text-gold-300 text-lg flex-shrink-0"></i>
         <div>
           <strong class="text-gold-300">Availability Notice:</strong>
-          <span class="text-slate-200"> Pricing and availability change frequently. Call <strong class="text-white">(561) 633-6003</strong> or email <strong class="text-white">admin@britishfeed.com</strong> to confirm.</span>
+          <span class="text-slate-200"> Pricing and availability change frequently. Call <strong class="text-white">(561) 633-6003</strong> to confirm.</span>
         </div>
       </div>
 
@@ -2035,7 +2027,7 @@ function getProductsHTML(): string {
         <i class="fas fa-phone-alt text-amber-500 mt-0.5 flex-shrink-0"></i>
         <div>
           <div class="font-semibold text-amber-800 text-sm">Confirm Availability</div>
-          <div class="text-amber-700 text-xs mt-0.5">Call <strong>(561) 633-6003</strong> or email <strong>admin@britishfeed.com</strong> to confirm availability and current pricing before visiting.</div>
+          <div class="text-amber-700 text-xs mt-0.5">Call <strong>(561) 633-6003</strong> to confirm availability and current pricing before visiting.</div>
         </div>
       </div>
 

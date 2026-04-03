@@ -739,14 +739,11 @@ function buildPanel(sec) {
       <div class="ve-section-body">
         <div class="ve-subsection">
           <div class="ve-subsection-title">Store Details</div>
-          <div class="ve-grid2">
-            \${fi('phone', 'Phone', '(561) 633-6003')}
-            \${fi('email', 'Email', 'admin@britishfeed.com')}
-          </div>
+          \${fi('phone', 'Phone', '(561) 633-6003')}
           \${fi('address', 'Address', '14589 Southern Blvd…')}
           <div class="ve-grid2">
-            \${fi('hours-wk',   'Weekday Hours', '7am – 6pm')}
-            \${fi('hours-wknd','Weekend Hours',  '8am – 4pm')}
+            \${fi('hours-wk',   'Weekday Hours', '9am – 6pm')}
+            \${fi('hours-wknd','Weekend Hours',  '9am – 4pm')}
           </div>
         </div>
         <div class="ve-subsection">
