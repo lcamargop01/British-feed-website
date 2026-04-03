@@ -8,6 +8,9 @@ type Bindings = {
   OPENAI_BASE_URL: string
   BF_STORE: KVNamespace
   ADMIN_PASSWORD: string
+  RESEND_API_KEY: string
+  NOTIFY_EMAIL: string
+  NOTIFY_PHONE: string
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -157,32 +160,59 @@ app.post('/api/contact', async (c) => {
     } catch {}
   }
 
-  // 2. Send notification via Web3Forms
+  // 2. Send notification via Resend
   const name    = `${lead.firstName || ''} ${lead.lastName || ''}`.trim() || 'Unknown'
   const subject = lead.subject || 'General'
   const phone   = lead.phone   || 'not provided'
   const email   = lead.email   || 'not provided'
   const message = lead.message || ''
+  const resendKey = c.env?.RESEND_API_KEY || ''
 
-  try {
-    await fetch('https://api.web3forms.com/submit', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({
-        access_key: '5039ba39-d0f0-4d3e-8811-3e1c911eb198',
-        subject:    `🐴 New Lead: ${name} — ${subject}`,
-        from_name:  'British Feed Website',
-        to_email:   'sales@britishfeed.com,laura@britishfeed.com',
-        replyto:    email !== 'not provided' ? email : 'sales@britishfeed.com',
-        name,
-        email,
-        phone,
-        topic:      subject,
-        message,
-        date:       `${lead.date} at ${lead.time} ET`,
-      }),
-    })
-  } catch (_) {}
+  if (resendKey) {
+    try {
+      const emailRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${resendKey}`,
+        },
+        body: JSON.stringify({
+          from: 'British Feed Website <onboarding@resend.dev>',
+          to:   ['sales@britishfeed.com', 'laura@britishfeed.com'],
+          reply_to: email !== 'not provided' ? email : undefined,
+          subject: `🐴 New Contact: ${name} — ${subject}`,
+          html: `
+<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+  <div style="background:#1B2A4A;padding:20px 24px;border-radius:8px 8px 0 0;">
+    <h2 style="color:#C9A84C;margin:0;font-size:20px;">🐴 New Contact Form Submission</h2>
+    <p style="color:#fff;opacity:0.7;margin:4px 0 0;font-size:13px;">British Feed &amp; Supplies Website</p>
+  </div>
+  <div style="background:#f9f7f3;padding:24px;border-radius:0 0 8px 8px;border:1px solid #e0d9cc;">
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <tr><td style="padding:8px 12px;font-weight:bold;color:#1B2A4A;width:120px;">Name</td><td style="padding:8px 12px;">${name}</td></tr>
+      <tr style="background:#fff;"><td style="padding:8px 12px;font-weight:bold;color:#1B2A4A;">Email</td><td style="padding:8px 12px;"><a href="mailto:${email}" style="color:#1B2A4A;">${email}</a></td></tr>
+      <tr><td style="padding:8px 12px;font-weight:bold;color:#1B2A4A;">Phone</td><td style="padding:8px 12px;"><a href="tel:${phone}" style="color:#1B2A4A;">${phone}</a></td></tr>
+      <tr style="background:#fff;"><td style="padding:8px 12px;font-weight:bold;color:#1B2A4A;">Subject</td><td style="padding:8px 12px;">${subject}</td></tr>
+      <tr><td style="padding:8px 12px;font-weight:bold;color:#1B2A4A;vertical-align:top;">Message</td><td style="padding:8px 12px;white-space:pre-wrap;">${message}</td></tr>
+      <tr style="background:#fff;"><td style="padding:8px 12px;font-weight:bold;color:#1B2A4A;">Submitted</td><td style="padding:8px 12px;color:#666;">${lead.date} at ${lead.time} ET</td></tr>
+    </table>
+    <div style="margin-top:20px;padding:12px 16px;background:#1B2A4A;border-radius:6px;text-align:center;">
+      <a href="mailto:${email}" style="color:#C9A84C;font-weight:bold;text-decoration:none;">Reply to ${name}</a>
+    </div>
+  </div>
+</div>`,
+        }),
+      })
+      if (!emailRes.ok) {
+        const errText = await emailRes.text()
+        console.error('Resend error:', emailRes.status, errText)
+      }
+    } catch (e: any) {
+      console.error('Resend exception:', e?.message)
+    }
+  } else {
+    console.error('RESEND_API_KEY not set — email notification skipped')
+  }
 
   return c.json({ success: true, message: 'Thank you! We will contact you within 24 hours.' })
 })
