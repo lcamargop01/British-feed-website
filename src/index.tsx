@@ -201,7 +201,7 @@ function getHTML(): string {
   <title>British Feed & Supplies | Premium Horse Feed — Wellington, FL</title>
   <meta name="description" content="British Feed & Supplies in Loxahatchee Groves, FL. Premium horse feed, hay, shavings and supplements for Wellington area horses. Nutrena, Cavalor, Pro Elite and more." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -214,8 +214,8 @@ function getHTML(): string {
             cream: { DEFAULT:'#FBF7F0', dark:'#F0E9D8' },
           },
           fontFamily: {
-            serif: ['Playfair Display', 'Georgia', 'serif'],
-            sans:  ['Inter', 'system-ui', 'sans-serif'],
+            serif: ['Cormorant Garamond', 'Georgia', 'serif'],
+            sans:  ['Nunito Sans', 'system-ui', 'sans-serif'],
           }
         }
       }
@@ -236,6 +236,29 @@ function getHTML(): string {
     }
     .hero-text-center { text-align:center; }
     @media(min-width:768px){ .hero-badge { backdrop-filter: blur(8px); } }
+    /* Delivery schedule popup */
+    .delivery-popup-wrap { position:relative; }
+    .delivery-popup {
+      display:none; position:absolute; bottom:calc(100% + 12px); left:50%;
+      transform:translateX(-50%); width:340px; max-width:92vw;
+      background:#1B2A4A; color:#fff; border-radius:14px;
+      padding:18px 20px; box-shadow:0 20px 60px rgba(0,0,0,0.35);
+      z-index:200; font-size:0.78rem; line-height:1.5;
+    }
+    .delivery-popup::after {
+      content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%);
+      border:8px solid transparent; border-top-color:#1B2A4A;
+    }
+    .delivery-popup-wrap:hover .delivery-popup,
+    .delivery-popup-wrap:focus-within .delivery-popup,
+    .delivery-popup.pinned { display:block; }
+    .delivery-day { display:flex; gap:8px; margin-bottom:8px; }
+    .delivery-day:last-child { margin-bottom:0; }
+    .delivery-day-name { color:#C9A84C; font-weight:700; min-width:72px; flex-shrink:0; }
+    @media(max-width:639px){
+      .delivery-popup { bottom:auto; top:calc(100% + 12px); }
+      .delivery-popup::after { top:auto; bottom:100%; border-top-color:transparent; border-bottom-color:#1B2A4A; }
+    }
     .section-divider { border-top: 2px solid #C9A84C; width: 60px; margin: 0 auto; }
     .card-hover { transition: all 0.3s ease; }
     .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
@@ -670,6 +693,22 @@ function getHTML(): string {
           <div class="mt-3 bg-amber-50 border border-amber-200 rounded-lg p-2.5 text-xs text-amber-800 flex items-start gap-2">
             <i class="fas fa-gas-pump mt-0.5 flex-shrink-0"></i>
             <span><strong>Fuel Surcharge Notice:</strong> Due to rising fuel costs, we are implementing a temporary, minimal fuel surcharge. Thank you for your understanding.</span>
+          </div>
+          <!-- Delivery Schedule popup trigger -->
+          <div class="delivery-popup-wrap mt-4">
+            <button onclick="this.closest('.delivery-popup-wrap').querySelector('.delivery-popup').classList.toggle('pinned')"
+              class="w-full flex items-center justify-center gap-2 bg-navy-700 hover:bg-navy-600 text-white text-xs font-semibold px-4 py-2.5 rounded-full transition-all">
+              <i class="fas fa-calendar-week"></i> View Delivery Schedule
+            </button>
+            <div class="delivery-popup" id="delivery-schedule-popup">
+              <div class="flex items-center justify-between mb-3">
+                <span class="font-bold text-gold-400 text-sm tracking-wide uppercase">Delivery Schedule</span>
+                <button onclick="document.getElementById('delivery-schedule-popup').classList.remove('pinned')" class="text-white/50 hover:text-white text-lg leading-none">&times;</button>
+              </div>
+              <div id="delivery-schedule-days">
+                <!-- Populated by JS from KV or default -->
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1345,6 +1384,9 @@ async function loadSiteContent() {
     if (D['instagram']) { var e = q('a[href*="instagram"]'); if (e) e.href = D['instagram']; }
     if (D['facebook'])  { var e = q('a[href*="facebook"]');  if (e) e.href = D['facebook']; }
 
+    // Delivery schedule
+    if (D['delivery-schedule']) { renderDeliverySchedule(D['delivery-schedule']); }
+
     // SEO / meta
     if (D['seo-title'])    { document.title = D['seo-title']; var e = q('title'); if(e) e.textContent = D['seo-title']; }
     if (D['seo-desc'])     { var e = q('meta[name="description"]'); if (e) e.setAttribute('content', D['seo-desc']); }
@@ -1352,6 +1394,39 @@ async function loadSiteContent() {
   } catch(e) {}
 }
 loadSiteContent();
+
+// ─── Delivery Schedule ───────────────────────────────────────────────────────
+const DEFAULT_DELIVERY_SCHEDULE = [
+  { day: 'Monday',    areas: 'Northwest Loxahatchee, North Wellington, Palm Beach Point North, Southfields' },
+  { day: 'Tuesday',   areas: 'C, E, F, G Road; Collecting Canal; Deer Run; Fox Trail; Sycamore; Palm Beach Point South' },
+  { day: 'Wednesday', areas: 'D Road, Northwest Loxahatchee, White Fences, Lake Worth, Grand Prix, Flying Cow, North Wellington, Palm Beach Point North' },
+  { day: 'Thursday',  areas: 'B, E, F, G Road; Collecting Canal; Deer Run; Jupiter; Grand Prix; Little Ranches; South Fields' },
+  { day: 'Friday',    areas: 'East Loxahatchee, White Fences, Flying Cow, North Wellington, Palm Beach Point (North & South)' },
+  { day: 'Saturday',  areas: 'A, B, C Road; Collecting Canal; Homeland' },
+];
+
+function renderDeliverySchedule(raw) {
+  const el = document.getElementById('delivery-schedule-days');
+  if (!el) return;
+  let days = DEFAULT_DELIVERY_SCHEDULE;
+  // raw can be JSON string or pre-parsed array
+  if (raw) {
+    try {
+      const parsed = (typeof raw === 'string') ? JSON.parse(raw) : raw;
+      if (Array.isArray(parsed) && parsed.length) days = parsed;
+    } catch(_) {
+      // fallback to default
+    }
+  }
+  el.innerHTML = days.map(d => \`
+    <div class="delivery-day">
+      <span class="delivery-day-name">\${d.day}</span>
+      <span class="text-white/80">\${d.areas}</span>
+    </div>
+  \`).join('');
+}
+// Render default schedule on page load
+renderDeliverySchedule(null);
 
 // ─── Scroll reveal ────────────────────────────────────────────────────────────
 const observer = new IntersectionObserver(entries => {
@@ -1617,7 +1692,7 @@ function getProductsHTML(): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Product Catalog | British Feed & Supplies — Wellington, FL</title>
   <meta name="description" content="Browse our complete product catalog at British Feed & Supplies. Premium horse feeds, supplements, grooming, hay, bedding and more in Wellington, FL."/>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -1630,7 +1705,7 @@ function getProductsHTML(): string {
             cream: { DEFAULT:'#FBF7F0', dark:'#F0E9D8' },
           },
           fontFamily: {
-            serif: ['Playfair Display','Georgia','serif'],
+            serif: ['Cormorant Garamond','Georgia','serif'],
             sans:  ['Inter','system-ui','sans-serif'],
           }
         }

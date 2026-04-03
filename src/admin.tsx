@@ -378,7 +378,7 @@ const FIELDS = [
   'hero-headline','hero-subheadline','hero-desc','cta1','cta2','hero-bg',
   'stats-1-num','stats-1-label','stats-2-num','stats-2-label','stats-3-num','stats-3-label','stats-4-num','stats-4-label',
   'about-heading','about-para1','about-para2','about-para3','about-image',
-  'svc1-title','svc1-icon','svc1-desc','svc1-detail','svc1-image',
+  'svc1-title','svc1-icon','svc1-desc','svc1-detail','svc1-image','delivery-schedule',
   'svc2-title','svc2-icon','svc2-desc','svc2-detail','svc2-image',
   'svc3-title','svc3-icon','svc3-desc','svc3-detail','svc3-image',
   'team1-name','team1-role','team1-bio','team1-photo','team1-cred',
@@ -697,6 +697,11 @@ function buildPanel(sec) {
           \${fi(\`svc\${n}-detail\`, 'Detail / Badge text', 'e.g. Free on orders $150+')}
           \${fimg(\`svc\${n}-image\`,'Photo', 'https://…')}
         </div>\`).join('')}
+        <div class="ve-subsection">
+          <div class="ve-subsection-title">📦 Delivery Schedule (Free Local Delivery card)</div>
+          <p style="font-size:0.72rem;color:#6b7280;margin-bottom:10px;line-height:1.5;">Enter JSON array. Each item: <code>{&quot;day&quot;:&quot;Monday&quot;,&quot;areas&quot;:&quot;Area 1, Area 2&quot;}</code><br/>Leave blank to use built-in default schedule.</p>
+          \${ft('delivery-schedule', 'Delivery Schedule (JSON)', '[{"day":"Monday","areas":"Northwest Loxahatchee, North Wellington…"}]', 10)}
+        </div>
       </div>\`,
 
     team: () => \`
