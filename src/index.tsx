@@ -2551,11 +2551,11 @@ table.ptable td {
   display: flex; gap: 10px; align-items: flex-start;
 }
 .story-timeline-dot {
-  width: 22px; height: 22px; border-radius: 50%;
+  width: 28px; height: 28px; border-radius: 50%;
   background: #1B2A4A; color: #C9A84C;
-  font-size: 6pt; font-weight: 800;
+  font-size: 5.5pt; font-weight: 800;
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; margin-top: 1px;
+  flex-shrink: 0; margin-top: 1px; text-align: center; line-height: 1.1;
 }
 .story-timeline-text { font-size: 7.5pt; color: #444; line-height: 1.5; }
 .story-timeline-text strong { color: #1B2A4A; }
@@ -3018,58 +3018,100 @@ function buildCatalog(products) {
   // ── OUR STORY PAGE ───────────────────────────────────────────────
   const storyPage = \`
 <div class="page story-page">
-  <!-- Dark hero band -->
+
+  <!-- ── Dark hero band ───────────────────────────────────────────────── -->
   <div class="story-hero">
     <div class="story-hero-left">
       <div class="story-hero-eyebrow">Our Story &amp; Mission</div>
-      <div class="story-hero-title">Wellington's Most<br/><em>Trusted</em> Feed Store</div>
+      <div class="story-hero-title">Wellington's <em>Premier</em><br/>Horse Feed Store</div>
       <div class="story-hero-tagline">"Proper care starts long before the ride."</div>
     </div>
     <div class="story-hero-right">
-      <img src="/admin/api/catalog/image/img_img_site_logo_white" alt="British Feed & Supplies" class="story-hero-logo" onerror="this.style.display='none'"/>
+      <img src="/admin/api/catalog/image/img_img_site_logo_white" alt="British Feed &amp; Supplies" class="story-hero-logo" onerror="this.style.display='none'"/>
       <div class="story-hero-since">Serving Equestrians Since 2012</div>
     </div>
   </div>
 
-  <!-- Two-column body -->
+  <!-- ── Mission statement full-width banner ──────────────────────────── -->
+  <div style="background:linear-gradient(135deg,#1B2A4A 0%,#0d1b35 100%);padding:10px 0.55in;border-bottom:2px solid #C9A84C;flex-shrink:0">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:11.5pt;font-style:italic;color:rgba(255,255,255,0.92);text-align:center;line-height:1.5">
+      "At British Feed &amp; Supplies, we provide <span style="color:#C9A84C;font-weight:700">premium feed, quality hay, and everyday essentials</span>
+      with dedicated service you can count on — so your horse gets the care they deserve."
+    </div>
+  </div>
+
+  <!-- ── Two-column body ───────────────────────────────────────────────── -->
   <div class="story-body">
 
-    <!-- LEFT COLUMN: Story + Timeline + Services -->
+    <!-- LEFT COLUMN -->
     <div class="story-left-col">
 
       <div>
         <div class="story-section-label">Who We Are</div>
-        <div class="story-section-title">A Passion for Horses,<br/>Built Into Everything We Do</div>
+        <div class="story-section-title">A Dream Come True<br/>for a True Horseman</div>
         <div class="story-text">
-          <strong>British Feed &amp; Supplies</strong> was established in 2012 as the go-to destination for horse owners, livestock farmers, and pet owners across Wellington, Loxahatchee Groves, and all of Palm Beach County. In 2016, under new ownership, the store was completely renovated and expanded — purpose-built to serve the growing world-class equestrian community of South Florida.
+          <strong>British Feed &amp; Supplies</strong> was founded in 2012 right at the border of Wellington and Loxahatchee Groves — steps from the equestrian heart of Palm Beach County. In May 2016, <strong>Vieri Bracco</strong> purchased the store and immediately embarked on a complete renovation, transforming it into the full-service equine supply destination it is today.
           <br/><br/>
-          Owned by <strong>Vieri Bracco</strong> and managed by <strong>Carmine Garrett</strong>, our team brings genuine horsemanship and deep product knowledge to every interaction. We don't just sell feed — we help you build the right program for your horse.
+          Vieri came from 25 years in international banking, but his heart was always with animals — cattle ranching, sheep breeding, and show jumping shaped his life before he found his way to South Florida. "When I found this business for sale, it was like a dream come true," he says. "It's the perfect blend of my business background with my personal passion."
+          <br/><br/>
+          Day-to-day operations are led by <strong>Carmine Garrett</strong>, whose deep knowledge of equine nutrition and personal relationships with every customer define the British Feed experience. Together, they have built something rare: a store where horse people feel genuinely at home.
         </div>
       </div>
 
       <div class="story-quote">
-        <div class="story-quote-text">"Proper care starts long before the ride. It's preparation, consistency, and the right support every step of the way."</div>
-        <div class="story-quote-attr">— British Feed &amp; Supplies Commercial</div>
+        <div class="story-quote-text">"This business is a life-changing prospect. I haven't worked this hard in 20 years — but I love every day. It's a real pleasure doing something I believe in with all my heart."</div>
+        <div class="story-quote-attr">— Vieri Bracco, Owner, British Feed &amp; Supplies</div>
       </div>
 
       <div>
-        <div class="story-section-label">Our Timeline</div>
+        <div class="story-section-label">Our Journey</div>
         <div class="story-timeline">
           <div class="story-timeline-item">
             <div class="story-timeline-dot">2012</div>
-            <div class="story-timeline-text"><strong>Founded</strong> — British Feed &amp; Supplies opens its doors in Loxahatchee Groves, serving the Wellington equestrian corridor from day one.</div>
+            <div class="story-timeline-text"><strong>Founded</strong> — British Feed opens at 14589 Southern Blvd, Loxahatchee Groves. The store quickly becomes an anchor for the western communities of Palm Beach County.</div>
           </div>
           <div class="story-timeline-item">
             <div class="story-timeline-dot">2016</div>
-            <div class="story-timeline-text"><strong>Transformation</strong> — New ownership renovates the store, expands product range, and establishes key brand partnerships with Nutrena, Cavalor, Red Mills, Havens, and more.</div>
+            <div class="story-timeline-text"><strong>New ownership &amp; full renovation</strong> — Vieri Bracco acquires the store in May. Complete renovation expands product lines: Nutrena, Cavalor, Red Mills, Havens, Buckeye, Foran, and more.</div>
           </div>
           <div class="story-timeline-item">
-            <div class="story-timeline-dot">2020</div>
-            <div class="story-timeline-text"><strong>Nutrena Certified Farm Program</strong> — Became an official Nutrena Certified retailer, giving our customers access to exclusive rewards and expert support.</div>
+            <div class="story-timeline-dot">2017</div>
+            <div class="story-timeline-text"><strong>Community partnerships</strong> — Named exclusive feed &amp; hay supplier for Nona Garson's Ridge Farm show series. Exclusive Palm Beach County dealer for Poulin Grain multi-species lines.</div>
           </div>
           <div class="story-timeline-item">
             <div class="story-timeline-dot">Now</div>
-            <div class="story-timeline-text"><strong>316 products</strong> across 16 categories — one of South Florida's most complete equine supply destinations, with free local delivery and nutritional consultations.</div>
+            <div class="story-timeline-text"><strong>\${products.length} products · 16+ categories · Nutrena Certified</strong> — One of South Florida's most complete equine destinations, trusted by competition riders, pleasure riders, and livestock owners alike.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="story-right-col">
+
+      <div>
+        <div class="story-section-label">Our Values &amp; What Sets Us Apart</div>
+        <div class="story-pillars">
+          <div class="story-pillar">
+            <div class="story-pillar-icon">&#127968;</div>
+            <div class="story-pillar-title">Your Local Store</div>
+            <div class="story-pillar-text">Locally owned and operated. "Being here is like being home," says one long-time customer. We know your name, your horse's name, and what works for them.</div>
+          </div>
+          <div class="story-pillar">
+            <div class="story-pillar-icon">&#127942;</div>
+            <div class="story-pillar-title">Quality Without Compromise</div>
+            <div class="story-pillar-text">"We may not be the cheapest, but we have great, consistent quality. If a customer ever gets a bad bale, we cheerfully exchange it." — Vieri Bracco</div>
+          </div>
+          <div class="story-pillar">
+            <div class="story-pillar-icon">&#127758;</div>
+            <div class="story-pillar-title">World-Class Brands</div>
+            <div class="story-pillar-text">Nutrena, Cavalor, Red Mills, Pro Elite, Havens, Buckeye, Foran — the same brands trusted by Olympic riders at the WEF, stocked right here in Wellington.</div>
+          </div>
+          <div class="story-pillar">
+            <div class="story-pillar-icon">&#128203;</div>
+            <div class="story-pillar-title">Expert Guidance</div>
+            <div class="story-pillar-text">We don't just sell feed — we help you build the right program. Our team knows the science, the products, and the specific needs of Florida horses.</div>
           </div>
         </div>
       </div>
@@ -3078,86 +3120,41 @@ function buildCatalog(products) {
         <div class="story-section-label">Our Services</div>
         <div class="story-services">
           <div class="story-service">
-            <div class="story-service-icon">🚚</div>
-            <div class="story-service-text"><strong>Free Delivery</strong>Orders $150+ delivered to Wellington, Loxahatchee, Royal Palm Beach, Jupiter Farms &amp; surrounding areas.</div>
+            <div class="story-service-icon">&#128666;</div>
+            <div class="story-service-text"><strong>Free Local Delivery</strong>Orders $150+ delivered to Wellington, Loxahatchee, Royal Palm Beach, Lake Worth, Jupiter Farms &amp; surrounding areas. Fuel surcharge temporarily in effect on some routes.</div>
           </div>
           <div class="story-service">
-            <div class="story-service-icon">🔬</div>
-            <div class="story-service-text"><strong>Nutrition Consults</strong>Barn visits from certified equine nutritionists — personalized feed programs tailored to your horse.</div>
+            <div class="story-service-icon">&#128300;</div>
+            <div class="story-service-text"><strong>Nutritional Barn Visits</strong>One-on-one sessions with a certified equine nutritionist. We evaluate your horse's condition, workload, and forage and build a personalized program.</div>
           </div>
           <div class="story-service">
-            <div class="story-service-icon">🏆</div>
-            <div class="story-service-text"><strong>Nutrena Farm Program</strong>Earn rewards for every bag purchased — exclusive to certified retailer locations like us.</div>
+            <div class="story-service-icon">&#127942;</div>
+            <div class="story-service-text"><strong>Nutrena Certified Farm Program</strong>Earn rewards on every qualifying Nutrena bag purchased. Ask us how to enroll and start earning today.</div>
           </div>
           <div class="story-service">
-            <div class="story-service-icon">📞</div>
-            <div class="story-service-text"><strong>Expert Guidance</strong>Call <strong>(561) 633-6003</strong> — our team knows the products and can match you to the right feed, hay, or supplement.</div>
+            <div class="story-service-icon">&#128222;</div>
+            <div class="story-service-text"><strong>Text &amp; Call Ordering</strong>Text your order or call <strong>(561) 633-6003</strong> — we get right back to you. Convenient for trainers managing multiple horses across multiple barns.</div>
           </div>
         </div>
       </div>
 
-    </div>
-
-    <!-- RIGHT COLUMN: Mission + Brand Pillars + Contact -->
-    <div class="story-right-col">
-
       <div>
-        <div class="story-section-label">Our Mission Statement</div>
-        <div class="story-section-title">For Proper Care &amp; Nutrition</div>
+        <div class="story-section-label">Hay We Carry — Picky About Quality</div>
         <div class="story-text">
-          At British Feed &amp; Supplies, our mission is simple: <strong>provide premium feed, quality hay, and everyday essentials backed by dedicated service you can count on</strong>. We exist to make sure your horse gets the care they deserve — whether you're a weekend trail rider or a competitive Grand Prix rider at the Winter Equestrian Festival.
-          <br/><br/>
-          We believe that a great ride begins hours before you put on your boots. It starts with the right bedding, the right hay, and a feed program built around your horse's individual needs. <strong>Preparation. Consistency. Support.</strong> That's what we bring to every barn we serve.
+          "We're very picky about the quality of our hay, and if a shipment isn't up to our standards, we send it back." Our hay selection spans Canadian &amp; US sources:
+          <br/><span style="color:#1B2A4A;font-weight:700">Timothy</span> (1st &amp; 2nd cut) · <span style="color:#1B2A4A;font-weight:700">Alfalfa</span> · <span style="color:#1B2A4A;font-weight:700">Orchard</span> · <span style="color:#1B2A4A;font-weight:700">T/A Blends</span> · <span style="color:#1B2A4A;font-weight:700">Peanut</span> · <span style="color:#1B2A4A;font-weight:700">Teff</span> · <span style="color:#1B2A4A;font-weight:700">O/T/A Mix</span> · <span style="color:#1B2A4A;font-weight:700">Special Reserve</span> · <span style="color:#1B2A4A;font-weight:700">Quebec</span> · <span style="color:#1B2A4A;font-weight:700">Alberta</span>
+          <br/>Available in 2-string (48–60 lb) and 3-string (100–110 lb) bales, plus compressed and pelleted formats.
         </div>
       </div>
 
-      <div>
-        <div class="story-section-label">What Sets Us Apart</div>
-        <div class="story-pillars">
-          <div class="story-pillar">
-            <div class="story-pillar-icon">🔬</div>
-            <div class="story-pillar-title">Science-Backed Selection</div>
-            <div class="story-pillar-text">Every brand we stock is vetted for nutritional quality, digestibility, and results supported by equine science and veterinary research.</div>
-          </div>
-          <div class="story-pillar">
-            <div class="story-pillar-icon">🤝</div>
-            <div class="story-pillar-title">Relationship-First Service</div>
-            <div class="story-pillar-text">We're not just a store — we're your partner. Our staff knows your horse's history and helps you make decisions based on your horse's real needs.</div>
-          </div>
-          <div class="story-pillar">
-            <div class="story-pillar-icon">🌎</div>
-            <div class="story-pillar-title">World-Class Brands</div>
-            <div class="story-pillar-text">Nutrena, Cavalor, Red Mills, Pro Elite, Havens, Buckeye, Foran — the brands trusted by Olympic riders are available right here in Wellington.</div>
-          </div>
-          <div class="story-pillar">
-            <div class="story-pillar-icon">🏘️</div>
-            <div class="story-pillar-title">Community Rooted</div>
-            <div class="story-pillar-text">From local shelters to equestrian events, we support the community that supports us. Proudly Palm Beach County's own.</div>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <div class="story-section-label">Brands We Carry</div>
-        <div class="story-text" style="margin-bottom:6px">
-          <strong>Feed &amp; Grain:</strong> Nutrena · Pro Elite · Cavalor · Red Mills · Havens · Buckeye · Crypto Aero · Kent Sentinel<br/>
-          <strong>Supplements:</strong> Cavalor · Foran · KPP · Farnam · Cosequin · Purina · Uckele<br/>
-          <strong>Fly Control:</strong> Farnam · Absorbine · Pyranha · Durvet<br/>
-          <strong>Bedding:</strong> WD Shavings · Fast Track · World Cup · King · Showtime<br/>
-          <strong>Hay:</strong> Alfalfa · Timothy · Orchard · T/A Blends · Peanut · Quebec · Alberta<br/>
-          <strong>Grooming &amp; Tack Care:</strong> Absorbine · Carr &amp; Day &amp; Martin · Belvoir · Eqyss
-        </div>
-      </div>
-
-      <div style="background:#0d1b35;border-radius:8px;padding:12px 14px;margin-top:auto">
-        <div class="story-section-label" style="color:#C9A84C;border-color:rgba(201,168,76,0.3)">Find Us</div>
-        <div style="color:rgba(255,255,255,0.85);font-size:7.5pt;line-height:1.8">
-          📍 14589 Southern Blvd, Palm West Plaza, Loxahatchee Groves, FL 33470<br/>
-          📞 <strong style="color:#C9A84C">(561) 633-6003</strong><br/>
-          🌐 britishfeed.com<br/>
-          🕐 Store: Mon–Fri 9am–6pm &nbsp;·&nbsp; Sat 9am–4pm<br/>
-          🚚 Distribution: Mon–Fri 8am–5pm &nbsp;·&nbsp; Sat 9am–4pm<br/>
-          <span style="color:rgba(255,255,255,0.45);font-size:6.5pt">Free delivery on orders $150+. Temporary minimal fuel surcharge in effect.</span>
+      <div style="background:#0d1b35;border-radius:8px;padding:11px 13px">
+        <div class="story-section-label" style="color:#C9A84C;border-color:rgba(201,168,76,0.3)">Visit Us · Order · Deliver</div>
+        <div style="color:rgba(255,255,255,0.88);font-size:7.5pt;line-height:1.9">
+          &#128205; <strong style="color:#fff">14589 Southern Blvd</strong>, Palm West Plaza, Loxahatchee Groves, FL 33470<br/>
+          &#128222; <strong style="color:#C9A84C">(561) 633-6003</strong> &nbsp;·&nbsp; &#127758; britishfeed.com<br/>
+          &#128336; <strong style="color:#fff">Store:</strong> Mon–Fri 9am–6pm &nbsp;·&nbsp; Sat 9am–4pm<br/>
+          &#128666; <strong style="color:#fff">Distribution Center:</strong> Mon–Fri 8am–5pm &nbsp;·&nbsp; Sat 9am–4pm<br/>
+          <span style="color:rgba(255,255,255,0.4);font-size:6pt">Free delivery on orders $150+. Temporary minimal fuel surcharge currently in effect on some delivery routes.</span>
         </div>
       </div>
 
@@ -3168,66 +3165,69 @@ function buildCatalog(products) {
   // ── FEEDING GUIDE PAGE ───────────────────────────────────────────────
   const feedingGuidePage = \`
 <div class="page guide-page">
+
+  <!-- ── Header ─────────────────────────────────────────────────────── -->
   <div class="guide-header">
     <div>
       <div class="guide-header-title">Horse Feeding <em>Guidelines</em></div>
-      <div class="guide-header-sub">A practical reference for South Florida horse owners — brought to you by British Feed &amp; Supplies</div>
+      <div class="guide-header-sub">A practical South Florida reference — brought to you by British Feed &amp; Supplies, Wellington's trusted equine supply store since 2012</div>
     </div>
     <img src="/admin/api/catalog/image/img_img_site_logo_white" alt="British Feed" class="guide-header-logo" onerror="this.style.display='none'"/>
   </div>
 
+  <!-- ── Body ───────────────────────────────────────────────────────── -->
   <div class="guide-body">
 
     <!-- LEFT COLUMN -->
     <div class="guide-col">
 
       <div class="guide-section">
-        <div class="guide-section-head">The Foundation</div>
-        <div class="guide-section-title">Forage First</div>
+        <div class="guide-section-head">Rule #1 — Forage First</div>
+        <div class="guide-section-title">The Foundation of Every Diet</div>
         <div class="guide-text">
-          The cornerstone of every equine diet is <strong>high-quality forage</strong>. Horses are hindgut fermenters designed to eat small amounts continuously — aim for <strong>1.5–2% of body weight in hay per day</strong> (15–20 lbs for a 1,000 lb horse). Forage supports gut motility, prevents ulcers, and maintains healthy hindgut bacteria. Grain and concentrates should supplement, not replace, a good hay program.
+          Horses are hindgut fermenters built to eat small amounts continuously. <strong>Forage should always be the largest component of the diet</strong> — aim for <strong>1.5–2% of body weight in hay per day</strong> (15–20 lbs for a 1,000 lb horse). Good hay buffers stomach acid, supports hindgut bacteria, prevents sand impaction, and reduces ulcer risk. Concentrates supplement forage — they never replace it.
         </div>
       </div>
 
       <div class="guide-section">
-        <div class="guide-section-head">Daily Feeding Reference</div>
-        <div class="guide-section-title">By Horse Type</div>
+        <div class="guide-section-head">Daily Feeding Reference by Horse Type</div>
         <table class="guide-table">
-          <thead><tr><th>Horse Type</th><th>Hay / Day</th><th>Concentrate</th><th>Key Focus</th></tr></thead>
+          <thead><tr><th>Horse Type</th><th>Hay / Day</th><th>Grain / Day</th><th>Key Priority</th></tr></thead>
           <tbody>
-            <tr><td>Idle / Easy Keeper</td><td>1.5% BW</td><td>Balancer only</td><td>Weight control, minerals</td></tr>
-            <tr><td>Pleasure / Light Work</td><td>1.8% BW</td><td>2–4 lbs</td><td>Balanced energy</td></tr>
-            <tr><td>Moderate Work</td><td>2.0% BW</td><td>4–6 lbs</td><td>Stamina, topline</td></tr>
-            <tr><td>Heavy / Competition</td><td>2.0% BW</td><td>6–10 lbs</td><td>Peak performance</td></tr>
-            <tr><td>Senior Horse</td><td>2.0–2.5% BW</td><td>4–8 lbs senior</td><td>Digestion, joints</td></tr>
-            <tr><td>Pregnant / Lactating</td><td>2.0–2.5% BW</td><td>4–8 lbs</td><td>Protein, calcium</td></tr>
-            <tr><td>Growing Youngster</td><td>2.0% BW</td><td>0.5–1% BW</td><td>Balanced growth</td></tr>
-            <tr><td>Metabolic / IR Horse</td><td>1.5% BW low-NSC</td><td>Low-starch only</td><td>Blood sugar control</td></tr>
+            <tr><td>Idle / Easy Keeper</td><td>1.5% BW</td><td>Balancer only</td><td>Weight &amp; mineral balance</td></tr>
+            <tr><td>Light / Pleasure Work</td><td>1.8% BW</td><td>2–4 lbs</td><td>Consistent energy</td></tr>
+            <tr><td>Moderate Work</td><td>2.0% BW</td><td>4–6 lbs</td><td>Stamina &amp; topline</td></tr>
+            <tr><td>Heavy / Competition</td><td>2.0% BW</td><td>6–10 lbs</td><td>Peak performance, recovery</td></tr>
+            <tr><td>Senior Horse</td><td>2.0–2.5% BW</td><td>4–8 lbs (senior formula)</td><td>Digestion, joints, condition</td></tr>
+            <tr><td>Pregnant / Lactating</td><td>2.0–2.5% BW</td><td>4–8 lbs</td><td>Protein, calcium, energy</td></tr>
+            <tr><td>Growing Youngster</td><td>2.0% BW</td><td>0.5–1% BW</td><td>Balanced skeletal growth</td></tr>
+            <tr><td>Metabolic / IR / EMS</td><td>1.5% BW — low NSC</td><td>Low-starch only</td><td>Blood sugar control</td></tr>
           </tbody>
         </table>
-        <div class="guide-text" style="margin-top:4px;font-size:6pt;color:#888">BW = Body Weight. Divide daily concentrate into 2–3 feedings. Never feed over 5 lbs of grain in a single meal.</div>
+        <div class="guide-text" style="margin-top:4px;font-size:6pt;color:#888">BW = Body Weight. Split concentrate into 2–3 meals. Never feed more than 5 lbs of grain in a single meal — colic risk increases significantly above this threshold.</div>
       </div>
 
       <div class="guide-section">
-        <div class="guide-section-head">South Florida Considerations</div>
-        <div class="guide-section-title">Our Climate &amp; Your Horse</div>
+        <div class="guide-section-head">South Florida Feeding Realities</div>
+        <div class="guide-section-title">What's Different Here</div>
         <div class="guide-text">
-          Florida's heat and humidity create unique nutritional demands:<br/>
-          <strong>• Electrolytes:</strong> Heavy sweating depletes sodium, potassium, and chloride — supplement daily in summer or during hard work.<br/>
-          <strong>• Sand colic risk:</strong> Sandy soil ingestion is common. Use psyllium supplements (e.g., SandClear) monthly to clear sand accumulation.<br/>
-          <strong>• Fly control:</strong> Year-round fly pressure requires both topical sprays and feed-through supplements for comprehensive protection.<br/>
-          <strong>• Gut health:</strong> Stress from heat, travel, and show schedules increases ulcer risk — consider a buffering supplement during busy seasons.
+          Florida's heat, humidity, and sandy soil create challenges unique to our region:<br/><br/>
+          <strong>&#9889; Electrolytes year-round</strong> — Horses sweating in Florida's summer heat can lose 2–4x the electrolytes of horses in cooler climates. Supplement sodium, potassium, and chloride daily, not just during competition.<br/><br/>
+          <strong>&#128681; Sand colic</strong> — Our sandy Loxahatchee soil is silently ingested with every bite of ground hay. Feed hay in racks, not directly on the ground. Use psyllium (SandClear, SandPurge) for one week every month as a preventive cleanse.<br/><br/>
+          <strong>&#128027; Flies all year</strong> — Unlike northern states, fly season never truly ends here. Combine topical sprays with a feed-through fly control supplement (Solitude IGR, SimpliFly) for comprehensive coverage.<br/><br/>
+          <strong>&#127784; Show &amp; travel stress</strong> — WEF season brings hauling, stabling changes, and irregular schedules. Ulcer risk spikes during these periods — consider gastric buffering supplements before and during show weeks.
         </div>
       </div>
 
       <div class="guide-tip-box">
-        <div class="guide-tip-head">✦ Pro Tips from Our Team</div>
+        <div class="guide-tip-head">&#10022; Pro Tips from the British Feed Team</div>
         <ul class="guide-tip-list">
-          <li>Introduce any new feed gradually over 7–14 days to avoid digestive upset.</li>
-          <li>Weigh your feed — don't scoop. A "scoop" of different feeds can vary by up to 3 lbs.</li>
-          <li>Fresh, clean water available at all times — horses drink 5–10 gallons per day.</li>
-          <li>Feed by weight, not volume. Pelleted feeds are denser than textured.</li>
-          <li>Horses with metabolic issues should have hay tested for non-structural carbohydrates (NSC) before feeding.</li>
+          <li>Transition any new feed gradually over 10–14 days — even premium feeds cause upset if switched abruptly.</li>
+          <li><strong>Weigh, don't scoop.</strong> The same "scoop" of pellets vs. textured feed can differ by 2–3 lbs.</li>
+          <li>Fresh, clean water at all times — horses drink 5–10 gallons daily, more in summer heat.</li>
+          <li>If hay quality is unknown, add a ration balancer to fill vitamin and mineral gaps.</li>
+          <li>Have your hay tested — NSC levels matter greatly for metabolic horses, and visual appearance doesn't tell the whole story.</li>
+          <li>Not sure what to feed? Call us — we offer free nutritional consultations and barn visits.</li>
         </ul>
       </div>
 
@@ -3237,91 +3237,81 @@ function buildCatalog(products) {
     <div class="guide-col">
 
       <div class="guide-section">
-        <div class="guide-section-head">Hay Selection Guide</div>
-        <div class="guide-section-title">Choosing the Right Hay</div>
+        <div class="guide-section-head">Hay Selection — We're Picky So You Don't Have To Be</div>
+        <div class="guide-section-title">Choosing the Right Hay for Your Horse</div>
         <table class="guide-table">
-          <thead><tr><th>Hay Type</th><th>Protein</th><th>Best For</th></tr></thead>
+          <thead><tr><th>Hay Type</th><th>Crude Protein</th><th>Best Suited For</th></tr></thead>
           <tbody>
-            <tr><td>Alfalfa</td><td>15–22%</td><td>Hard keepers, lactating mares, growing horses, added calories</td></tr>
-            <tr><td>Timothy (1st cut)</td><td>8–10%</td><td>All-around choice; lower sugar, excellent fiber</td></tr>
-            <tr><td>Timothy (2nd cut)</td><td>10–12%</td><td>Softer, more palatable; moderate energy horses</td></tr>
-            <tr><td>Orchard Grass</td><td>10–12%</td><td>Horses that won't eat timothy; good palatability</td></tr>
-            <tr><td>T/A Blend</td><td>12–16%</td><td>Performance horses; balances fiber and protein</td></tr>
-            <tr><td>Peanut Hay</td><td>14–18%</td><td>High-protein legume; excellent for underweight horses</td></tr>
-            <tr><td>Teff / Tropical</td><td>8–10%</td><td>Metabolic horses; lower NSC than cool-season grasses</td></tr>
+            <tr><td>Premium Alfalfa</td><td>15–22%</td><td>Hard keepers, lactating mares, young horses needing extra calories &amp; protein</td></tr>
+            <tr><td>Timothy 1st Cut</td><td>8–10%</td><td>All-around choice; lower sugar, excellent long-stem fiber for gut health</td></tr>
+            <tr><td>Timothy 2nd Cut</td><td>10–12%</td><td>Softer, leafier, more palatable; ideal for performance horses in moderate work</td></tr>
+            <tr><td>Orchard Grass</td><td>10–12%</td><td>Horses that refuse timothy; high palatability, excellent fiber source</td></tr>
+            <tr><td>T/A Blend</td><td>12–16%</td><td>Performance horses — balances Timothy fiber with Alfalfa protein &amp; energy</td></tr>
+            <tr><td>Peanut Hay</td><td>14–18%</td><td>High-protein legume; excellent for underweight horses and growing youngsters</td></tr>
+            <tr><td>Teff Grass</td><td>8–10%</td><td>Metabolic, IR, and Cushings horses — ultra-low NSC, safe warm-season forage</td></tr>
           </tbody>
         </table>
+        <div class="guide-text" style="margin-top:4px;font-size:6pt;color:#888">"If a shipment isn't up to our standards, we send it back." — Vieri Bracco. We carry 3-string (100–110 lb) and 2-string (48–60 lb) bales plus compressed and cubed/pelleted formats.</div>
       </div>
 
       <div class="guide-section">
-        <div class="guide-section-head">Feed Selector</div>
-        <div class="guide-section-title">Match Your Horse to the Right Feed</div>
+        <div class="guide-section-head">British Feed Quick-Match Guide</div>
+        <div class="guide-section-title">Find the Right Feed — Ask Us for Details</div>
         <div class="guide-brand-grid">
           <div class="guide-brand-cell">
             <div class="guide-brand-need">Competition</div>
-            <div class="guide-brand-name">Pro Elite Performance · Cavalor Performix · Red Mills Competition 14</div>
+            <div class="guide-brand-name">Pro Elite Performance · Cavalor Performix · Red Mills Competition 14 · Havens Performance 14</div>
           </div>
           <div class="guide-brand-cell">
-            <div class="guide-brand-need">Senior</div>
+            <div class="guide-brand-need">Senior Horse</div>
             <div class="guide-brand-name">SafeChoice Senior · Pro Elite Senior · Buckeye EQ8 Senior · Cavalor Strucomix Senior</div>
           </div>
           <div class="guide-brand-cell">
             <div class="guide-brand-need">Easy Keeper / IR</div>
-            <div class="guide-brand-name">SafeChoice Special Care · Pro Elite Starch Wise · Cavalor Pianissimo</div>
+            <div class="guide-brand-name">SafeChoice Special Care · Pro Elite Starch Wise · Cavalor Pianissimo · Havens Cool Mix</div>
           </div>
           <div class="guide-brand-cell">
             <div class="guide-brand-need">Hard Keeper</div>
             <div class="guide-brand-name">Pro Elite Omega Advantage · Cavalor WholyGain · Havens Power Plus · Buckeye Cadence Ultra</div>
           </div>
           <div class="guide-brand-cell">
-            <div class="guide-brand-need">Digestive / Ulcers</div>
-            <div class="guide-brand-name">Cavalor FiberGastro · Havens Gastro Plus · Red Mills Comfort Mash · Buckeye EQ8</div>
+            <div class="guide-brand-need">Gut Health / Ulcers</div>
+            <div class="guide-brand-name">Cavalor FiberGastro · Cavalor FiberForce · Havens Gastro Plus · Red Mills Comfort Mash</div>
           </div>
           <div class="guide-brand-cell">
-            <div class="guide-brand-need">Growing / Young</div>
-            <div class="guide-brand-name">Pro Elite Growth · Buckeye Gro-N-Win · SafeChoice Mare &amp; Foal</div>
+            <div class="guide-brand-need">Young / Growing</div>
+            <div class="guide-brand-name">Pro Elite Growth · Buckeye Gro-N-Win · SafeChoice Mare &amp; Foal · Red Mills Horse Care 14</div>
           </div>
           <div class="guide-brand-cell">
             <div class="guide-brand-need">Endurance</div>
-            <div class="guide-brand-name">Havens Endurance · Cavalor Endurix · CocoSoya Oil</div>
+            <div class="guide-brand-name">Havens Endurance · Cavalor Endurix · CocoSoya Oil · Havens Equi-Force Oil</div>
           </div>
           <div class="guide-brand-cell">
-            <div class="guide-brand-need">Nervous / Calm</div>
-            <div class="guide-brand-name">Cavalor Pianissimo · Havens Cool Mix · Foran Nutri-Calm</div>
+            <div class="guide-brand-need">Topline &amp; Muscle</div>
+            <div class="guide-brand-name">Pro Elite Topline Advantage · Cavalor Muscle Force · Topline Xtreme · Vita-E &amp; Selenium</div>
           </div>
           <div class="guide-brand-cell">
-            <div class="guide-brand-need">Topline / Muscle</div>
-            <div class="guide-brand-name">Pro Elite Topline Advantage · Cavalor Muscle Force · Topline Xtreme</div>
+            <div class="guide-brand-need">Natural / Whole Food</div>
+            <div class="guide-brand-name">Crypto Aero Wholefood · Red Mills Horse Care 10 Mix · Cavalor Strucomix Original</div>
           </div>
-        </div>
-      </div>
-
-      <div class="guide-section">
-        <div class="guide-section-head">Supplement Basics</div>
-        <div class="guide-section-title">When to Add Supplements</div>
-        <div class="guide-text">
-          A good-quality concentrate fed at the correct rate often provides adequate vitamins and minerals. Supplements are most valuable when:<br/>
-          <strong>• Hay quality is unknown</strong> — add a vitamin/mineral balancer<br/>
-          <strong>• Horse is in hard work</strong> — consider electrolytes, joint support, muscle recovery<br/>
-          <strong>• Digestive concerns</strong> — pre/probiotics, glutamine, or buffering agents<br/>
-          <strong>• Skin, coat, or hoof issues</strong> — omega fatty acids (CocoSoya, Karron Oil, Max-E-Glo), biotin, zinc<br/>
-          <strong>• Sand accumulation risk</strong> — psyllium (SandClear or SandPurge) one week per month
         </div>
       </div>
 
       <div class="guide-alert-box">
-        <div class="guide-alert-head">⚠ When to Call Your Vet or Nutritionist</div>
+        <div class="guide-alert-head">&#9888; Signs Your Horse Needs a Nutrition Review</div>
         <div class="guide-alert-text">
-          Sudden weight loss or gain · Recurring colic · Loose manure for more than 48 hours · Changes in energy or attitude · Hoof rings or laminitis signs · Difficulty chewing or dropping feed. <strong>We offer free nutritional consultations — call (561) 633-6003 to schedule a barn visit.</strong>
+          <strong>Call your vet or schedule a barn visit with us if you notice:</strong> sudden weight loss or gain · poor topline despite adequate feeding · recurring colic · loose or dark manure lasting 48+ hours · coat dullness, excessive shedding · hoof rings or laminitis signs · changes in energy, attitude, or focus · difficulty chewing or dropping feed (quidding).
+          <br/><strong style="color:#b05020">Free nutritional barn visits available — call (561) 633-6003 to schedule.</strong>
         </div>
       </div>
 
     </div>
   </div>
 
+  <!-- ── Footer ──────────────────────────────────────────────────────── -->
   <div class="guide-footer">
-    <span>British Feed &amp; Supplies · 14589 Southern Blvd, Loxahatchee Groves FL · <strong>(561) 633-6003</strong> · britishfeed.com</span>
-    <span class="guide-footer-cta">For proper care &amp; nutrition</span>
+    <span>British Feed &amp; Supplies · 14589 Southern Blvd, Loxahatchee Groves FL 33470 · <strong>(561) 633-6003</strong> · britishfeed.com</span>
+    <span><em>For proper care &amp; nutrition</em></span>
   </div>
 </div>\`;
 
