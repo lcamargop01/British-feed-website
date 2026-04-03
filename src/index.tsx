@@ -224,9 +224,11 @@ function getHTML(): string {
   <style>
     html { scroll-behavior: smooth; }
     .hero-bg {
-      background: linear-gradient(135deg, rgba(27,42,74,0.72) 0%, rgba(27,42,74,0.38) 55%, rgba(0,0,0,0.15) 100%),
-                  url('https://sspark.genspark.ai/cfimages?u1=5JrGkxXguoxsFg4FfUCeFWzD%2F6OU2V4Nd7PCUlAgk16M2vA5jUlLdE01YhtF0JvcA7Xksxqa%2Bo2yxrmffuqFcZc5u9do1eTDqR9Yuch26r2qLO2rfMh3bIvsKpHbTqgR1pcn&u2=OUTntpi6GMHAaQBY&width=2560') center/cover no-repeat;
+      background: linear-gradient(to bottom, rgba(10,20,40,0.55) 0%, rgba(10,20,40,0.35) 50%, rgba(10,20,40,0.65) 100%),
+                  url('https://sspark.genspark.ai/cfimages?u1=5JrGkxXguoxsFg4FfUCeFWzD%2F6OU2V4Nd7PCUlAgk16M2vA5jUlLdE01YhtF0JvcA7Xksxqa%2Bo2yxrmffuqFcZc5u9do1eTDqR9Yuch26r2qLO2rfMh3bIvsKpHbTqgR1pcn&u2=OUTntpi6GMHAaQBY&width=2560') center 30%/cover no-repeat;
     }
+    .hero-text-center { text-align:center; }
+    @media(min-width:768px){ .hero-badge { backdrop-filter: blur(8px); } }
     .section-divider { border-top: 2px solid #C9A84C; width: 60px; margin: 0 auto; }
     .card-hover { transition: all 0.3s ease; }
     .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.12); }
@@ -304,40 +306,50 @@ function getHTML(): string {
 </nav>
 
 <!-- ═══════════════════════════ HERO ═══════════════════════════ -->
-<section id="home" class="hero-bg min-h-screen flex flex-col justify-center relative overflow-hidden">
-  <div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-navy-900/50"></div>
-  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-white">
-    <div class="max-w-2xl">
-      <div class="flex items-center gap-2 mb-4">
-        <div class="h-px w-12 bg-gold-400"></div>
-        <span class="text-gold-400 font-semibold tracking-widest text-xs uppercase">Wellington · Loxahatchee · Palm Beach County</span>
+<section id="home" class="hero-bg min-h-screen flex flex-col justify-center items-center relative overflow-hidden">
+  <!-- Bottom gradient fade -->
+  <div class="absolute inset-0 bg-gradient-to-t from-navy-900/80 via-transparent to-navy-900/20 pointer-events-none"></div>
+  <div class="relative w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-28 text-white hero-text-center">
+    <!-- Location badge -->
+    <div class="inline-flex items-center gap-2 bg-white/10 hero-badge border border-white/20 rounded-full px-4 py-1.5 mb-8">
+      <div class="h-px w-8 bg-gold-400"></div>
+      <span class="text-gold-300 font-semibold tracking-widest text-xs uppercase">Wellington · Loxahatchee · Palm Beach County</span>
+      <div class="h-px w-8 bg-gold-400"></div>
+    </div>
+    <h1 class="font-serif text-5xl sm:text-7xl lg:text-8xl font-bold leading-tight mb-6 drop-shadow-2xl">
+      Premium Feed<br/>
+      <span class="text-gold-400">for Champions.</span>
+    </h1>
+    <p class="text-xl sm:text-2xl text-white/85 mb-10 leading-relaxed max-w-2xl mx-auto drop-shadow">
+      Serving Wellington's equestrian community since 2012. Expert nutrition, top brands, and personalized service for horses, livestock, and pets.
+    </p>
+    <div class="flex flex-wrap justify-center gap-4 mb-12">
+      <a href="#products" class="bg-gold-400 hover:bg-gold-500 text-navy-700 font-bold px-9 py-4 rounded-full text-lg transition-all hover:scale-105 shadow-xl">
+        <i class="fas fa-search mr-2"></i>Find the Right Feed
+      </a>
+      <a href="#contact" class="border-2 border-white/70 hover:border-white text-white hover:bg-white/15 font-semibold px-9 py-4 rounded-full text-lg transition-all">
+        <i class="fas fa-envelope mr-2"></i>Contact Us
+      </a>
+    </div>
+    <!-- Feature pills -->
+    <div class="flex flex-wrap justify-center gap-3 text-sm">
+      <div class="flex items-center gap-2 bg-white/10 hero-badge border border-white/20 rounded-full px-4 py-1.5">
+        <i class="fas fa-star text-gold-400"></i><span class="text-white/90">Since 2012</span>
       </div>
-      <h1 class="font-serif text-5xl sm:text-6xl lg:text-7xl font-bold leading-tight mb-6 drop-shadow-lg">
-        Premium Feed<br/>
-        <span class="text-gold-400">for Champions.</span>
-      </h1>
-      <p class="text-xl text-white/85 mb-8 leading-relaxed max-w-xl">
-        Serving Wellington's equestrian community since 2012. Expert nutrition, top brands, and personalized service for horses, livestock, and pets.
-      </p>
-      <div class="flex flex-wrap gap-4">
-        <a href="#products" class="bg-gold-400 hover:bg-gold-500 text-navy-700 font-bold px-8 py-4 rounded-full text-lg transition-all hover:scale-105 shadow-lg">
-          <i class="fas fa-search mr-2"></i>Find the Right Feed
-        </a>
-        <a href="#contact" class="border-2 border-white/60 hover:border-white text-white hover:bg-white/10 font-semibold px-8 py-4 rounded-full text-lg transition-all">
-          <i class="fas fa-envelope mr-2"></i>Contact Us
-        </a>
+      <div class="flex items-center gap-2 bg-white/10 hero-badge border border-white/20 rounded-full px-4 py-1.5">
+        <i class="fas fa-truck text-gold-400"></i><span class="text-white/90">Free Local Delivery</span>
       </div>
-      <div class="flex flex-wrap gap-6 mt-10 text-sm text-white/75">
-        <div class="flex items-center gap-2"><i class="fas fa-star text-gold-400"></i><span>Since 2012</span></div>
-        <div class="flex items-center gap-2"><i class="fas fa-truck text-gold-400"></i><span>Free Local Delivery</span></div>
-        <div class="flex items-center gap-2"><i class="fas fa-award text-gold-400"></i><span>10+ Premium Brands</span></div>
-        <div class="flex items-center gap-2"><i class="fas fa-horse text-gold-400"></i><span>Equine Nutritionists</span></div>
+      <div class="flex items-center gap-2 bg-white/10 hero-badge border border-white/20 rounded-full px-4 py-1.5">
+        <i class="fas fa-award text-gold-400"></i><span class="text-white/90">10+ Premium Brands</span>
+      </div>
+      <div class="flex items-center gap-2 bg-white/10 hero-badge border border-white/20 rounded-full px-4 py-1.5">
+        <i class="fas fa-horse text-gold-400"></i><span class="text-white/90">Equine Nutritionists</span>
       </div>
     </div>
   </div>
   <!-- Scroll indicator -->
-  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/50 animate-bounce">
-    <i class="fas fa-chevron-down text-xl"></i>
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/60 animate-bounce">
+    <i class="fas fa-chevron-down text-2xl"></i>
   </div>
 </section>
 
@@ -393,21 +405,22 @@ function getHTML(): string {
           </div>
         </div>
       </div>
-      <div class="scroll-reveal relative">
+      <div class="scroll-reveal">
         <div class="rounded-2xl overflow-hidden shadow-2xl">
-          <video class="w-full h-96 object-cover" autoplay muted loop playsinline poster="/admin/api/catalog/image/img_site_hero_bg">
+          <video class="w-full object-cover" style="max-height:480px;" controls playsinline poster="/admin/api/catalog/image/img_site_hero_bg" preload="metadata">
             <source src="/static/commercial.mp4" type="video/mp4" />
-            <img src="/admin/api/catalog/image/img_site_hero_bg" alt="British Feed commercial" class="w-full h-96 object-cover" />
+            <img src="/admin/api/catalog/image/img_site_hero_bg" alt="British Feed commercial" class="w-full object-cover" />
           </video>
         </div>
-        <div class="absolute -bottom-6 -left-6 bg-white rounded-2xl p-5 shadow-xl border border-gray-100 max-w-xs hidden lg:block">
+        <!-- Find Us card below the video, not overlapping -->
+        <div class="mt-5 bg-white rounded-2xl p-5 shadow-md border border-gray-100">
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 bg-navy-700 rounded-full flex items-center justify-center">
+            <div class="w-12 h-12 bg-navy-700 rounded-full flex items-center justify-center flex-shrink-0">
               <i class="fas fa-map-marker-alt text-gold-400 text-xl"></i>
             </div>
             <div>
               <div class="font-bold text-navy-700 text-sm">Find Us</div>
-              <div class="text-xs text-gray-500">14589 Southern Blvd</div>
+              <div class="text-xs text-gray-500">14589 Southern Blvd, Palm West Plaza</div>
               <div class="text-xs text-gray-500">Loxahatchee Groves, FL 33470</div>
             </div>
           </div>
@@ -650,6 +663,10 @@ function getHTML(): string {
             <div class="font-semibold text-navy-700">Free on orders $150+</div>
             <div class="text-gray-500 text-xs mt-1">$50 fee on orders under $150</div>
           </div>
+          <div class="mt-3 bg-amber-50 border border-amber-200 rounded-lg p-2.5 text-xs text-amber-800 flex items-start gap-2">
+            <i class="fas fa-gas-pump mt-0.5 flex-shrink-0"></i>
+            <span><strong>Fuel Surcharge Notice:</strong> Due to rising fuel costs, we are implementing a temporary, minimal fuel surcharge. Thank you for your understanding.</span>
+          </div>
         </div>
       </div>
       <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 card-hover scroll-reveal">
@@ -696,7 +713,9 @@ function getHTML(): string {
     </div>
     <!-- Shared team photo -->
     <div class="mb-10 scroll-reveal">
-      <img src="/admin/api/catalog/image/img_site_team_owners" alt="Vieri Bracco & Carmine Garrett" class="w-full max-h-80 object-cover object-top rounded-2xl shadow-xl" onerror="this.style.display='none'" />
+      <div class="rounded-2xl overflow-hidden shadow-xl" style="max-height:420px;">
+        <img src="/admin/api/catalog/image/img_site_team_owners" alt="Vieri Bracco & Carmine Garrett" class="w-full h-full object-cover" style="object-position:center 20%;" onerror="this.parentElement.style.display='none'" />
+      </div>
     </div>
     <div class="grid md:grid-cols-2 gap-10">
       <!-- Vieri Bracco -->
@@ -1277,7 +1296,7 @@ async function loadSiteContent() {
     if (D['hero-desc'])        { var e = q('#home p.text-xl'); if (e) e.textContent = D['hero-desc']; }
     if (D['cta1']) { var e = q('#home a[href="#products"]'); if (e) e.innerHTML = '<i class="fas fa-search mr-2"></i>' + D['cta1']; }
     if (D['cta2']) { var e = q('#home a[href="#contact"]');  if (e) e.innerHTML = '<i class="fas fa-envelope mr-2"></i>' + D['cta2']; }
-    if (D['hero-bg']) { var e = g('home'); if (e) e.style.backgroundImage = 'url(' + D['hero-bg'] + ')'; }
+    if (D['hero-bg']) { var e = g('home'); if (e) e.style.backgroundImage = 'linear-gradient(to bottom, rgba(10,20,40,0.55) 0%, rgba(10,20,40,0.35) 50%, rgba(10,20,40,0.65) 100%), url(' + D['hero-bg'] + ')'; }
 
     // Stats bar
     var sn = qa('section.bg-navy-700 .text-3xl'), sl = qa('section.bg-navy-700 .text-sm');
