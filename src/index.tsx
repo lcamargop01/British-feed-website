@@ -226,6 +226,13 @@ function getHTML(): string {
     .hero-bg {
       background: linear-gradient(to bottom, rgba(10,20,40,0.45) 0%, rgba(10,20,40,0.20) 40%, rgba(10,20,40,0.65) 100%),
                   url('https://sspark.genspark.ai/cfimages?u1=bjFbxr1dt1IgTwWI6rBmznGwqcE%2F6lOpH8IEb5QcqnHyruCviBPWzT9g61YEPJuZIcBLE4KEjr4WqttlRVrvu3xAfMhkq4JXTgKndw%3D%3D&u2=ElqfVS4599dVePu6&width=2560') center 40%/cover no-repeat;
+      background-attachment: scroll;
+    }
+    @media (max-width: 767px) {
+      .hero-bg {
+        background-position: 70% 40%;
+        background-size: cover;
+      }
     }
     .hero-text-center { text-align:center; }
     @media(min-width:768px){ .hero-badge { backdrop-filter: blur(8px); } }
@@ -265,7 +272,7 @@ function getHTML(): string {
     <div class="flex items-center justify-between h-16">
       <a href="#home" class="flex items-center gap-3 group">
         <img src="/admin/api/catalog/image/img_img_site_logo_white" alt="British Feed Logo" class="h-10" onerror="this.style.display='none'" style="filter: brightness(0) invert(1);" />
-        <span class="text-white font-serif text-lg font-semibold hidden sm:block">British Feed & Supplies</span>
+
       </a>
       <div class="hidden md:flex items-center gap-6 text-sm font-medium text-white/90">
         <a href="#about"    class="nav-link hover:text-gold-400 transition-colors">About</a>
@@ -421,19 +428,7 @@ function getHTML(): string {
             </button>
           </div>
         </div>
-        <!-- Find Us card below the video, not overlapping -->
-        <div class="mt-5 bg-white rounded-2xl p-5 shadow-md border border-gray-100">
-          <div class="flex items-center gap-3">
-            <div class="w-12 h-12 bg-navy-700 rounded-full flex items-center justify-center flex-shrink-0">
-              <i class="fas fa-map-marker-alt text-gold-400 text-xl"></i>
-            </div>
-            <div>
-              <div class="font-bold text-navy-700 text-sm">Find Us</div>
-              <div class="text-xs text-gray-500">14589 Southern Blvd, Palm West Plaza</div>
-              <div class="text-xs text-gray-500">Loxahatchee Groves, FL 33470</div>
-            </div>
-          </div>
-        </div>
+
       </div>
     </div>
   </div>
@@ -778,7 +773,7 @@ function getHTML(): string {
         <div class="stars text-2xl">★★★★★</div>
         <span class="text-xl font-bold text-navy-700">4.8</span>
         <span class="text-gray-400 text-sm">on Google</span>
-        <a href="https://www.google.com/maps/place/British+Feed+and+Supplies" target="_blank" rel="noopener" class="ml-2 text-sm text-navy-500 hover:text-navy-700 underline">View all reviews</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=British+Feed+and+Supplies+Loxahatchee+Groves+FL" target="_blank" rel="noopener" class="ml-2 text-sm text-navy-500 hover:text-navy-700 underline">View all reviews</a>
       </div>
     </div>
     <div class="grid md:grid-cols-3 gap-6">
@@ -806,7 +801,7 @@ function getHTML(): string {
         </div>`).join('')}
     </div>
     <div class="text-center mt-10 scroll-reveal">
-      <a href="https://www.google.com/maps/place/British+Feed+and+Supplies" target="_blank" rel="noopener"
+      <a href="https://www.google.com/maps/search/?api=1&query=British+Feed+and+Supplies+Loxahatchee+Groves+FL" target="_blank" rel="noopener"
          class="inline-flex items-center gap-2 bg-white border-2 border-navy-200 hover:border-navy-700 text-navy-700 font-semibold px-8 py-3 rounded-full transition-all hover:shadow-md">
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/24px-Google_%22G%22_logo.svg.png" alt="Google" class="w-5 h-5" />
         See All Google Reviews
