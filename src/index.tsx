@@ -2460,6 +2460,207 @@ table.ptable td {
 .back-contact-val   { font-size: 10pt; font-weight: 600; color: #fff; line-height: 1.4; }
 .back-site  { font-family: 'Cormorant Garamond', serif; font-size: 12pt; color: #C9A84C; font-style: italic; margin-top: 8px; }
 .back-fine  { position: absolute; bottom: 0.35in; font-size: 6pt; color: rgba(255,255,255,0.3); }
+
+/* ═══ OUR STORY PAGE ══════════════════════════════════════════════════ */
+.story-page { background: #fff; display: flex; flex-direction: column; }
+.story-hero {
+  background: #0d1b35;
+  padding: 0.32in 0.55in 0.28in;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.story-hero-left { }
+.story-hero-eyebrow {
+  font-size: 6.5pt; font-weight: 800; letter-spacing: 0.18em;
+  text-transform: uppercase; color: #C9A84C; margin-bottom: 6px;
+}
+.story-hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28pt; font-weight: 700; color: #fff; line-height: 1.05;
+}
+.story-hero-title em { color: #C9A84C; font-style: italic; }
+.story-hero-tagline {
+  font-size: 9pt; color: rgba(255,255,255,0.6); margin-top: 8px;
+  font-style: italic; font-family: 'Cormorant Garamond', serif;
+}
+.story-hero-right {
+  text-align: right;
+}
+.story-hero-logo { height: 36px; filter: brightness(0) invert(1); margin-bottom: 6px; }
+.story-hero-since {
+  font-size: 6.5pt; color: rgba(255,255,255,0.45);
+  text-transform: uppercase; letter-spacing: 0.12em;
+}
+
+.story-body {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0; flex: 1; overflow: hidden;
+}
+.story-left-col {
+  background: #FBF7F0;
+  padding: 0.3in 0.3in 0.3in 0.55in;
+  border-right: 1px solid #e8dcc8;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.story-right-col {
+  background: #fff;
+  padding: 0.3in 0.55in 0.3in 0.3in;
+  display: flex; flex-direction: column; gap: 18px;
+}
+
+.story-section-label {
+  font-size: 6pt; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.18em; color: #C9A84C;
+  border-bottom: 1px solid #e8dcc8; padding-bottom: 4px; margin-bottom: 8px;
+}
+.story-section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14pt; font-weight: 700; color: #1B2A4A; line-height: 1.2; margin-bottom: 7px;
+}
+.story-text {
+  font-size: 8pt; color: #444; line-height: 1.65;
+}
+.story-text strong { color: #1B2A4A; }
+.story-quote {
+  border-left: 3px solid #C9A84C;
+  padding: 8px 12px;
+  background: rgba(201,168,76,0.07);
+  border-radius: 0 6px 6px 0;
+}
+.story-quote-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 10.5pt; font-style: italic; color: #1B2A4A; line-height: 1.45;
+}
+.story-quote-attr {
+  font-size: 6.5pt; color: #888; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.1em;
+}
+.story-pillars {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.story-pillar {
+  background: #fff; border: 1px solid #e8dcc8;
+  border-radius: 6px; padding: 9px 10px;
+}
+.story-pillar-icon { font-size: 12pt; margin-bottom: 4px; }
+.story-pillar-title { font-size: 7.5pt; font-weight: 700; color: #1B2A4A; margin-bottom: 2px; }
+.story-pillar-text  { font-size: 6.5pt; color: #666; line-height: 1.5; }
+.story-timeline {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.story-timeline-item {
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.story-timeline-dot {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #1B2A4A; color: #C9A84C;
+  font-size: 6pt; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.story-timeline-text { font-size: 7.5pt; color: #444; line-height: 1.5; }
+.story-timeline-text strong { color: #1B2A4A; }
+.story-services {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 7px;
+}
+.story-service {
+  display: flex; align-items: flex-start; gap: 7px;
+}
+.story-service-icon {
+  width: 20px; height: 20px; border-radius: 4px;
+  background: #1B2A4A; color: #C9A84C;
+  font-size: 8pt; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.story-service-text { font-size: 7pt; color: #444; line-height: 1.45; }
+.story-service-text strong { color: #1B2A4A; font-size: 7.5pt; display: block; }
+
+/* ═══ FEEDING GUIDE PAGE ══════════════════════════════════════════════ */
+.guide-page { background: #fff; display: flex; flex-direction: column; }
+.guide-header {
+  background: #1B2A4A;
+  padding: 0.22in 0.55in;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.guide-header-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18pt; font-weight: 700; color: #fff;
+}
+.guide-header-title em { color: #C9A84C; font-style: italic; }
+.guide-header-sub { font-size: 7.5pt; color: rgba(255,255,255,0.55); margin-top: 3px; }
+.guide-header-logo { height: 28px; filter: brightness(0) invert(1); }
+
+.guide-body {
+  flex: 1; padding: 0.2in 0.55in 0.15in;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.2in;
+  overflow: visible;
+}
+.guide-col { display: flex; flex-direction: column; gap: 10px; }
+.guide-section { }
+.guide-section-head {
+  font-size: 6pt; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.16em; color: #C9A84C;
+  border-bottom: 1.5px solid #C9A84C; padding-bottom: 3px; margin-bottom: 6px;
+}
+.guide-section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 11.5pt; font-weight: 700; color: #1B2A4A; margin-bottom: 5px;
+}
+.guide-text { font-size: 7pt; color: #444; line-height: 1.6; }
+.guide-text strong { color: #1B2A4A; }
+
+.guide-table {
+  width: 100%; border-collapse: collapse; font-size: 6.5pt; margin-top: 4px;
+}
+.guide-table th {
+  background: #1B2A4A; color: #C9A84C;
+  padding: 4px 7px; text-align: left; font-size: 6pt;
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+.guide-table td {
+  padding: 4px 7px; border-bottom: 1px solid #eee;
+  vertical-align: top; line-height: 1.45; color: #444;
+}
+.guide-table tr:nth-child(even) td { background: #fafaf8; }
+.guide-table td:first-child { font-weight: 700; color: #1B2A4A; }
+
+.guide-tip-box {
+  background: rgba(201,168,76,0.1); border: 1px solid #C9A84C;
+  border-radius: 6px; padding: 8px 10px;
+}
+.guide-tip-head { font-size: 6.5pt; font-weight: 800; color: #a07830; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 4px; }
+.guide-tip-list { list-style: none; padding: 0; margin: 0; }
+.guide-tip-list li { font-size: 7pt; color: #444; line-height: 1.65; padding-left: 12px; position: relative; }
+.guide-tip-list li::before { content: "✓"; position: absolute; left: 0; color: #C9A84C; font-weight: 700; }
+
+.guide-alert-box {
+  background: #FFF8F0; border-left: 3px solid #E8956A;
+  border-radius: 0 6px 6px 0; padding: 7px 10px;
+}
+.guide-alert-head { font-size: 6.5pt; font-weight: 800; color: #b05020; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px; }
+.guide-alert-text { font-size: 7pt; color: #555; line-height: 1.55; }
+
+.guide-brand-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 4px;
+}
+.guide-brand-cell {
+  background: #F8FAFC; border: 1px solid #E2E8F0;
+  border-radius: 5px; padding: 5px 7px;
+}
+.guide-brand-need { font-size: 6pt; color: #888; text-transform: uppercase; letter-spacing: 0.08em; }
+.guide-brand-name { font-size: 7pt; font-weight: 700; color: #1B2A4A; line-height: 1.3; margin-top: 1px; }
+
+.guide-footer {
+  background: #0d1b35; color: rgba(255,255,255,0.7);
+  padding: 7px 0.55in; font-size: 6.5pt;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-shrink: 0;
+}
+.guide-footer strong { color: #C9A84C; }
+.guide-footer-cta {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 9pt; color: #C9A84C; font-style: italic;
+}
 </style>
 </head>
 <body>
@@ -2814,7 +3015,317 @@ function buildCatalog(products) {
   <div class="back-fine">Pricing and availability subject to change. Call (561) 633-6003 to confirm. © \${YEAR} British Feed &amp; Supplies.</div>
 </div>\`;
 
-  return cover + toc + catPages + back;
+  // ── OUR STORY PAGE ───────────────────────────────────────────────
+  const storyPage = \`
+<div class="page story-page">
+  <!-- Dark hero band -->
+  <div class="story-hero">
+    <div class="story-hero-left">
+      <div class="story-hero-eyebrow">Our Story &amp; Mission</div>
+      <div class="story-hero-title">Wellington's Most<br/><em>Trusted</em> Feed Store</div>
+      <div class="story-hero-tagline">"Proper care starts long before the ride."</div>
+    </div>
+    <div class="story-hero-right">
+      <img src="/admin/api/catalog/image/img_img_site_logo_white" alt="British Feed & Supplies" class="story-hero-logo" onerror="this.style.display='none'"/>
+      <div class="story-hero-since">Serving Equestrians Since 2012</div>
+    </div>
+  </div>
+
+  <!-- Two-column body -->
+  <div class="story-body">
+
+    <!-- LEFT COLUMN: Story + Timeline + Services -->
+    <div class="story-left-col">
+
+      <div>
+        <div class="story-section-label">Who We Are</div>
+        <div class="story-section-title">A Passion for Horses,<br/>Built Into Everything We Do</div>
+        <div class="story-text">
+          <strong>British Feed &amp; Supplies</strong> was established in 2012 as the go-to destination for horse owners, livestock farmers, and pet owners across Wellington, Loxahatchee Groves, and all of Palm Beach County. In 2016, under new ownership, the store was completely renovated and expanded — purpose-built to serve the growing world-class equestrian community of South Florida.
+          <br/><br/>
+          Owned by <strong>Vieri Bracco</strong> and managed by <strong>Carmine Garrett</strong>, our team brings genuine horsemanship and deep product knowledge to every interaction. We don't just sell feed — we help you build the right program for your horse.
+        </div>
+      </div>
+
+      <div class="story-quote">
+        <div class="story-quote-text">"Proper care starts long before the ride. It's preparation, consistency, and the right support every step of the way."</div>
+        <div class="story-quote-attr">— British Feed &amp; Supplies Commercial</div>
+      </div>
+
+      <div>
+        <div class="story-section-label">Our Timeline</div>
+        <div class="story-timeline">
+          <div class="story-timeline-item">
+            <div class="story-timeline-dot">2012</div>
+            <div class="story-timeline-text"><strong>Founded</strong> — British Feed &amp; Supplies opens its doors in Loxahatchee Groves, serving the Wellington equestrian corridor from day one.</div>
+          </div>
+          <div class="story-timeline-item">
+            <div class="story-timeline-dot">2016</div>
+            <div class="story-timeline-text"><strong>Transformation</strong> — New ownership renovates the store, expands product range, and establishes key brand partnerships with Nutrena, Cavalor, Red Mills, Havens, and more.</div>
+          </div>
+          <div class="story-timeline-item">
+            <div class="story-timeline-dot">2020</div>
+            <div class="story-timeline-text"><strong>Nutrena Certified Farm Program</strong> — Became an official Nutrena Certified retailer, giving our customers access to exclusive rewards and expert support.</div>
+          </div>
+          <div class="story-timeline-item">
+            <div class="story-timeline-dot">Now</div>
+            <div class="story-timeline-text"><strong>316 products</strong> across 16 categories — one of South Florida's most complete equine supply destinations, with free local delivery and nutritional consultations.</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="story-section-label">Our Services</div>
+        <div class="story-services">
+          <div class="story-service">
+            <div class="story-service-icon">🚚</div>
+            <div class="story-service-text"><strong>Free Delivery</strong>Orders $150+ delivered to Wellington, Loxahatchee, Royal Palm Beach, Jupiter Farms &amp; surrounding areas.</div>
+          </div>
+          <div class="story-service">
+            <div class="story-service-icon">🔬</div>
+            <div class="story-service-text"><strong>Nutrition Consults</strong>Barn visits from certified equine nutritionists — personalized feed programs tailored to your horse.</div>
+          </div>
+          <div class="story-service">
+            <div class="story-service-icon">🏆</div>
+            <div class="story-service-text"><strong>Nutrena Farm Program</strong>Earn rewards for every bag purchased — exclusive to certified retailer locations like us.</div>
+          </div>
+          <div class="story-service">
+            <div class="story-service-icon">📞</div>
+            <div class="story-service-text"><strong>Expert Guidance</strong>Call <strong>(561) 633-6003</strong> — our team knows the products and can match you to the right feed, hay, or supplement.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN: Mission + Brand Pillars + Contact -->
+    <div class="story-right-col">
+
+      <div>
+        <div class="story-section-label">Our Mission Statement</div>
+        <div class="story-section-title">For Proper Care &amp; Nutrition</div>
+        <div class="story-text">
+          At British Feed &amp; Supplies, our mission is simple: <strong>provide premium feed, quality hay, and everyday essentials backed by dedicated service you can count on</strong>. We exist to make sure your horse gets the care they deserve — whether you're a weekend trail rider or a competitive Grand Prix rider at the Winter Equestrian Festival.
+          <br/><br/>
+          We believe that a great ride begins hours before you put on your boots. It starts with the right bedding, the right hay, and a feed program built around your horse's individual needs. <strong>Preparation. Consistency. Support.</strong> That's what we bring to every barn we serve.
+        </div>
+      </div>
+
+      <div>
+        <div class="story-section-label">What Sets Us Apart</div>
+        <div class="story-pillars">
+          <div class="story-pillar">
+            <div class="story-pillar-icon">🔬</div>
+            <div class="story-pillar-title">Science-Backed Selection</div>
+            <div class="story-pillar-text">Every brand we stock is vetted for nutritional quality, digestibility, and results supported by equine science and veterinary research.</div>
+          </div>
+          <div class="story-pillar">
+            <div class="story-pillar-icon">🤝</div>
+            <div class="story-pillar-title">Relationship-First Service</div>
+            <div class="story-pillar-text">We're not just a store — we're your partner. Our staff knows your horse's history and helps you make decisions based on your horse's real needs.</div>
+          </div>
+          <div class="story-pillar">
+            <div class="story-pillar-icon">🌎</div>
+            <div class="story-pillar-title">World-Class Brands</div>
+            <div class="story-pillar-text">Nutrena, Cavalor, Red Mills, Pro Elite, Havens, Buckeye, Foran — the brands trusted by Olympic riders are available right here in Wellington.</div>
+          </div>
+          <div class="story-pillar">
+            <div class="story-pillar-icon">🏘️</div>
+            <div class="story-pillar-title">Community Rooted</div>
+            <div class="story-pillar-text">From local shelters to equestrian events, we support the community that supports us. Proudly Palm Beach County's own.</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="story-section-label">Brands We Carry</div>
+        <div class="story-text" style="margin-bottom:6px">
+          <strong>Feed &amp; Grain:</strong> Nutrena · Pro Elite · Cavalor · Red Mills · Havens · Buckeye · Crypto Aero · Kent Sentinel<br/>
+          <strong>Supplements:</strong> Cavalor · Foran · KPP · Farnam · Cosequin · Purina · Uckele<br/>
+          <strong>Fly Control:</strong> Farnam · Absorbine · Pyranha · Durvet<br/>
+          <strong>Bedding:</strong> WD Shavings · Fast Track · World Cup · King · Showtime<br/>
+          <strong>Hay:</strong> Alfalfa · Timothy · Orchard · T/A Blends · Peanut · Quebec · Alberta<br/>
+          <strong>Grooming &amp; Tack Care:</strong> Absorbine · Carr &amp; Day &amp; Martin · Belvoir · Eqyss
+        </div>
+      </div>
+
+      <div style="background:#0d1b35;border-radius:8px;padding:12px 14px;margin-top:auto">
+        <div class="story-section-label" style="color:#C9A84C;border-color:rgba(201,168,76,0.3)">Find Us</div>
+        <div style="color:rgba(255,255,255,0.85);font-size:7.5pt;line-height:1.8">
+          📍 14589 Southern Blvd, Palm West Plaza, Loxahatchee Groves, FL 33470<br/>
+          📞 <strong style="color:#C9A84C">(561) 633-6003</strong><br/>
+          🌐 britishfeed.com<br/>
+          🕐 Store: Mon–Fri 9am–6pm &nbsp;·&nbsp; Sat 9am–4pm<br/>
+          🚚 Distribution: Mon–Fri 8am–5pm &nbsp;·&nbsp; Sat 9am–4pm<br/>
+          <span style="color:rgba(255,255,255,0.45);font-size:6.5pt">Free delivery on orders $150+. Temporary minimal fuel surcharge in effect.</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>\`;
+
+  // ── FEEDING GUIDE PAGE ───────────────────────────────────────────────
+  const feedingGuidePage = \`
+<div class="page guide-page">
+  <div class="guide-header">
+    <div>
+      <div class="guide-header-title">Horse Feeding <em>Guidelines</em></div>
+      <div class="guide-header-sub">A practical reference for South Florida horse owners — brought to you by British Feed &amp; Supplies</div>
+    </div>
+    <img src="/admin/api/catalog/image/img_img_site_logo_white" alt="British Feed" class="guide-header-logo" onerror="this.style.display='none'"/>
+  </div>
+
+  <div class="guide-body">
+
+    <!-- LEFT COLUMN -->
+    <div class="guide-col">
+
+      <div class="guide-section">
+        <div class="guide-section-head">The Foundation</div>
+        <div class="guide-section-title">Forage First</div>
+        <div class="guide-text">
+          The cornerstone of every equine diet is <strong>high-quality forage</strong>. Horses are hindgut fermenters designed to eat small amounts continuously — aim for <strong>1.5–2% of body weight in hay per day</strong> (15–20 lbs for a 1,000 lb horse). Forage supports gut motility, prevents ulcers, and maintains healthy hindgut bacteria. Grain and concentrates should supplement, not replace, a good hay program.
+        </div>
+      </div>
+
+      <div class="guide-section">
+        <div class="guide-section-head">Daily Feeding Reference</div>
+        <div class="guide-section-title">By Horse Type</div>
+        <table class="guide-table">
+          <thead><tr><th>Horse Type</th><th>Hay / Day</th><th>Concentrate</th><th>Key Focus</th></tr></thead>
+          <tbody>
+            <tr><td>Idle / Easy Keeper</td><td>1.5% BW</td><td>Balancer only</td><td>Weight control, minerals</td></tr>
+            <tr><td>Pleasure / Light Work</td><td>1.8% BW</td><td>2–4 lbs</td><td>Balanced energy</td></tr>
+            <tr><td>Moderate Work</td><td>2.0% BW</td><td>4–6 lbs</td><td>Stamina, topline</td></tr>
+            <tr><td>Heavy / Competition</td><td>2.0% BW</td><td>6–10 lbs</td><td>Peak performance</td></tr>
+            <tr><td>Senior Horse</td><td>2.0–2.5% BW</td><td>4–8 lbs senior</td><td>Digestion, joints</td></tr>
+            <tr><td>Pregnant / Lactating</td><td>2.0–2.5% BW</td><td>4–8 lbs</td><td>Protein, calcium</td></tr>
+            <tr><td>Growing Youngster</td><td>2.0% BW</td><td>0.5–1% BW</td><td>Balanced growth</td></tr>
+            <tr><td>Metabolic / IR Horse</td><td>1.5% BW low-NSC</td><td>Low-starch only</td><td>Blood sugar control</td></tr>
+          </tbody>
+        </table>
+        <div class="guide-text" style="margin-top:4px;font-size:6pt;color:#888">BW = Body Weight. Divide daily concentrate into 2–3 feedings. Never feed over 5 lbs of grain in a single meal.</div>
+      </div>
+
+      <div class="guide-section">
+        <div class="guide-section-head">South Florida Considerations</div>
+        <div class="guide-section-title">Our Climate &amp; Your Horse</div>
+        <div class="guide-text">
+          Florida's heat and humidity create unique nutritional demands:<br/>
+          <strong>• Electrolytes:</strong> Heavy sweating depletes sodium, potassium, and chloride — supplement daily in summer or during hard work.<br/>
+          <strong>• Sand colic risk:</strong> Sandy soil ingestion is common. Use psyllium supplements (e.g., SandClear) monthly to clear sand accumulation.<br/>
+          <strong>• Fly control:</strong> Year-round fly pressure requires both topical sprays and feed-through supplements for comprehensive protection.<br/>
+          <strong>• Gut health:</strong> Stress from heat, travel, and show schedules increases ulcer risk — consider a buffering supplement during busy seasons.
+        </div>
+      </div>
+
+      <div class="guide-tip-box">
+        <div class="guide-tip-head">✦ Pro Tips from Our Team</div>
+        <ul class="guide-tip-list">
+          <li>Introduce any new feed gradually over 7–14 days to avoid digestive upset.</li>
+          <li>Weigh your feed — don't scoop. A "scoop" of different feeds can vary by up to 3 lbs.</li>
+          <li>Fresh, clean water available at all times — horses drink 5–10 gallons per day.</li>
+          <li>Feed by weight, not volume. Pelleted feeds are denser than textured.</li>
+          <li>Horses with metabolic issues should have hay tested for non-structural carbohydrates (NSC) before feeding.</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="guide-col">
+
+      <div class="guide-section">
+        <div class="guide-section-head">Hay Selection Guide</div>
+        <div class="guide-section-title">Choosing the Right Hay</div>
+        <table class="guide-table">
+          <thead><tr><th>Hay Type</th><th>Protein</th><th>Best For</th></tr></thead>
+          <tbody>
+            <tr><td>Alfalfa</td><td>15–22%</td><td>Hard keepers, lactating mares, growing horses, added calories</td></tr>
+            <tr><td>Timothy (1st cut)</td><td>8–10%</td><td>All-around choice; lower sugar, excellent fiber</td></tr>
+            <tr><td>Timothy (2nd cut)</td><td>10–12%</td><td>Softer, more palatable; moderate energy horses</td></tr>
+            <tr><td>Orchard Grass</td><td>10–12%</td><td>Horses that won't eat timothy; good palatability</td></tr>
+            <tr><td>T/A Blend</td><td>12–16%</td><td>Performance horses; balances fiber and protein</td></tr>
+            <tr><td>Peanut Hay</td><td>14–18%</td><td>High-protein legume; excellent for underweight horses</td></tr>
+            <tr><td>Teff / Tropical</td><td>8–10%</td><td>Metabolic horses; lower NSC than cool-season grasses</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="guide-section">
+        <div class="guide-section-head">Feed Selector</div>
+        <div class="guide-section-title">Match Your Horse to the Right Feed</div>
+        <div class="guide-brand-grid">
+          <div class="guide-brand-cell">
+            <div class="guide-brand-need">Competition</div>
+            <div class="guide-brand-name">Pro Elite Performance · Cavalor Performix · Red Mills Competition 14</div>
+          </div>
+          <div class="guide-brand-cell">
+            <div class="guide-brand-need">Senior</div>
+            <div class="guide-brand-name">SafeChoice Senior · Pro Elite Senior · Buckeye EQ8 Senior · Cavalor Strucomix Senior</div>
+          </div>
+          <div class="guide-brand-cell">
+            <div class="guide-brand-need">Easy Keeper / IR</div>
+            <div class="guide-brand-name">SafeChoice Special Care · Pro Elite Starch Wise · Cavalor Pianissimo</div>
+          </div>
+          <div class="guide-brand-cell">
+            <div class="guide-brand-need">Hard Keeper</div>
+            <div class="guide-brand-name">Pro Elite Omega Advantage · Cavalor WholyGain · Havens Power Plus · Buckeye Cadence Ultra</div>
+          </div>
+          <div class="guide-brand-cell">
+            <div class="guide-brand-need">Digestive / Ulcers</div>
+            <div class="guide-brand-name">Cavalor FiberGastro · Havens Gastro Plus · Red Mills Comfort Mash · Buckeye EQ8</div>
+          </div>
+          <div class="guide-brand-cell">
+            <div class="guide-brand-need">Growing / Young</div>
+            <div class="guide-brand-name">Pro Elite Growth · Buckeye Gro-N-Win · SafeChoice Mare &amp; Foal</div>
+          </div>
+          <div class="guide-brand-cell">
+            <div class="guide-brand-need">Endurance</div>
+            <div class="guide-brand-name">Havens Endurance · Cavalor Endurix · CocoSoya Oil</div>
+          </div>
+          <div class="guide-brand-cell">
+            <div class="guide-brand-need">Nervous / Calm</div>
+            <div class="guide-brand-name">Cavalor Pianissimo · Havens Cool Mix · Foran Nutri-Calm</div>
+          </div>
+          <div class="guide-brand-cell">
+            <div class="guide-brand-need">Topline / Muscle</div>
+            <div class="guide-brand-name">Pro Elite Topline Advantage · Cavalor Muscle Force · Topline Xtreme</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="guide-section">
+        <div class="guide-section-head">Supplement Basics</div>
+        <div class="guide-section-title">When to Add Supplements</div>
+        <div class="guide-text">
+          A good-quality concentrate fed at the correct rate often provides adequate vitamins and minerals. Supplements are most valuable when:<br/>
+          <strong>• Hay quality is unknown</strong> — add a vitamin/mineral balancer<br/>
+          <strong>• Horse is in hard work</strong> — consider electrolytes, joint support, muscle recovery<br/>
+          <strong>• Digestive concerns</strong> — pre/probiotics, glutamine, or buffering agents<br/>
+          <strong>• Skin, coat, or hoof issues</strong> — omega fatty acids (CocoSoya, Karron Oil, Max-E-Glo), biotin, zinc<br/>
+          <strong>• Sand accumulation risk</strong> — psyllium (SandClear or SandPurge) one week per month
+        </div>
+      </div>
+
+      <div class="guide-alert-box">
+        <div class="guide-alert-head">⚠ When to Call Your Vet or Nutritionist</div>
+        <div class="guide-alert-text">
+          Sudden weight loss or gain · Recurring colic · Loose manure for more than 48 hours · Changes in energy or attitude · Hoof rings or laminitis signs · Difficulty chewing or dropping feed. <strong>We offer free nutritional consultations — call (561) 633-6003 to schedule a barn visit.</strong>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="guide-footer">
+    <span>British Feed &amp; Supplies · 14589 Southern Blvd, Loxahatchee Groves FL · <strong>(561) 633-6003</strong> · britishfeed.com</span>
+    <span class="guide-footer-cta">For proper care &amp; nutrition</span>
+  </div>
+</div>\`;
+
+  return cover + toc + storyPage + feedingGuidePage + catPages + back;
 }
 
 // Boot: load products then render
