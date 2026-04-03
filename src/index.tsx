@@ -224,8 +224,8 @@ function getHTML(): string {
   <style>
     html { scroll-behavior: smooth; }
     .hero-bg {
-      background: linear-gradient(to bottom, rgba(10,20,40,0.55) 0%, rgba(10,20,40,0.35) 50%, rgba(10,20,40,0.65) 100%),
-                  url('https://sspark.genspark.ai/cfimages?u1=5JrGkxXguoxsFg4FfUCeFWzD%2F6OU2V4Nd7PCUlAgk16M2vA5jUlLdE01YhtF0JvcA7Xksxqa%2Bo2yxrmffuqFcZc5u9do1eTDqR9Yuch26r2qLO2rfMh3bIvsKpHbTqgR1pcn&u2=OUTntpi6GMHAaQBY&width=2560') center 30%/cover no-repeat;
+      background: linear-gradient(to bottom, rgba(10,20,40,0.50) 0%, rgba(10,20,40,0.25) 45%, rgba(10,20,40,0.60) 100%),
+                  url('/static/hero_horse.jpg') center 25%/cover no-repeat;
     }
     .hero-text-center { text-align:center; }
     @media(min-width:768px){ .hero-badge { backdrop-filter: blur(8px); } }
