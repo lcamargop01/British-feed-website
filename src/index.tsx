@@ -2125,12 +2125,26 @@ body { font-family: 'Nunito Sans', sans-serif; color: #1a1a2e; background: #d0d0
 @media print {
   html, body { background: white !important; }
   .no-print { display: none !important; }
-  .page { page-break-after: always; page-break-inside: avoid; break-after: page; }
+  /* Fixed pages (cover, toc, back) break after themselves */
+  .page { page-break-after: always; break-after: page; }
   .page:last-child { page-break-after: auto; break-after: auto; }
+  /* Cat pages flow freely and are NOT clamped to 11in */
+  .cat-page { height: auto !important; overflow: visible !important; page-break-after: always; break-after: page; }
+  .cat-page:last-child { page-break-after: auto; break-after: auto; }
+  .cat-body { overflow: visible !important; }
+  /* Vendor groups: try to keep together, but allow breaking if needed */
+  .vgroup { break-inside: avoid; }
+  /* Table rows should not be orphaned */
+  table.ptable { break-inside: auto; }
+  table.ptable thead { display: table-header-group; }
+  table.ptable tbody tr { break-inside: avoid; break-after: auto; }
   a { color: inherit !important; text-decoration: none !important; }
   .print-bar { display: none !important; }
   .loading-overlay { display: none !important; }
   body { padding-top: 0 !important; }
+  /* Footer stays at bottom of each print page via margin */
+  .cat-footer { position: running(catFooter); }
+  @page { margin-bottom: 0.35in; }
 }
 
 /* ═══ PAGE SHELL ═════════════════════════════════════════════════════ */
@@ -2142,6 +2156,12 @@ body { font-family: 'Nunito Sans', sans-serif; color: #1a1a2e; background: #d0d0
   background: #ffffff;
   display: flex;
   flex-direction: column;
+}
+/* Category pages are NOT height-clamped — they flow to next print page */
+.cat-page {
+  height: auto;
+  min-height: 11in;
+  overflow: visible;
 }
 @media screen {
   .page {
@@ -2287,7 +2307,7 @@ body { font-family: 'Nunito Sans', sans-serif; color: #1a1a2e; background: #d0d0
 }
 .cover-right-img {
   position: absolute; inset: 0;
-  background: url('/static/catalog_cover.jpg') 82% 25% / cover no-repeat;
+  background: url('/static/catalog_cover.jpg') 55% 25% / cover no-repeat;
   opacity: 0.95;
 }
 .cover-right-overlay {
@@ -2377,13 +2397,17 @@ body { font-family: 'Nunito Sans', sans-serif; color: #1a1a2e; background: #d0d0
 }
 
 /* product table */
-.cat-body { padding: 0 0.4in; flex: 1; overflow: hidden; }
+.cat-body { padding: 0 0.4in 0.18in; flex: 1; overflow: visible; }
 .vgroup { margin-top: 8px; }
 .vgroup-label {
   font-size: 6.5pt; font-weight: 800; text-transform: uppercase;
   letter-spacing: 0.12em; color: #fff;
   padding: 3px 10px; display: inline-block;
   border-radius: 3px 3px 0 0; margin-bottom: 0;
+}
+/* Vendor divider row inside the unified table */
+tr.vendor-row td {
+  padding: 8px 0 0; border-bottom: none; background: transparent !important;
 }
 table.ptable {
   width: 100%; border-collapse: collapse;
@@ -2651,18 +2675,13 @@ function buildCatalog(products) {
     });
     const vList = Object.entries(vg).sort(([a],[b]) => a.localeCompare(b));
 
-    const tableRows = vList.map(([vendor, vprods]) => \`
-      <div class="vgroup">
-        <div class="vgroup-label" style="background:\${meta.color}">\${esc(vendor)}</div>
-        <table class="ptable">
-          <thead><tr>
-            <th class="col-name">Product</th>
-            <th class="col-desc">Description &amp; Benefits</th>
-            <th class="col-price">Price</th>
-          </tr></thead>
-          <tbody>\${vprods.map(prodRow).join('')}</tbody>
-        </table>
-      </div>\`).join('');
+    // Build a single unified table — thead repeats on every print page
+    // Vendor rows act as section dividers within the body
+    const tbodyRows = vList.map(([vendor, vprods]) => \`
+      <tr class="vendor-row">
+        <td colspan="3"><div class="vgroup-label" style="background:\${meta.color}">\${esc(vendor)}</div></td>
+      </tr>
+      \${vprods.map(prodRow).join('')}\`).join('');
 
     return \`
 <div class="page cat-page">
@@ -2675,8 +2694,19 @@ function buildCatalog(products) {
     </div>
     <div class="cat-header-right">British Feed<br/>&amp; Supplies</div>
   </div>
-  <div class="cat-body">\${tableRows}</div>
-  <div class="page-footer">
+  <div class="cat-body">
+    <table class="ptable">
+      <thead>
+        <tr>
+          <th class="col-name">Product</th>
+          <th class="col-desc">Description &amp; Benefits</th>
+          <th class="col-price">Price</th>
+        </tr>
+      </thead>
+      <tbody>\${tbodyRows}</tbody>
+    </table>
+  </div>
+  <div class="page-footer cat-page-footer">
     <span>British Feed &amp; Supplies · 14589 Southern Blvd · (561) 633-6003 · britishfeed.com</span>
     <span>\${esc(cat)} · \${MONTH_YEAR}</span>
   </div>
