@@ -1941,6 +1941,39 @@ admin.delete('/api/catalog/:id', requireAuth, async (c) => {
   return c.json({ ok: true, deleted: id })
 })
 
+// POST /admin/api/catalog/repair-images — re-attach imageKey fields after a bad import
+// Scans all img_{id} KV keys and patches matching products
+admin.post('/api/catalog/repair-images', requireAuth, async (c) => {
+  const kv = c.env?.BF_STORE
+  if (!kv) return c.json({ ok: false, error: 'No KV binding' }, 500)
+
+  // Load current products from KV
+  const products: any[] = await kvGet(kv, 'catalog_products', [])
+  if (!products.length) return c.json({ ok: false, error: 'No products in KV' }, 400)
+
+  // List all KV keys with prefix img_
+  let repaired = 0
+  const list = await kv.list({ prefix: 'img_' })
+
+  for (const key of list.keys) {
+    const k = key.name // e.g. "img_42" or "img_1234567890"
+    // Try to match by product id: img_{id}
+    const idStr = k.replace('img_', '')
+    const id = parseInt(idStr)
+    if (!isNaN(id)) {
+      const idx = products.findIndex((p: any) => p.id === id)
+      if (idx !== -1 && !products[idx].imageKey) {
+        products[idx].imageKey = k
+        products[idx].imageUrl = ''
+        repaired++
+      }
+    }
+  }
+
+  await kvPut(kv, 'catalog_products', products)
+  return c.json({ ok: true, repaired, total: products.length, keysFound: list.keys.length })
+})
+
 // POST /admin/api/catalog/upload-image — store image as base64 in KV
 admin.post('/api/catalog/upload-image', requireAuth, async (c) => {
   const kv = c.env?.BF_STORE
@@ -2565,18 +2598,44 @@ async function importStaticCatalog() {
   showStatus('info', '<i class="fas fa-spinner fa-spin"></i> Loading static catalog…');
   try {
     const res = await fetch('/static/products-data.json');
-    const products = await res.json();
-    showStatus('info', \`<i class="fas fa-spinner fa-spin"></i> Saving \${products.length} products to store…\`);
+    const staticProducts = await res.json();
+
+    // ── SAFE MERGE: preserve imageKey/imageUrl/custom edits from existing KV products ──
+    const existingMap = {};
+    (catProducts || []).forEach(p => { existingMap[p.id] = p; });
+
+    const merged = staticProducts.map(sp => {
+      const existing = existingMap[sp.id];
+      if (existing) {
+        return {
+          ...sp,
+          imageKey:       existing.imageKey       || sp.imageKey       || '',
+          imageUrl:       existing.imageUrl       || sp.imageUrl       || '',
+          description:    existing.description    || sp.description    || '',
+          price:          existing.price          !== undefined ? existing.price : sp.price,
+          priceFormatted: existing.priceFormatted || sp.priceFormatted || '',
+          inStock:        existing.inStock        !== undefined ? existing.inStock : sp.inStock,
+          bestFor:        existing.bestFor        || sp.bestFor        || '',
+          keyFeatures:    existing.keyFeatures    || sp.keyFeatures    || '',
+          protein:        existing.protein        || sp.protein        || '',
+          fat:            existing.fat            || sp.fat            || '',
+          fiber:          existing.fiber          || sp.fiber          || '',
+        };
+      }
+      return sp;
+    });
+
+    showStatus('info', \`<i class="fas fa-spinner fa-spin"></i> Saving \${merged.length} products (images & edits preserved)…\`);
     const saveRes = await fetch('/admin/api/catalog', {
       method: 'PUT',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ products })
+      body: JSON.stringify({ products: merged })
     });
     const result = await saveRes.json();
     if (result.ok) {
-      catProducts = products;
+      catProducts = merged;
       initCatalog();
-      showStatus('success', \`<i class="fas fa-check-circle"></i> Imported \${result.count} products successfully!\`);
+      showStatus('success', \`<i class="fas fa-check-circle"></i> Imported \${result.count} products (images & custom edits preserved)!\`);
       setTimeout(() => document.getElementById('catalog-status').classList.add('hidden'), 4000);
     } else {
       showStatus('error', '<i class="fas fa-times-circle"></i> Import failed: ' + (result.error || 'Unknown error'));
