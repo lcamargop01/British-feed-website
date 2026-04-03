@@ -3289,7 +3289,7 @@ function buildCatalog(products) {
   pageNum++;       // Feeding Guide = 4
   const storyPageNum = 3;
   const guidePageNum = 4;
-  const catPageNums: Record<string,number> = {};
+  const catPageNums = {};
   categories.forEach(cat => {
     catPageNums[cat] = pageNum++;
   });
