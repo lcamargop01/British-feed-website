@@ -2047,7 +2047,7 @@ async function submitContact(e){
         email:    email,
         phone:    phone || 'not provided',
         subject:  'New Contact: ' + (firstName + ' ' + lastName).trim() + ' - ' + subject,
-        message:  'Name: ' + firstName + ' ' + lastName + '\nEmail: ' + email + '\nPhone: ' + (phone || 'not provided') + '\nTopic: ' + subject + '\n\n' + message,
+        message:  'Name: ' + firstName + ' ' + lastName + '\\nEmail: ' + email + '\\nPhone: ' + (phone || 'not provided') + '\\nTopic: ' + subject + '\\n\\n' + message,
         replyto:  email,
         from_name: 'British Feed Website'
       })
