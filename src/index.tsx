@@ -2036,19 +2036,42 @@ async function submitContact(e){
   const message   = form.message.value;
 
   try {
-    // Single call to backend — saves to KV and sends email via Resend
-    const res = await fetch('/api/contact', {
+    // 1. Web3Forms — client-side JSON (required by Web3Forms, no server proxy)
+    const w3res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        access_key: '70c128a5-b266-4e4f-ae13-99dc1f2ac7cd',
+        botcheck: false,
+        name:     (firstName + ' ' + lastName).trim(),
+        email:    email,
+        phone:    phone || 'not provided',
+        subject:  'New Contact: ' + (firstName + ' ' + lastName).trim() + ' - ' + subject,
+        message:  'Name: ' + firstName + ' ' + lastName + '\nEmail: ' + email + '\nPhone: ' + (phone || 'not provided') + '\nTopic: ' + subject + '\n\n' + message,
+        replyto:  email,
+        from_name: 'British Feed Website'
+      })
+    });
+    const w3data = await w3res.json();
+    console.log('Web3Forms:', w3data);
+
+    // 2. Backend — saves lead to KV admin log (fire and forget)
+    fetch('/api/contact', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ firstName, lastName, email, phone, subject, message })
-    });
-    if (!res.ok) throw new Error('Server error ' + res.status);
-    form.style.display = 'none';
-    document.getElementById('contact-success').classList.remove('hidden');
+    }).catch(() => {});
+
+    if (w3data.success) {
+      form.style.display = 'none';
+      document.getElementById('contact-success').classList.remove('hidden');
+    } else {
+      throw new Error(w3data.message || 'Submission failed');
+    }
   } catch(err) {
     console.error('Contact form error:', err);
     btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>Send Message';
+    btn.innerHTML = '<i class=\"fas fa-paper-plane mr-2\"></i>Send Message';
   }
 }
 
