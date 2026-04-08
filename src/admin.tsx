@@ -1984,11 +1984,11 @@ admin.post('/api/catalog/upload-image', requireAuth, async (c) => {
   if (!file) return c.json({ ok: false, error: 'No file provided' }, 400)
 
   // Check size: KV values max 25MB, but base64 adds ~33% overhead
-  // Keep images under 2MB for better performance and to avoid KV limits
-  const maxSize = 2 * 1024 * 1024 // 2MB
+  // Allow up to 10MB which becomes ~13.3MB after base64 encoding (well under 25MB limit)
+  const maxSize = 10 * 1024 * 1024 // 10MB
   if (file.size > maxSize) {
     const sizeMB = (file.size / (1024 * 1024)).toFixed(1)
-    return c.json({ ok: false, error: `Image is ${sizeMB}MB. Please use an image under 2MB, or use the URL tab to link an external image.` }, 400)
+    return c.json({ ok: false, error: `Image is ${sizeMB}MB. Please use an image under 10MB, or use the URL tab to link an external image.` }, 400)
   }
 
   const arrayBuf = await file.arrayBuffer()
@@ -2323,7 +2323,7 @@ function getCatalogManagerHTML(): string {
             <!-- Upload panel -->
             <div id="img-panel-upload" style="padding:14px;">
               <div style="font-size:11px; color:#94a3b8; margin-bottom:10px;">
-                JPG, PNG, WebP, GIF — up to <strong style="color:#475569">2MB</strong> — larger images should use the URL tab
+                JPG, PNG, WebP, GIF — up to <strong style="color:#475569">10MB</strong> — larger images should use the URL tab
               </div>
               <div id="pm-img-dropzone"
                 onclick="document.getElementById('pm-img-file').click()"
@@ -2333,7 +2333,7 @@ function getCatalogManagerHTML(): string {
                 style="border:2px dashed #e2e8f0; border-radius:10px; padding:20px; text-align:center; cursor:pointer; transition:all .2s;">
                 <i class="fas fa-images" style="font-size:24px; color:#94a3b8; display:block; margin-bottom:6px;"></i>
                 <div style="font-size:12px; font-weight:600; color:#475569;">Click or drag &amp; drop an image</div>
-                <div style="font-size:11px; color:#94a3b8; margin-top:2px;">Up to 2MB · JPG, PNG, WebP, GIF</div>
+                <div style="font-size:11px; color:#94a3b8; margin-top:2px;">Up to 10MB · JPG, PNG, WebP, GIF</div>
                 <input type="file" id="pm-img-file" accept="image/*" onchange="previewUpload()" style="display:none;"/>
               </div>
               <div id="pm-upload-status" style="font-size:12px; color:#64748b; margin-top:8px; min-height:18px;"></div>
@@ -2345,7 +2345,7 @@ function getCatalogManagerHTML(): string {
             <!-- URL panel -->
             <div id="img-panel-url" style="padding:14px; display:none;">
               <div style="font-size:11px; color:#94a3b8; margin-bottom:8px;">
-                Paste any direct image URL (HTTPS recommended). <strong style="color:#475569;">Best for high-res images over 2MB.</strong>
+                Paste any direct image URL (HTTPS recommended). <strong style="color:#475569;">Best for images over 10MB.</strong>
               </div>
               <input id="pm-imageurl" class="form-input" style="font-size:13px;" placeholder="https://example.com/product-image.jpg"
                 oninput="previewImageUrl(this.value)"/>
@@ -2982,11 +2982,11 @@ function previewUpload() {
     return;
   }
   
-  // Check file size (2MB limit)
-  const maxSize = 2 * 1024 * 1024;
+  // Check file size (10MB limit)
+  const maxSize = 10 * 1024 * 1024;
   if (file.size > maxSize) {
     const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-    status.innerHTML = \`<span style="color:#dc2626;">⚠ Image is \${sizeMB}MB. Please use an image under 2MB, or paste the URL in the URL tab instead.</span>\`;
+    status.innerHTML = \`<span style="color:#dc2626;">⚠ Image is \${sizeMB}MB. Please use an image under 10MB, or paste the URL in the URL tab instead.</span>\`;
     fileInput.value = '';
     return;
   }
