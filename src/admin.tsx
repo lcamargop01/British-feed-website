@@ -1983,9 +1983,12 @@ admin.post('/api/catalog/upload-image', requireAuth, async (c) => {
 
   if (!file) return c.json({ ok: false, error: 'No file provided' }, 400)
 
-  // Check size: KV values max 25MB, keep images reasonable for performance
-  if (file.size > 4 * 1024 * 1024) {
-    return c.json({ ok: false, error: 'Image must be under 4 MB.' }, 400)
+  // Check size: KV values max 25MB, but base64 adds ~33% overhead
+  // Keep images under 2MB for better performance and to avoid KV limits
+  const maxSize = 2 * 1024 * 1024 // 2MB
+  if (file.size > maxSize) {
+    const sizeMB = (file.size / (1024 * 1024)).toFixed(1)
+    return c.json({ ok: false, error: `Image is ${sizeMB}MB. Please use an image under 2MB, or use the URL tab to link an external image.` }, 400)
   }
 
   const arrayBuf = await file.arrayBuffer()
@@ -2320,7 +2323,7 @@ function getCatalogManagerHTML(): string {
             <!-- Upload panel -->
             <div id="img-panel-upload" style="padding:14px;">
               <div style="font-size:11px; color:#94a3b8; margin-bottom:10px;">
-                JPG, PNG, WebP, GIF — up to <strong style="color:#475569">32MB</strong> — hosted permanently via imgbb
+                JPG, PNG, WebP, GIF — up to <strong style="color:#475569">2MB</strong> — larger images should use the URL tab
               </div>
               <div id="pm-img-dropzone"
                 onclick="document.getElementById('pm-img-file').click()"
@@ -2330,7 +2333,7 @@ function getCatalogManagerHTML(): string {
                 style="border:2px dashed #e2e8f0; border-radius:10px; padding:20px; text-align:center; cursor:pointer; transition:all .2s;">
                 <i class="fas fa-images" style="font-size:24px; color:#94a3b8; display:block; margin-bottom:6px;"></i>
                 <div style="font-size:12px; font-weight:600; color:#475569;">Click or drag &amp; drop an image</div>
-                <div style="font-size:11px; color:#94a3b8; margin-top:2px;">Up to 32MB · any format</div>
+                <div style="font-size:11px; color:#94a3b8; margin-top:2px;">Up to 2MB · JPG, PNG, WebP, GIF</div>
                 <input type="file" id="pm-img-file" accept="image/*" onchange="previewUpload()" style="display:none;"/>
               </div>
               <div id="pm-upload-status" style="font-size:12px; color:#64748b; margin-top:8px; min-height:18px;"></div>
@@ -2341,7 +2344,9 @@ function getCatalogManagerHTML(): string {
 
             <!-- URL panel -->
             <div id="img-panel-url" style="padding:14px; display:none;">
-              <div style="font-size:11px; color:#94a3b8; margin-bottom:8px;">Paste any direct image URL (HTTPS recommended):</div>
+              <div style="font-size:11px; color:#94a3b8; margin-bottom:8px;">
+                Paste any direct image URL (HTTPS recommended). <strong style="color:#475569;">Best for high-res images over 2MB.</strong>
+              </div>
               <input id="pm-imageurl" class="form-input" style="font-size:13px;" placeholder="https://example.com/product-image.jpg"
                 oninput="previewImageUrl(this.value)"/>
               <div id="pm-url-status" style="font-size:11px; color:#94a3b8; margin-top:4px;"></div>
@@ -2969,6 +2974,23 @@ function previewUpload() {
   const file = fileInput.files[0];
   if (!file) return;
   const status = document.getElementById('pm-upload-status');
+  
+  // Check file type
+  if (!file.type.startsWith('image/')) {
+    status.innerHTML = '<span style="color:#dc2626;">⚠ Please select an image file (JPG, PNG, WebP, GIF)</span>';
+    fileInput.value = '';
+    return;
+  }
+  
+  // Check file size (2MB limit)
+  const maxSize = 2 * 1024 * 1024;
+  if (file.size > maxSize) {
+    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+    status.innerHTML = \`<span style="color:#dc2626;">⚠ Image is \${sizeMB}MB. Please use an image under 2MB, or paste the URL in the URL tab instead.</span>\`;
+    fileInput.value = '';
+    return;
+  }
+  
   status.innerHTML = \`<span style="color:#475569;">📎 \${file.name} (\${(file.size/1024).toFixed(0)}KB) — ready to upload on Save</span>\`;
   const reader = new FileReader();
   reader.onload = (e) => {
@@ -3220,26 +3242,47 @@ async function saveProdModal() {
     fd.append('productId', prodId);
     try {
       const uploadRes = await fetch('/admin/api/catalog/upload-image', { method: 'POST', body: fd });
-      const uploadData = await uploadRes.json();
       clearInterval(progInterval);
+      
+      if (!uploadRes.ok) {
+        const errorText = await uploadRes.text();
+        let errorMsg = 'Upload failed';
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMsg = errorData.error || errorMsg;
+        } catch(e) {
+          errorMsg = \`HTTP \${uploadRes.status}: \${errorText.substring(0, 100)}\`;
+        }
+        fill.style.width = '0%';
+        uploadStatus.innerHTML = \`<span style="color:#dc2626;">⚠ \${errorMsg}</span>\`;
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Product';
+        bar.style.display = 'none';
+        alert('Image upload failed: ' + errorMsg);
+        return;
+      }
+      
+      const uploadData = await uploadRes.json();
       fill.style.width = '100%';
       if (uploadData.ok) {
         imageKey = uploadData.key;
         imageUrl = '';
         uploadStatus.innerHTML = '<span style="color:#16a34a;">✓ Image uploaded successfully!</span>';
       } else {
-        uploadStatus.innerHTML = \`<span style="color:#dc2626;">Upload failed: \${uploadData.error}</span>\`;
+        uploadStatus.innerHTML = \`<span style="color:#dc2626;">⚠ \${uploadData.error || 'Upload failed'}</span>\`;
         saveBtn.disabled = false;
         saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Product';
         bar.style.display = 'none';
+        alert('Image upload failed: ' + (uploadData.error || 'Unknown error'));
         return;
       }
     } catch(e) {
       clearInterval(progInterval);
-      uploadStatus.innerHTML = \`<span style="color:#dc2626;">Upload error: \${e.message}</span>\`;
+      uploadStatus.innerHTML = \`<span style="color:#dc2626;">⚠ Network error: \${e.message}</span>\`;
       saveBtn.disabled = false;
       saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Product';
       bar.style.display = 'none';
+      alert('Image upload error: ' + e.message);
       return;
     }
     setTimeout(() => { bar.style.display = 'none'; fill.style.width = '0%'; }, 1500);
