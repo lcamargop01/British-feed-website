@@ -2809,10 +2809,12 @@ function renderCatalogTable() {
   }
 
   tbody.innerHTML = page.map(p => {
+    // Add cache-busting timestamp to force reload of updated images
+    const cacheBust = '?t=' + Date.now();
     const imgHtml = p.imageUrl
-      ? \`<img src="\${p.imageUrl}" alt="" style="width:40px;height:40px;object-fit:contain;border-radius:6px;border:1px solid #e2e8f0;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div style="display:none;width:40px;height:40px;background:#f1f5f9;border-radius:6px;align-items:center;justify-content:center;font-size:18px;">📦</div>\`
+      ? \`<img src="\${p.imageUrl}\${cacheBust}" alt="" style="width:40px;height:40px;object-fit:contain;border-radius:6px;border:1px solid #e2e8f0;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" /><div style="display:none;width:40px;height:40px;background:#f1f5f9;border-radius:6px;align-items:center;justify-content:center;font-size:18px;">📦</div>\`
       : (p.imageKey
-        ? \`<img src="/admin/api/catalog/image/\${p.imageKey}" alt="" style="width:40px;height:40px;object-fit:contain;border-radius:6px;border:1px solid #e2e8f0;" onerror="this.style.display='none'" />\`
+        ? \`<img src="/admin/api/catalog/image/\${p.imageKey}\${cacheBust}" alt="" style="width:40px;height:40px;object-fit:contain;border-radius:6px;border:1px solid #e2e8f0;" onerror="this.style.display='none'" />\`
         : \`<div style="width:40px;height:40px;background:#f1f5f9;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#94a3b8;" title="No image">📦</div>\`);
     const escapedName = p.name.split("'").join("\\'");
 
@@ -3340,6 +3342,15 @@ async function saveProdModal() {
       const existing = catProducts.findIndex(p => p.id === data.product.id);
       if (existing >= 0) catProducts[existing] = data.product;
       else catProducts.push(data.product);
+      
+      // Debug: Log what was actually saved to server
+      console.log('Server confirmed save:', {
+        id: data.product.id,
+        name: data.product.name,
+        imageKey: data.product.imageKey,
+        imageUrl: data.product.imageUrl
+      });
+      
       closeProdModal();
       filterCatalog();
       initCatalog(); // refresh dropdowns

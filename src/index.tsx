@@ -4647,7 +4647,9 @@ function renderResults() {
   empty.classList.add('hidden');
   grid.innerHTML=page.map((p,i)=>{
     const imgUrl=getProductImage(p), cfg=catConfig(p.category);
-    const imgContent=imgUrl?\`<img src="\${imgUrl}" alt="\${p.name}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">\`:'';
+    // Add cache-busting to force reload of updated images
+    const imgSrc = imgUrl ? (imgUrl.includes('?') ? imgUrl + '&t=' + Date.now() : imgUrl + '?t=' + Date.now()) : '';
+    const imgContent=imgSrc?\`<img src="\${imgSrc}" alt="\${p.name}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='flex'">\`:'';
     const phStyle=imgUrl?'display:none':'display:flex';
     return \`<div class="product-card fade-in" style="animation-delay:\${i*0.015}s" onclick="openModal(\${p.id})">
       <div class="product-img-wrap">
