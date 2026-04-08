@@ -3298,8 +3298,9 @@ async function saveProdModal() {
     price,
     inStock: document.getElementById('pm-instock').checked,
     description: document.getElementById('pm-description').value.trim(),
-    imageUrl: imageUrl || undefined,
-    imageKey: imageKey || undefined,
+    // IMPORTANT: Always include imageUrl and imageKey (even if empty) to clear old values
+    imageUrl: imageUrl || '',
+    imageKey: imageKey || '',
     videoUrl: document.getElementById('pm-videourl').value.trim() || undefined,
     protein: document.getElementById('pm-protein').value.trim() || undefined,
     fat: document.getElementById('pm-fat').value.trim() || undefined,
@@ -3310,7 +3311,7 @@ async function saveProdModal() {
     availabilityNote: 'Call (561) 633-6003 to confirm current availability and pricing'
   };
 
-  // Remove undefined keys
+  // Remove undefined keys (but keep empty strings for imageUrl/imageKey to clear old values)
   Object.keys(productData).forEach(k => productData[k] === undefined && delete productData[k]);
 
   try {
