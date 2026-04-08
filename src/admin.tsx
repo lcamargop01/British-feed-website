@@ -3146,7 +3146,9 @@ function openEditProduct(id) {
 
   const imgUrl = p.imageUrl || (p.imageKey ? \`/admin/api/catalog/image/\${p.imageKey}\` : null);
   if (imgUrl) {
-    document.getElementById('pm-img-preview').src = imgUrl;
+    // Add cache-busting parameter to force reload of updated images
+    const cacheBust = imgUrl.includes('?') ? '&' : '?';
+    document.getElementById('pm-img-preview').src = imgUrl + cacheBust + 't=' + Date.now();
     document.getElementById('pm-img-preview-url').textContent = p.imageUrl || p.imageKey || '';
     document.getElementById('pm-img-preview-wrap').style.display = 'block';
   } else {
@@ -3202,7 +3204,10 @@ function clearImage() {
   document.getElementById('pm-imagekey').value = '';
   document.getElementById('pm-img-file').value = '';
   document.getElementById('pm-img-preview-wrap').style.display = 'none';
-  document.getElementById('pm-upload-status').textContent = '';
+  document.getElementById('pm-upload-status').innerHTML = '<span style="color:#16a34a;">✓ Image cleared. Upload a new one or click Save to remove the image completely.</span>';
+  // Clear the preview src to avoid browser caching
+  document.getElementById('pm-img-preview').src = '';
+  console.log('Image cleared - imageKey and imageUrl set to empty strings');
 }
 
 // ── Save product ─────────────────────────────────────────────────────────
@@ -3314,6 +3319,9 @@ async function saveProdModal() {
 
   // Remove undefined keys (but keep empty strings for imageUrl/imageKey to clear old values)
   Object.keys(productData).forEach(k => productData[k] === undefined && delete productData[k]);
+
+  // Debug: Log what we're about to save
+  console.log('Saving product data:', { name, imageUrl, imageKey, hasFile: !!fileInput.files[0] });
 
   try {
     const id = parseInt(document.getElementById('pm-id').value);
