@@ -2614,17 +2614,18 @@ async function importStaticCatalog() {
       if (existing) {
         return {
           ...sp,
-          imageKey:       existing.imageKey       || sp.imageKey       || '',
-          imageUrl:       existing.imageUrl       || sp.imageUrl       || '',
-          description:    existing.description    || sp.description    || '',
-          price:          existing.price          !== undefined ? existing.price : sp.price,
-          priceFormatted: existing.priceFormatted || sp.priceFormatted || '',
-          inStock:        existing.inStock        !== undefined ? existing.inStock : sp.inStock,
-          bestFor:        existing.bestFor        || sp.bestFor        || '',
-          keyFeatures:    existing.keyFeatures    || sp.keyFeatures    || '',
-          protein:        existing.protein        || sp.protein        || '',
-          fat:            existing.fat            || sp.fat            || '',
-          fiber:          existing.fiber          || sp.fiber          || '',
+          // IMPORTANT: Check !== undefined, not truthy, so empty strings (cleared images) are preserved
+          imageKey:       existing.imageKey       !== undefined ? existing.imageKey       : (sp.imageKey       || ''),
+          imageUrl:       existing.imageUrl       !== undefined ? existing.imageUrl       : (sp.imageUrl       || ''),
+          description:    existing.description    !== undefined ? existing.description    : (sp.description    || ''),
+          price:          existing.price          !== undefined ? existing.price          : sp.price,
+          priceFormatted: existing.priceFormatted !== undefined ? existing.priceFormatted : (sp.priceFormatted || ''),
+          inStock:        existing.inStock        !== undefined ? existing.inStock        : sp.inStock,
+          bestFor:        existing.bestFor        !== undefined ? existing.bestFor        : (sp.bestFor        || ''),
+          keyFeatures:    existing.keyFeatures    !== undefined ? existing.keyFeatures    : (sp.keyFeatures    || ''),
+          protein:        existing.protein        !== undefined ? existing.protein        : (sp.protein        || ''),
+          fat:            existing.fat            !== undefined ? existing.fat            : (sp.fat            || ''),
+          fiber:          existing.fiber          !== undefined ? existing.fiber          : (sp.fiber          || ''),
         };
       }
       return sp;
